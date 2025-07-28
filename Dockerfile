@@ -13,6 +13,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY --from=builder /app .
+COPY --from=builder /app/node_modules ./node_modules
 
 ENV PORT=8080
 EXPOSE 8080
