@@ -1,14 +1,21 @@
+---
+import '../styles/global.css'
+import Header from '@/components/Header.astro'
+---
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta name="description" content="Tours en Santiago de Chile guiados por profesores. Explora la rica cultura e historia con expertos. ¡Una visita guiada inigualable te espera, reserva ahora!">
+		<title>Better With a Teacher - Los mejores Tours en Santiago de Chile</title>
 	</head>
 	<body>
-		<slot />
+		<Header />
+		<main class="px-[160px] py-6 ">
+			<slot />
+		</main>
 	</body>
 </html>
 
