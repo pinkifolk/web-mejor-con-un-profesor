@@ -1,21 +1,21 @@
+---
+import { GetDestinos } from '../lib/db.js';
+import type { Tour } from '../types/tours.js';
+const tours:Tour[] = await GetDestinos();
+
+---
 <section class="p-4">
     <h1 class="text-2xl font-bold">Destinos populares</h1>
     <div class="flex gap-3 py-5">
-        <a href="#" class="w-[928px] duration-200 transform transition hover:scale-105" aria-label="Tour en Atacama">
-            <img src="/img/atacama.webp" class="w-full h-auto rounded-xl hover:shadow-xl" alt="Tour en Atacama">
-            <p class="mt-2 text-lg">Atacama</p>
-        </a>
-        <a href="#" class="w-[928px] duration-200 transform transition hover:scale-105" aria-label="Tour en Valparaíso">
-            <img src="/img/valparaiso.webp" class="w-full h-auto rounded-xl hover:shadow-xl" alt="Tour en Valparaíso">
-            <p class="mt-2 text-lg">Valparaíso</p>
-        </a>
-        <a href="#" class="w-[928px] duration-200 transform transition hover:scale-105" aria-label="Tour en Santiago">
-            <img src="/img/santiago.webp" class="w-full h-auto rounded-xl hover:shadow-xl" alt="Tour en Santiago">
-            <p class="mt-2 text-lg">Santiago</p>
-        </a>
-        <a href="#" class="w-[928px] duration-200 transform transition hover:scale-105" aria-label="Tour en Patagonia">
-            <img src="/img/patagonia.webp" class="w-full h-auto rounded-xl hover:shadow-xl" alt="Tour en Patagonia">
-            <p class="mt-2 text-lg">Patagonia</p>
-        </a>
+        {
+            tours.map((tour:any) => (
+                <a href="#" class="w-[928px] duration-200 transform transition hover:scale-105" aria-label={`Tour en ${tour.name}`}>
+                    <img src={`img/${tour.img}`} class="w-full h-auto rounded-xl hover:shadow-xl" alt={`Tour en ${tour.name}`}>
+                    <p class="mt-2 text-lg">{tour.name}</p>
+                    <p>{tour.status }</p>
+                </a>
+                )
+            )
+        }
     </div>
 </section>

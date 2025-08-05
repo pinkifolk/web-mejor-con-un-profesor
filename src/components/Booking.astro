@@ -1,0 +1,64 @@
+---
+
+---
+<aside class="w-1/2 p-4">
+    <h2 class="text-2xl font-bold mb-4">
+        Reserva tu recorrido
+    </h2>
+    <section class="mb-6" aria-labelledby="fecha-heading">
+        <h2 id="fecha-heading" class="text-xl font-bold mb-4">Selecciona una fecha</h2>
+        <input type="date" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    </section>
+    <section class="mb-6" aria-labelledby="participantes-heading">
+        <h2 id="participantes-heading" class="text-xl font-bold mb-4">Participantes</h2>
+        <div class="flex justify-between gap-4 mb-4 items-center">
+            <label for="adultos" class="text-lg">Adulto</label>
+            <div class="flex items-center gap-2">
+                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">-</button>
+                <span class="text-lg mx-3">0</span>
+                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">+</button>
+            </div> 
+        </div>
+        <div class="flex justify-between gap-4 mb-4 items-center">
+            <label for="ninos" class="text-lg">Niños</label>
+            <div class="flex items-center gap-2">
+                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">-</button>
+                <span class="text-lg mx-3">0</span>
+                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">+</button>
+            </div> 
+        </div>
+    </section>
+
+    <section class="mb-6" aria-labelledby="horario-heading">
+        <h2 id="horario-heading" class="text-xl font-bold mb-4">Elige un horario</h2>
+        <div class="flex justify-between">
+            <div class="relative">
+                <input type="radio" name="horario" id="hora1" value="10:00" class="hidden peer" checked>
+                <label for="hora1" class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected">
+                10:00 AM
+                </label>
+            </div>
+
+            <div class="relative">
+                <input type="radio" name="horario" id="hora2" value="13:00" class="hidden peer">
+                <label for="hora2" class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected">
+                13:00 PM
+                </label>
+            </div>
+        </div>
+    </section>
+    <section class="mb-6" aria-labelledby="resumen-heading">
+        <h2 id="resumen-heading" class="text-xl font-bold pb-5 border-b border-gray-300">Resumen de la reserva</h2>
+        <div class="grid grid-cols-3 mt-4 text-text-place">
+            <div class="col-span-1">
+                <p class="text-sm">Adultos: 1</p>
+                <p class="text-sm">Niños: 0 </p>
+            </div>
+            <div class="col-span-2">
+                <p class="text-sm">Jueves 05 de Julio del 2025</p>
+                <p class="text-sm">Horario 1:00 PM</p>
+            </div>
+        </div>
+    </section>
+    <button class="bg-buttons px-4 py-2 w-full rounded-4xl text-text-button font-semibold">Reservar</button>
+</aside>

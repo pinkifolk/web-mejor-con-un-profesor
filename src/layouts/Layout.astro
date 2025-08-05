@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css'
 import Header from '@/components/Header.astro'
+const { mainClass } = Astro.props;
+const pdMain = mainClass ? mainClass : 'px-[160px] py-6';
 ---
 <!doctype html>
 <html lang="es">
@@ -13,7 +15,7 @@ import Header from '@/components/Header.astro'
 	</head>
 	<body>
 		<Header />
-		<main class="px-[160px] py-6 ">
+		<main class={pdMain}>
 			<slot />
 		</main>
 	</body>
