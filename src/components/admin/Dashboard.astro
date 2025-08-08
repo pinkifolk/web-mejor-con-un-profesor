@@ -1,0 +1,16 @@
+---
+import Today from "./Today.astro"
+import Next from "./Next.astro"
+import Statistics from "./Statistics.astro"
+---
+<article class="overflow-y-auto h-full">
+    <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+        <h1 class="text-4xl font-bold">Dashboard</h1>
+        <a href="nuevo" class="bg-fondo-place text-text-place text-sm py-2 px-4 rounded-4xl hover:bg-buttons hover:text-text-button" aria-label="Crear nuevo Tour">Crear Tour</a>
+    </header>
+    <section class="px-11">
+        <Today />
+        <Next />
+        <Statistics />
+    </section>
+</article>

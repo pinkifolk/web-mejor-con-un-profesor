@@ -1,0 +1,27 @@
+---
+
+---
+
+<section class="flex justify-center items-center h-full">
+  <form action="" class="flex flex-col gap-4 p-6 max-w-sm w-full shadow-2xl rounded" aria-labelledby="form-title">
+    <h1 id="form-title" class="text-xl font-bold text-center">
+      Ingresa el codigo de verificación
+    </h1>
+    <p class="text-center text-sm">Hemos enviado un código de verificación a tu correo electrónico. Por favor, ingrésalo a continuación para continuar.</p>
+    <div class="flex flex-col">
+      <input
+        type="text"
+        id="verification-code"
+        name="verification-code"
+        required
+        class="p-2 bg-fondo-place text-center rounded focus:outline-none focus:ring-2 focus:ring-text-place"
+      />
+    </div>
+    <button
+      type="submit"
+      class="bg-buttons py-2 px-4 rounded-4xl text-text-button cursor-pointer hover:opacity-90"
+    >
+      Verificar
+    </button>
+  </form>
+</section>

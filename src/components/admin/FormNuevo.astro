@@ -1,0 +1,133 @@
+---
+import Add from "@/assets/add.svg";
+---
+
+<form action="" class="w-lg">
+  <h2 class="text-2xl font-semibold mb-4">Información Básica</h2>
+  <div class="mb-4">
+    <label for="title" class="block text-[16px] font-medium mb-2">Titulo</label>
+    <input
+      type="text"
+      id="title"
+      name="title"
+      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+      required
+      placeholder="Ingrese el título del tour"
+      autocomplete="title"
+    />
+  </div>
+  <div class="mb-4">
+    <label for="description" class="block text-[16px] font-medium mb-2"
+      >Descripción</label
+    >
+    <textarea
+      id="description"
+      name="description"
+      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+      required
+      placeholder="Ingrese una descripción del tour"
+      rows="6"></textarea>
+  </div>
+  <div class="mb-4">
+    <label for="timing" class="block text-[16px] font-medium mb-2"
+      >Duración</label
+    >
+    <input
+      type="text"
+      id="timing"
+      name="timing"
+      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+      required
+      placeholder="Ingrese la duración del tour (e.g., 2 Horas)"
+      autocomplete="timing"
+    />
+  </div>
+  <h2 class="text-2xl font-semibold mb-4">Puntos</h2>
+  <div class="mb-4">
+    <label for="title-point" class="block text-[16px] font-medium mb-2">
+      Título
+    </label>
+    <div class="flex gap-2">
+      <input
+        type="text"
+        id="title-point"
+        name="title-point"
+        class="flex-1 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+        placeholder="Ingrese el título del punto"
+      />
+      <button
+        id="add-point"
+        type="button"
+        class="px-4 py-2 rounded-lg hover:bg-table cursor-pointer"
+      >
+        <Add />
+      </button>
+    </div>
+  </div>
+
+  <div
+    id="points-list"
+    class="border border-table mb-4 rounded-lg p-2 flex flex-wrap gap-2"
+  >
+  </div>
+  <div class="mb-4">
+  <label for="persons" class="block text-[16px] font-medium mb-2"
+    >Max personas</label
+  >
+  <input
+    type="number"
+    id="persons"
+    name="persons"
+    class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+    required
+    placeholder="Ingrese la cantidad máxima de personas"
+    autocomplete="persons"
+  />
+</div>
+<div class="flex justify-end mb-20">
+    <button class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100">Crear</button>
+</div>
+</form>
+
+
+<script>
+  import Sortable from "sortablejs";
+  const input = document.getElementById("title-point") as HTMLInputElement;
+  const addBtn = document.getElementById("add-point");
+  const list = document.getElementById("points-list");
+  let draggedItem = null;
+
+  function createTag(text: string) {
+    const tag = document.createElement("span");
+    tag.className =
+      "flex items-center gap-2 bg-fondo-place px-4 py-1 rounded-full cursor-move";
+    tag.setAttribute("draggable", "true");
+    tag.innerHTML = `
+      ${text}
+      <button class="text-gray-400 hover:text-gray-700 font-bold">×</button>
+    `;
+    tag.querySelector("button")?.addEventListener("click", () => tag.remove());
+    return tag;
+  }
+  function addPoint() {
+    const value = input.value.trim();
+    if (!value) return;
+    list?.appendChild(createTag(value));
+    input.value = "";
+  }
+
+  addBtn?.addEventListener("click", addPoint);
+  input?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" || e.keyCode === 13) {
+      e.preventDefault();
+      addPoint();
+    }
+  });
+
+  if (typeof window !== "undefined") {
+    Sortable.create(document.getElementById("points-list"), {
+      animation: 150,
+      ghostClass: "opacity-50",
+    });
+  }
+</script>
