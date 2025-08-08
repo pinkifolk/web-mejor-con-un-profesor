@@ -11,10 +11,11 @@
   },
   "dependencies": {
     "@astrojs/node": "9.3.0",
-    "@tailwindcss/vite": "^4.1.11",
+    "@tailwindcss/vite": "4.1.11",
     "astro": "5.12.3",
-    "pg": "^8.16.3",
-    "qrcode": "^1.5.4",
-    "tailwindcss": "^4.1.11"
+    "pg": "8.16.3",
+    "qrcode": "1.5.4",
+    "sortablejs": "1.15.6",
+    "tailwindcss": "4.1.11"
   }
 }
