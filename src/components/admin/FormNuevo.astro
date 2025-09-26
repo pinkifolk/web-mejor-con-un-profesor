@@ -1,5 +1,8 @@
 ---
 import Add from "@/assets/add.svg";
+import type { Hours } from '../../types/tours.js';
+import { GetHours } from '../../lib/db.js';
+const data:Hours[] = await GetHours();
 ---
 
 <form action="" class="w-lg">
@@ -29,6 +32,17 @@ import Add from "@/assets/add.svg";
       rows="6"></textarea>
   </div>
   <div class="mb-4">
+    <label for="img" class="block text-[16px] font-medium mb-2">Imagen</label>
+    <input
+      type="file"
+      id="imgTour"
+      name="imgTour"
+      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+      required
+      accept="image/png, image/jpeg, image/jpg"
+    />
+  </div>
+  <div class="mb-4">
     <label for="timing" class="block text-[16px] font-medium mb-2"
       >Duración</label
     >
@@ -41,6 +55,32 @@ import Add from "@/assets/add.svg";
       placeholder="Ingrese la duración del tour (e.g., 2 Horas)"
       autocomplete="timing"
     />
+  </div>
+  <div class="mb-4">
+    <label for="horario" class="block text-[16px] font-medium mb-2"
+      >Horarios</label
+    >
+    <div class="flex justify-start gap-4 flex-wrap m-3">
+      {
+        data.map((hour) => (
+          <div class="relative">
+            <input
+              type="checkbox"
+              name="horario"
+              id={`hora${hour.id}`}
+              value={hour.id}
+              class="hidden peer"
+            />
+            <label
+              for={`hora${hour.id}`}
+              class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected"
+            >
+              {hour.hour}
+            </label>
+          </div>
+        ))
+      }
+    </div>
   </div>
   <h2 class="text-2xl font-semibold mb-4">Puntos</h2>
   <div class="mb-4">
@@ -71,27 +111,65 @@ import Add from "@/assets/add.svg";
   >
   </div>
   <div class="mb-4">
-  <label for="persons" class="block text-[16px] font-medium mb-2"
-    >Max personas</label
-  >
-  <input
-    type="number"
-    id="persons"
-    name="persons"
-    class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-    required
-    placeholder="Ingrese la cantidad máxima de personas"
-    autocomplete="persons"
-  />
-</div>
-<div class="flex justify-end mb-20">
-    <button class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100">Crear</button>
-</div>
+    <label for="persons" class="block text-[16px] font-medium mb-2"
+      >Max personas</label
+    >
+    <input
+      type="number"
+      id="persons"
+      name="persons"
+      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+      required
+      placeholder="Ingrese la cantidad máxima de personas"
+      autocomplete="persons"
+    />
+  </div>
+  <div class="mb-4">
+    <label for="popular" class="block text-[16px] font-medium mb-2"
+      >Mostrar al inicio</label
+    >
+    <input
+      type="checkbox"
+      id="popular"
+      name="popular"
+      class="w-5 h-5 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+    />
+  </div>
+  <div class="flex justify-end mb-20">
+    <button
+      type="submit"
+      class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
+      >Crear</button
+    >
+  </div>
 </form>
-
-
 <script>
   import Sortable from "sortablejs";
+  import { Notyf } from "notyf";
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+    types: [
+      {
+        type: "custom-success",
+        background: "#16a34a",
+        icon: {
+          className: "notyf__icon-custom",
+          tagName: "div",
+        },
+      },
+      {
+        type: "custom-error",
+        background: "#dc2626",
+        icon: {
+          className: "notyf__icon-custom2",
+          tagName: "div",
+        },
+      },
+    ],
+  });
+
+  const form = document.querySelector("form");
   const input = document.getElementById("title-point") as HTMLInputElement;
   const addBtn = document.getElementById("add-point");
   const list = document.getElementById("points-list");
@@ -130,4 +208,41 @@ import Add from "@/assets/add.svg";
       ghostClass: "opacity-50",
     });
   }
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const points: string[] = [];
+    list?.querySelectorAll("span").forEach((tag) => {
+      const text = tag.textContent?.replace("×", "").trim();
+      if (text) points.push(text);
+    });
+    const horarios: string[] = [];
+    document.querySelectorAll<HTMLInputElement>("input[name=horario]:checked").forEach((checkbox) => {
+      horarios.push(checkbox.value);
+    });
+    formData.delete("horario");
+    formData.append("points", JSON.stringify(points));
+    formData.append("horario", JSON.stringify(horarios));
+
+    const response = await fetch("/aNKiNFLow/api/tours", {
+      method: "POST",
+      body: formData,
+    }); 
+
+    if (response.ok) {
+      notyf.open({
+        type: "custom-success",
+        message: "Tour creado con éxito",
+      });
+      form.reset();
+      list!.innerHTML = "";
+    } else {
+      const data = await response.json();
+      notyf.open({
+        type: "custom-error",
+        message: data.error || "Error al crear el tour",
+      });
+      console.error("Error al crear el tour");
+    }
+  });
 </script>
