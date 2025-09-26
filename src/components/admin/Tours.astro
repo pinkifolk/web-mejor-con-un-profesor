@@ -22,12 +22,12 @@
             <th class="py-2 font-normal w-1/4">Acción</th>
           </tr>
         </thead>
-        <tbody id="table-body">
-        </tbody>
+        <tbody id="table-body"> </tbody>
       </table>
     </div>
   </section>
 </article>
+<!-- modal para eliminar -->
 <div
   data-dialog-backdrop="delete"
   data-dialog-backdrop-close="true"
@@ -58,7 +58,7 @@
         Cancel
       </button>
       <button
-        id="eliminar"
+        id="delete"
         class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
         type="button"
       >
@@ -67,8 +67,47 @@
     </div>
   </div>
 </div>
+<!-- modal para cambiar estado -->
+<div
+  data-dialog-backdrop="changeStatus"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+>
+  <div
+    data-dialog="changeStatus"
+    class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+  >
+    <div
+      class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+    >
+      <span id="title"></span>
+    </div>
+    <div
+      class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+    >
+      <span id="body">activar</span>
+    </div>
+    <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+      <button
+        data-dialog-close="true"
+        class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        type="button"
+      >
+        Cancel
+      </button>
+      <button
+        id="change"
+        class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+        type="button"
+      >
+        Pausar
+      </button>
+    </div>
+  </div>
+</div>
 <script>
-import type { TourAdmin } from "../../types/tours.js";
+  import type { TourAdmin } from "../../types/tours.js";
   import { Notyf } from "notyf";
   const notyf = new Notyf({
     duration: 3000,
@@ -93,20 +132,23 @@ import type { TourAdmin } from "../../types/tours.js";
     ],
   });
   let id: string | null = null;
+  let status: string | null = null;
   const tableBody = document.getElementById("table-body");
+  const title = document.getElementById("title") as HTMLElement;
+  const body = document.getElementById("body") as HTMLElement;
 
-  async function fetchData() {
-  try {
-    const response = await fetch("/aNKiNFLow/api/tours");
-    if (response.ok) {
-      const data = await response.json();
-      if (tableBody) {
-        tableBody.innerHTML = "";
-        data.forEach((tour: TourAdmin) => {
-          const row = document.createElement("tr");
-          row.className =
-            "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
-          row.innerHTML = `
+  async function getData() {
+    try {
+      const response = await fetch("/aNKiNFLow/api/tours");
+      if (response.ok) {
+        const data = await response.json();
+        if (tableBody) {
+          tableBody.innerHTML = "";
+          data.forEach((tour: TourAdmin) => {
+            const row = document.createElement("tr");
+            row.className =
+              "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
+            row.innerHTML = `
             <td class="pl-4 py-4">${tour.name}</td>
             <td>
               <span class="bg-fondo-place rounded-3xl px-8 py-2">
@@ -115,9 +157,24 @@ import type { TourAdmin } from "../../types/tours.js";
             </td>
             <td>${tour.total_bookings}</td>
             <td>
-              <button  type="button" class="text-text-place font-semibold cursor-pointer">Editar</a> |
-              <button  type="button" class="text-text-place font-semibold cursor-pointer">Pausar</a> |
-              <button  type="button" class="text-text-place font-semibold cursor-pointer">Ver</a> |
+              <button  
+                type="button" 
+                data-id="${tour.id}"
+                class="text-text-place font-semibold cursor-pointer"
+                >Editar
+              </button> |
+              <button  
+                type="button" 
+                data-id="${tour.id}"
+                data-status="${tour.status}"
+                class="text-text-place font-semibold cursor-pointer" data-dialog-target="changeStatus"
+                >${!tour.status ? "Pausar" : "Activar"}
+              </button> |
+              <button  
+                type="button" 
+                class="text-text-place font-semibold cursor-pointer"
+                >Ver
+              </button> |
               <button
                 type="button"
                 data-id="${tour.id}"
@@ -128,78 +185,116 @@ import type { TourAdmin } from "../../types/tours.js";
               </button>
             </td>
           `;
-          tableBody.appendChild(row);
-        });
-        attachDialogListeners();
-      }
-    } else {
-      notyf.open({
-        type: "custom-error",
-        message: "Error al obtener los datos",
-      });
-    }
-  } catch (error) {
-    console.error("Error al obtener los datos:", error);
-  }
-}
-    fetchData();
-
-function attachDialogListeners() {
-  document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
-    const dialogId = trigger.getAttribute("data-dialog-target");
-    const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
-    const backdrop = document.querySelector(
-      `[data-dialog-backdrop="${dialogId}"]`
-    );
-
-    function openDialog() {
-      dialog?.classList.remove("pointer-events-none", "opacity-0");
-      backdrop?.classList.remove("pointer-events-none", "opacity-0");
-      id = trigger.getAttribute("data-id");
-    }
-
-    function closeDialog() {
-      dialog?.classList.add("pointer-events-none", "opacity-0");
-      backdrop?.classList.add("pointer-events-none", "opacity-0");
-      id = null;
-    }
-
-    trigger.addEventListener("click", openDialog);
-    dialog
-      ?.querySelectorAll("[data-dialog-close]")
-      .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
-    backdrop?.addEventListener("click", (event) => {
-      if (
-        event.target === backdrop &&
-        backdrop.hasAttribute("data-dialog-backdrop-close")
-      ) {
-        closeDialog();
-      }
-    });
-  });
-}
-  document.getElementById("eliminar")?.addEventListener("click", async () => {
-    try {
-      const response = await fetch(`/aNKiNFLow/api/tours?id=${id}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        notyf.open({
-          type: "custom-success",
-          message: "Tour eliminado con éxito",
-        });
-        
+            tableBody.appendChild(row);
+          });
+          attachDialogListeners();
+        }
       } else {
-        const data = await response.json();
         notyf.open({
           type: "custom-error",
-          message: data.error || "Error al crear el tour",
+          message: "Error al obtener los datos",
         });
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    }
+  }
+  getData();
+
+  function attachDialogListeners() {
+    document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
+      const dialogId = trigger.getAttribute("data-dialog-target");
+      const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+      const backdrop = document.querySelector(
+        `[data-dialog-backdrop="${dialogId}"]`
+      );
+
+      function openDialog() {
+        dialog?.classList.remove("pointer-events-none", "opacity-0");
+        backdrop?.classList.remove("pointer-events-none", "opacity-0");
+        id = trigger.getAttribute("data-id");
+        status = trigger.getAttribute("data-status");
+        title.textContent = `${status === "false" ? "Pausar el Tour" : "Activar el Tour"}`;
+        body.textContent = `${status === "false" ? "¿Estás seguro de que deseas Pausar este tour? Los usuarios no podrán reservarlo hasta que se reactive." : "¿Estás seguro de que deseas Activar este tour?"}`;
+      }
+
+      function closeDialog() {
+        dialog?.classList.add("pointer-events-none", "opacity-0");
+        backdrop?.classList.add("pointer-events-none", "opacity-0");
+        id = null;
+        status = null;
+      }
+
+      trigger.addEventListener("click", openDialog);
+      dialog
+        ?.querySelectorAll("[data-dialog-close]")
+        .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+      backdrop?.addEventListener("click", (event) => {
+        if (
+          event.target === backdrop &&
+          backdrop.hasAttribute("data-dialog-backdrop-close")
+        ) {
+          closeDialog();
+        }
+      });
+    });
+  }
+  async function fetching(
+    id: string | null,
+    method: string,
+    status: string | null
+  ) {
+    try {
+      const response = await fetch(
+        `/aNKiNFLow/api/tours?id=${id}&status=${status}`,
+        {
+          method: method,
+        }
+      );
+      if (response.ok) {
+        return true;
+      } else {
+        const data = await response.json();
+        return data;
       }
     } catch (error) {
       console.error("Error al eliminar el tour:", error);
     }
-    fetchData();
+  }
+  document.getElementById("delete")?.addEventListener("click", async () => {
+    const response = await fetching(id, "DELETE", status);
+    if (response) {
+      notyf.open({
+        type: "custom-success",
+        message: "Tour eliminado con éxito",
+      });
+    } else {
+      const err = response.json();
+      notyf.open({
+        type: "custom-error",
+        message: err.error || "Error al crear el tour",
+      });
+    }
+    getData();
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((btn) => btn.click());
+  });
+  document.getElementById("change")?.addEventListener("click", async () => {
+    const response = await fetching(id, "PUT", status);
+    if (response) {
+      notyf.open({
+        type: "custom-success",
+        message: "Tour modificado con éxito",
+      });
+    } else {
+      const err = response.json();
+      notyf.open({
+        type: "custom-error",
+        message: err.error || "Error al crear el tour",
+      });
+    }
+    getData();
     document
       .querySelectorAll<HTMLElement>("[data-dialog-close]")
       .forEach((btn) => btn.click());
