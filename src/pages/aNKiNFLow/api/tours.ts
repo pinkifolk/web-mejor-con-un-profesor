@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { DeleteTour, GetToursAdmin } from "../../../lib/db.js";
+import { DeleteTour, GetToursAdmin, ChangeStatus } from "../../../lib/db.js";
 import fs from "fs";
 
 export const GET: APIRoute = async () => { 
@@ -62,6 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 };
+
 export const DELETE: APIRoute = async ({ request }) => {
   try {
     const url = new URL(request.url);
@@ -82,4 +83,30 @@ export const DELETE: APIRoute = async ({ request }) => {
     );
   }
 }
-
+export const PUT: APIRoute = async ({ request }) => {
+  try {
+    const url = new URL(request.url);
+    const id  = url.searchParams.get("id");
+    const status = url.searchParams.get("status");
+    const boolStatus = status === "true" ? false : true
+    if (!id) {
+      return new Response(JSON.stringify({ error: "ID no válido" }), {
+        status: 400,
+      });
+    }
+    if (!status) {
+      return new Response(JSON.stringify({ error: "estatus no válido" }), {
+        status: 400,
+      });
+    }
+    const deleted = await ChangeStatus(id,boolStatus);
+    return new Response(JSON.stringify(deleted), { status: 200 });
+  } catch (err:string|any) {
+    return new Response(
+      JSON.stringify({ error: err.message || "Error al eliminar el tour" }),
+      {
+        status: 400,
+      }
+    );
+  }
+}
