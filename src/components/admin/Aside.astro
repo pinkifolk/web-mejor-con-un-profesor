@@ -1,6 +1,10 @@
 ---
 import HomeIcons from "@/assets/home.svg";
 import ToursIcons from "@/assets/tours.svg";
+import ConfigIcons from "@/assets/config.svg";
+import Chevron from "@/assets/chevron.svg";
+import Clock from "@/assets/clock.svg";
+
 ---
 
 <aside class="w-64 text-black p-4 shadow-lg">
@@ -21,5 +25,25 @@ import ToursIcons from "@/assets/tours.svg";
       <ToursIcons />
       <span>Tours</span>
     </a>
+    <a
+      href="#"
+      class="flex items-center gap-4 hover:bg-fondo-place py-2 px-4 rounded-3xl"
+    >
+      <ConfigIcons/>
+      <span>Configuración</span>
+      <Chevron class="ml-auto transition-transform duration-200"/>
+    </a>
+    <ul
+    id="submenu-config"
+    class="bg-white ml-5"
+  >
+      <a
+        href="horarios"
+        class="flex items-center gap-4 hover:bg-fondo-place py-2 px-4 rounded-3xl"
+      >
+      <Clock/>
+      <span>Horarios</span>
+    </a>
+  </ul>
   </nav>
 </aside>
