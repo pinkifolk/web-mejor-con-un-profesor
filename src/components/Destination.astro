@@ -4,7 +4,7 @@ import type { Tour } from '../types/tours.js';
 const tours:Tour[] = await GetDestinosPopulate();
 ---
 <section class="p-4">
-  <h1 class="text-2xl font-bold">Destinos populares</h1>
+  <h1 class="text-3xl md:text-2xl font-bold">Destinos populares</h1>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-5">
     {tours.map((tour: any) => (
       <a
@@ -20,7 +20,7 @@ const tours:Tour[] = await GetDestinosPopulate();
             title={`Tour por ${tour.name}`}
           />
         </div>
-        <p class="mt-2 text-lg font-semibold">{tour.name}</p>
+        <p class="mt-2 text-2xl md:text-lg font-semibold">{tour.name}</p>
       </a>
     ))}
   </div>

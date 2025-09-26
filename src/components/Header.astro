@@ -1,23 +1,81 @@
-<header class="flex justify-between py-3 px-[40px] text-text items-center">
-    <div class="">
+---
+import Bars from "@/assets/bars.svg";
+const url = Astro.url.pathname;
+---
 
-        Better With a Teacher
-    </div>
-    <nav class="mr-5 flex w-full justify-end">
-        <ul class="flex gap-5 items-center mr-5">
-            <li>
-                <a href="/">Explorar</a>
-            </li>
-            <li>
-               <a href="nosotros">Quienes Somos</a>
-            </li>
-            <li>
-                <a href="tours">Tours</a>
-            </li>
-            <li>
-                <a href="contacto">Contacto</a>
-            </li>  
-        </ul>
-        <button id="random" type="button" class="w-32 py-2 px-8 bg-buttons text-text-button rounded-2xl m-3 cursor-pointer hover:opacity-90">Aleatorio</button>
-    </nav>
+<header
+  class="flex justify-between py-3 px-5 md:px-[40px] text-text items-center"
+>
+  <div class="">Better With a Teacher</div>
+  <nav class="flex w-full justify-end">
+    <button type="button" class="cursor-pointer md:hidden" id="toggle">
+      <Bars />
+    </button>
+    <ul class="hidden md:flex md:gap-5 md:items-center md:mr-5">
+      <li class={url === "/" ? "text-text-place" : ""}>
+        <a href="/">Explorar</a>
+      </li>
+      <li class={url === "/nosotros" ? "text-text-place" : ""}>
+        <a href="nosotros">Quienes Somos</a>
+      </li>
+      <li class={url === "/tours" ? "text-text-place" : ""}>
+        <a href="tours">Tours</a>
+      </li>
+      <li class={url === "/contacto" ? "text-text-place" : ""}>
+        <a href="contacto">Contacto</a>
+      </li>
+    </ul>
+    <button
+      type="button"
+      class="random hidden md:block w-32 py-2 px-8 bg-buttons text-text-button rounded-2xl m-3 cursor-pointer hover:opacity-90"
+    >
+      Aleatorio
+    </button>
+  </nav>
 </header>
+<div
+  id="menu"
+  class="fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out md:hidden z-50"
+>
+  <div class="flex justify-end p-4">
+    <button id="close" class="cursor-pointer"> ✕ </button>
+  </div>
+  <ul class="flex flex-col gap-5 p-4">
+    <li class={url === "/" ? "text-text-place" : ""}>
+      <a href="/" class="block w-full h-full">Explorar</a>
+    </li>
+    <li class={url === "/nosotros" ? "text-text-place" : ""}>
+      <a href="nosotros" class="block w-full h-full">Quienes Somos</a>
+    </li>
+    <li class={url === "/tours" ? "text-text-place" : ""}>
+      <a href="tours" class="block w-full h-full">Tours</a>
+    </li>
+    <li class={url === "/contacto" ? "text-text-place" : ""}>
+      <a href="contacto" class="block w-full h-full">Contacto</a>
+    </li>
+  </ul>
+  <div class="px-16">
+    <button
+      type="button"
+      class="random py-2 md:hidden w-full  bg-buttons text-text-button rounded-2xl"
+    >
+      Aleatorio
+    </button>
+  </div>
+</div>
+
+<script>
+  const toggle = document.getElementById("toggle") as HTMLElement;
+  const close = document.getElementById("close") as HTMLElement;
+  const menu = document.getElementById("menu") as HTMLElement;
+
+  toggle.addEventListener("click", () => {
+    menu.classList.remove("translate-x-full");
+    menu.classList.add("translate-x-0");
+  });
+
+  close.addEventListener("click", () => {
+    menu.classList.add("translate-x-full");
+    menu.classList.remove("translate-x-0");
+  });
+</script>
