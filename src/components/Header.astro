@@ -6,7 +6,11 @@ const url = Astro.url.pathname;
 <header
   class="flex justify-between py-3 px-5 md:px-[40px] text-text items-center"
 >
-  <div class="">Better With a Teacher</div>
+  <div class="font-bold w-full">
+    <!-- alt="Logo Better With a Teacher" -->
+    <!-- <img src="/img/descarga.png"  class="inline h-8 mr-2" /> -->
+    <a href="/">Better With a Teacher</a>
+  </div>
   <nav class="flex w-full justify-end">
     <button type="button" class="cursor-pointer md:hidden" id="toggle">
       <Bars />
@@ -57,7 +61,7 @@ const url = Astro.url.pathname;
   <div class="px-16">
     <button
       type="button"
-      class="random py-2 md:hidden w-full  bg-buttons text-text-button rounded-2xl"
+      class="random py-2 md:hidden w-full bg-buttons text-text-button rounded-2xl"
     >
       Aleatorio
     </button>
