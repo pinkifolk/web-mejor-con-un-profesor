@@ -1,36 +1,27 @@
 ---
-import QRCode from 'qrcode'
-
-
-function generarCodigoTicket() {
-    const fecha = Date.now().toString(36).toUpperCase();
-	const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-	return `${fecha}-${random}`;
-}
-const qr = await QRCode.toDataURL(generarCodigoTicket());
 
 ---
-<section class="flex items-center justify-center opacity-0 transition-opacity duration-1000 ease-in-out hover:opacity-100">
+<section id="ticketReady" class="flex items-center justify-center opacity-0 transition-opacity duration-1000 ease-in-out">
     <div class="border border-gray-300 w-lg h-60 p-6 bg-white rounded-lg shadow-lg absolute -rotate-5 z-10"></div>
     <div class="border border-gray-300 w-lg h-60 p-6 bg-white rounded-lg shadow-lg absolute z-20">
         <div class="grid grid-cols-3 gap-4 h-full items-center">
             <div class="border-r-2 border-dashed border-gray-300 col-span-2">
-                <div class="grid grid-cols-2">
-                    <img src="#" alt="Imagen del Tour">
-                    <div>
+                <div class="grid grid-cols-3">
+                    <img id="imgTour" src="" alt="" class="w-24 h-24 rounded-lg">
+                    <div class="col-span-2 pl-4">
                         <h2 class="text-3xl font-bold mb-4">Ticket</h2>
-                        <h2 class="text-3xl font-bold mb-4">Tour Santiago</h2>
+                        <h2 class="text-xl font-bold mb-4" id="tour">Tour Santiago</h2>
                     </div>
                 </div>
                 <div class="flex justify-between px-2 text-gray-500">
-                    <p class="text-sm">13:00 Hrs</p>
-                    <p class="text-sm">Jueves 05 de Julio 2025</p>
-                    <p class="text-sm text-center">2 Adulto</p>
-                    <p class="text-sm text-center">1 Niño</p>
+                    <p class="text-sm" id="hour">13:00 Hrs</p>
+                    <p class="text-sm" id="date">Jueves 05 de Julio 2025</p>
+                    <p class="text-sm text-center" id="adult">2 Adulto</p>
+                    <p class="text-sm text-center" id="child">1 Niño</p>
                 </div>
             </div>
             <div class="text-center m-auto py-4">
-                <img src={qr} alt="Numero de Ticket" class="w-36 h-36 mb-1">
+                <img id="qr" src="" alt="" class="w-36 h-36 mb-1">
                 <a class="bg-buttons text-text-button rounded-4xl px-4 py-2" href="http://">Descargar</a>
             </div>
 
