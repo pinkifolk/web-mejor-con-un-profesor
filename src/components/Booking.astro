@@ -1,64 +1,258 @@
 ---
+const { slug } = Astro.params;
+import { GetHoursBySlug } from "../lib/db.js";
+import type { Hours } from "@/types/tours";
+const data: Hours = await GetHoursBySlug(slug);
 
+const validarHoras = Array.isArray(data)
+  ? data.filter((h) => h.id !== null && h.hour !== null)
+  : [];
 ---
+
 <aside class="w-1/2 p-4">
-    <h2 class="text-2xl font-bold mb-4">
-        Reserva tu recorrido
+  <h2 class="text-2xl font-bold mb-4">Reserva tu recorrido</h2>
+  <section class="mb-6" aria-labelledby="fecha-heading">
+    <h2 id="fecha-heading" class="text-xl font-bold mb-4">
+      Selecciona una fecha
     </h2>
-    <section class="mb-6" aria-labelledby="fecha-heading">
-        <h2 id="fecha-heading" class="text-xl font-bold mb-4">Selecciona una fecha</h2>
-        <input type="date" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    </section>
-    <section class="mb-6" aria-labelledby="participantes-heading">
-        <h2 id="participantes-heading" class="text-xl font-bold mb-4">Participantes</h2>
-        <div class="flex justify-between gap-4 mb-4 items-center">
-            <label for="adultos" class="text-lg">Adulto</label>
-            <div class="flex items-center gap-2">
-                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">-</button>
-                <span class="text-lg mx-3">0</span>
-                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">+</button>
-            </div> 
-        </div>
-        <div class="flex justify-between gap-4 mb-4 items-center">
-            <label for="ninos" class="text-lg">Niños</label>
-            <div class="flex items-center gap-2">
-                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">-</button>
-                <span class="text-lg mx-3">0</span>
-                <button class="bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer">+</button>
-            </div> 
-        </div>
-    </section>
+    <input
+      type="date"
+      id="fecha"
+      name="fecha"
+      data-slug={slug}
+      class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </section>
+  <section class="mb-6" aria-labelledby="participantes-heading">
+    <h2 id="participantes-heading" class="text-xl font-bold">Participantes</h2>
+    <p class="text-red-600 font-bold text-sm mb-4">
+      <span id="cupos">0</span> Cupos disponible
+    </p>
+    <div
+      class="flex justify-between gap-4 mb-4 items-center counter"
+      data-type="adultos"
+    >
+      <label class="text-lg">Adulto</label>
+      <div class="flex items-center gap-2">
+        <button
+          class="decrement bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer"
+          >-</button
+        >
+        <span class="count text-lg mx-3">0</span>
+        <button
+          class="increment bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer"
+          >+</button
+        >
+      </div>
+    </div>
+    <div
+      class="flex justify-between gap-4 mb-4 items-center counter"
+      data-type="ninos"
+    >
+      <label class="text-lg">Niños</label>
+      <div class="flex items-center gap-2">
+        <button
+          class="decrement bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer"
+          >-</button
+        >
+        <span class="count text-lg mx-3">0</span>
+        <button
+          class="increment bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer"
+          >+</button
+        >
+      </div>
+    </div>
+  </section>
 
-    <section class="mb-6" aria-labelledby="horario-heading">
-        <h2 id="horario-heading" class="text-xl font-bold mb-4">Elige un horario</h2>
-        <div class="flex justify-between">
+  <section class="mb-6" aria-labelledby="horario-heading">
+    <h2 id="horario-heading" class="text-xl font-bold mb-4">
+      Elige un horario
+    </h2>
+    {
+      validarHoras.length > 0 ? (
+        <div
+          class={`flex flex-wrap ${validarHoras.length > 4 ? "justify-start gap-4" : "justify-between"} my-6`}
+        >
+          {validarHoras.map((hour: Hours) => (
             <div class="relative">
-                <input type="radio" name="horario" id="hora1" value="10:00" class="hidden peer" checked>
-                <label for="hora1" class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected">
-                10:00 AM
-                </label>
+              <input
+                type="radio"
+                name="horario"
+                id={`hora${hour.id}`}
+                value={hour.hour}
+                class="hidden peer"
+              />
+              <label
+                for={`hora${hour.id}`}
+                class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected"
+              >
+                {hour.hour}
+              </label>
             </div>
-
-            <div class="relative">
-                <input type="radio" name="horario" id="hora2" value="13:00" class="hidden peer">
-                <label for="hora2" class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected">
-                13:00 PM
-                </label>
-            </div>
+          ))}
         </div>
-    </section>
-    <section class="mb-6" aria-labelledby="resumen-heading">
-        <h2 id="resumen-heading" class="text-xl font-bold pb-5 border-b border-gray-300">Resumen de la reserva</h2>
-        <div class="grid grid-cols-3 mt-4 text-text-place">
-            <div class="col-span-1">
-                <p class="text-sm">Adultos: 1</p>
-                <p class="text-sm">Niños: 0 </p>
-            </div>
-            <div class="col-span-2">
-                <p class="text-sm">Jueves 05 de Julio del 2025</p>
-                <p class="text-sm">Horario 1:00 PM</p>
-            </div>
-        </div>
-    </section>
-    <button class="bg-buttons px-4 py-2 w-full rounded-4xl text-text-button font-semibold">Reservar</button>
+      ) : (
+        <p>Sin Horas disponibles</p>
+      )
+    }
+  </section>
+  <section class="mb-6" aria-labelledby="resumen-heading">
+    <h2
+      id="resumen-heading"
+      class="text-xl font-bold pb-5 border-b border-gray-300"
+    >
+      Resumen de la reserva
+    </h2>
+    <div class="grid grid-cols-3 mt-4 text-text-place animate-pulse">
+      <div class="col-span-1">
+        <p class="text-sm">Adultos: <span data-summary="adultos">0</span></p>
+        <p class="text-sm">Niños: <span data-summary="ninos">0</span></p>
+      </div>
+      <div class="col-span-2">
+        <p class="text-sm" id="dateSelected"></p>
+        <p class="text-sm" id="HoursSelected"></p>
+      </div>
+    </div>
+  </section>
+  <button
+    id="reservar"
+    name="reservar"
+    class="bg-buttons px-4 py-2 w-full rounded-4xl text-text-button font-semibold cursor-pointer opacity-0 transition-opacity duration-1000 ease-in-out"
+    >Reservar</button
+  >
 </aside>
+
+<script>
+  const fechaInput = document.getElementById("fecha") as HTMLInputElement;
+  const enviarBtn = document.getElementById("reservar") as HTMLButtonElement;
+  const cupos = document.getElementById("cupos") as HTMLSpanElement;
+  const detailsDate = document.getElementById(
+    "dateSelected"
+  ) as HTMLParagraphElement;
+  const detailsHour = document.getElementById(
+    "HoursSelected"
+  ) as HTMLParagraphElement;
+  const hoursSelected = document.getElementsByName(
+    "horario"
+  ) as NodeListOf<HTMLInputElement>;
+  let cuposDisponibles = parseInt(cupos.textContent || "0", 10);
+  const slug = fechaInput.dataset.slug;
+
+  fechaInput.addEventListener("change", async () => {
+    const selectedDate = fechaInput.value;
+    detailsDate.textContent = new Date(
+      `${selectedDate}T00:00:00`
+    ).toLocaleDateString("es-ES", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    if (selectedDate) {
+      try {
+        const response = await fetch(
+          `/api/availability?date=${selectedDate}&slug=${slug}`
+        );
+        const data = await response.json();
+        cupos.textContent = data.disponible;
+        cuposDisponibles = parseInt(data.disponible, 10);
+      } catch (error) {
+        console.error("Error al solicitar los dias disponibles:", error);
+        cupos.textContent = "0";
+      }
+    } else {
+      cupos.textContent = "0";
+    }
+  });
+  document.querySelectorAll(".counter").forEach((couterEl) => {
+    let count = 0;
+    const span = couterEl.querySelector(".count") as HTMLSpanElement;
+    const decrementBtn = couterEl.querySelector(
+      ".decrement"
+    ) as HTMLButtonElement;
+    const incrementBtn = couterEl.querySelector(
+      ".increment"
+    ) as HTMLButtonElement;
+    const type = (couterEl as HTMLElement).dataset.type;
+    const summaryEl = document.querySelector(`[data-summary="${type}"]`);
+
+    const update = () => {
+      span.textContent = count.toString();
+      cupos.textContent = cuposDisponibles.toString();
+      if (summaryEl) summaryEl.textContent = count.toString();
+    };
+
+    incrementBtn.addEventListener("click", () => {
+      if (cuposDisponibles <= 0) return;
+      count++;
+      cuposDisponibles--;
+      update();
+    });
+    decrementBtn.addEventListener("click", () => {
+      if (count > 0) {
+        count--;
+        cuposDisponibles++;
+        update();
+      }
+    });
+  });
+  hoursSelected.forEach((hour) => {
+    hour.addEventListener("change", () => {
+      if (hour.checked) {
+        detailsHour.textContent = `Hora: ${hour.value}`;
+        enviarBtn.classList.add("opacity-100");
+      }
+    });
+  });
+
+  enviarBtn.addEventListener("click", async () => {
+    const selectedDate = fechaInput.value;
+    const adultos =
+      document.querySelector('[data-summary="adultos"]')?.textContent || "0";
+    const ninos =
+      document.querySelector('[data-summary="ninos"]')?.textContent || "0";
+    let selectedHour = "";
+    let hash = "";
+    hoursSelected.forEach((hour) => {
+      if (hour.checked) {
+        selectedHour = hour.value;
+      }
+    });
+    if (!selectedDate) {
+      alert("Por favor selecciona una fecha.");
+      return;
+    }
+    if (parseInt(adultos, 10) === 0 && parseInt(ninos, 10) === 0) {
+      alert("Por favor selecciona al menos un participante.");
+      return;
+    }
+    if (!selectedHour) {
+      alert("Por favor selecciona un horario.");
+      return;
+    }
+    const payload = {
+      date: selectedDate,
+      adultos,
+      ninos,
+      hour: selectedHour,
+      slug: slug ?? "",
+    };
+    try {
+      const response = await fetch("/api/booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      hash = new URLSearchParams(data).toString();
+    } catch (error) {
+      console.error("Error al guardar en localStorage:", error);
+    }
+    window.location.href = `/confirmacion?${hash}`;
+  });
+</script>
