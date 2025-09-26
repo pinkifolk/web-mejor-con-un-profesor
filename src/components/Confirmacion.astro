@@ -1,5 +1,5 @@
 <section class="p-18">
-    <form action="">
+    <form class="max-w-lg mx-auto">
         <h2 class="text-2xl font-bold mb-4">Tu información</h2>
         
         <div class="mb-4">
@@ -19,8 +19,96 @@
             <input type="tel" id="telefono" name="telefono" class="w-full p-3 mb-2 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place" required placeholder="Ingrese su número telefónico" />
         </div>
 
-        <button type="submit" class="bg-buttons opacity-85 text-text-button cursor-pointer w-full p-4 rounded-full hover:opacity-100">
+        <button type="submit" id="btnConfirmar" class="bg-buttons text-text-button cursor-pointer w-full p-4 rounded-full">
             Confirmar Reserva
         </button>
     </form>
 </section>
+
+<script>
+    import QRCode from 'qrcode'
+    const ticket = document.getElementById('ticketReady') as HTMLElement;
+    const imgTourElement = document.getElementById('imgTour') as HTMLImageElement;
+    const tourElement = document.getElementById('tour') as HTMLElement;
+    const dateElement = document.getElementById('date') as HTMLElement;
+    const hourElement = document.getElementById('hour') as HTMLElement;
+    const adultElement = document.getElementById('adult') as HTMLElement;
+    const childElement = document.getElementById('child') as HTMLElement;
+    const qrElement = document.getElementById('qr') as HTMLImageElement;
+    const btnConfirmar = document.getElementById('btnConfirmar') as HTMLButtonElement;
+
+    const form = document.querySelector('form') as HTMLFormElement;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+    
+        const formData = new FormData(form);
+        const nombre = formData.get('nombre');
+        const apellido = formData.get('apellido');
+        const email = formData.get('email');
+        const telefono = formData.get('telefono');
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+    
+        if (!nombre || !apellido || !email || !telefono) {
+        alert('Por favor, complete todos los campos.');
+        return;
+        }
+        if (!id) {
+        alert('ID de reserva no encontrado. Por favor, regrese a la página de reservas.');
+        return;
+        }
+    
+        const bookingData = {
+        nombre,
+        apellido,
+        email,
+        telefono,
+        id,
+        };
+    
+        try {
+        const response = await fetch('/api/confirm', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingData),
+        });
+    
+        if (response.ok) {
+            const result = await response.json();
+            const {ticketid,imgTour,tour,date_booking,hours,adult,child} = result.response;
+            form.reset();
+            ticket.classList.add('opacity-100');
+            tourElement.textContent = tour;   
+            imgTourElement.src = `/img/${imgTour}`;
+            imgTourElement.alt = `Imagen del tour ${tour}`;
+            dateElement.textContent =  new Date(date_booking).toLocaleDateString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            });
+            hourElement.textContent = `Hora: ${hours}`;
+            adultElement.textContent = `${adult} Adulto${adult  > 1 ? 's' : ''}`;      
+            childElement.textContent = `${child} Niño${child  > 1 ? 's' : ''}`;
+            const qrCodeDataUrl = await QRCode.toDataURL(ticketid);
+            qrElement.src = qrCodeDataUrl;
+            qrElement.alt = `Código QR del ticket ${ticketid}`;
+            btnConfirmar.disabled = true;
+            btnConfirmar.textContent = 'Reserva Confirmada';
+            btnConfirmar.classList.remove('bg-buttons','text-text-button');
+            btnConfirmar.classList.add('bg-fondo-place', 'text-text-place');
+            
+        } else {
+            const errorResult = await response.json();
+            alert(errorResult.message);
+        }
+        } catch (error) {
+        console.error('Error:', error);
+        alert('Ocurrió un error al procesar la reserva. Por favor, inténtelo de nuevo.');
+        }
+    });
+
+</script>
