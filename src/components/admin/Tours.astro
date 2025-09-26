@@ -1,84 +1,207 @@
-<article class="overflow-y-auto h-full">
-    <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
-        <h1 class="text-4xl font-bold">Lista de tours</h1>
-        <a href="nuevo" class="bg-fondo-place text-text-place text-sm py-2 px-4 rounded-4xl hover:bg-buttons hover:text-text-button" aria-label="Crear nuevo Tour">Crear Tour</a>
-    </header>
-    <section class="px-11">
-    <div class="border border-table rounded-lg w-full">
-        <table class="min-w-full w-full table-fixed">
-            <thead>
-                <tr class="text-left border-b border-table font-medium text-sm"> 
-                    <th class="py-2 px-4 font-normal w-1/4">Nombre</th>
-                    <th class="py-2 font-normal w-1/4">Estado</th>
-                    <th class="py-2 font-normal w-1/4">Total</th>
-                    <th class="py-2 font-normal w-1/4">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="hover:bg-fondo text-text text-sm border-b border-table last:border-b-0">
-                    <td class="pl-4 py-4">Santiago</td>
-                    <td>
-                        <span class="bg-fondo-place rounded-3xl px-8 py-2">
-                            Activo
-                        </span>
-                    </td>
-                    <td>150</td>
-                    <td>
-                        <a href="#" class="text-text-place font-semibold hover:underline">Editar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Pausar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Ver</a> | 
-                        <a href="#" class="text-text-place font-semibold hover:underline">Eliminar</a> 
-                    </td>
-                </tr>
-                <tr class="hover:bg-fondo text-text text-sm border-b border-table last:border-b-0">
-                    <td class="pl-4 py-4">Santiago</td>
-                    <td>
-                        <span class="bg-fondo-place rounded-3xl px-8 py-2">
-                            Activo
-                        </span>
-                    </td>
-                    <td>150</td>
-                    <td>
-                        <a href="#" class="text-text-place font-semibold hover:underline">Editar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Pausar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Ver</a> | 
-                        <a href="#" class="text-text-place font-semibold hover:underline">Eliminar</a> 
-                    </td>
-                </tr>
-                <tr class="hover:bg-fondo text-text text-sm border-b border-table last:border-b-0">
-                    <td class="pl-4 py-4">Santiago</td>
-                    <td>
-                        <span class="bg-fondo-place rounded-3xl px-8 py-2">
-                            Activo
-                        </span>
-                    </td>
-                    <td>150</td>
-                    <td>
-                        <a href="#" class="text-text-place font-semibold hover:underline">Editar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Pausar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Ver</a> | 
-                        <a href="#" class="text-text-place font-semibold hover:underline">Eliminar</a> 
-                    </td>
-                </tr>
-                <tr class="hover:bg-fondo text-text text-sm border-b border-table last:border-b-0">
-                    <td class="pl-4 py-4">Santiago</td>
-                    <td>
-                        <span class="bg-fondo-place rounded-3xl px-8 py-2">
-                            Activo
-                        </span>
-                    </td>
-                    <td>150</td>
-                    <td>
-                        <a href="#" class="text-text-place font-semibold hover:underline">Editar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Pausar</a> |
-                        <a href="#" class="text-text-place font-semibold hover:underline">Ver</a> | 
-                        <a href="#" class="text-text-place font-semibold hover:underline">Eliminar</a> 
-                    </td>
-                </tr>
-                <!-- Más filas -->
-            </tbody>
-        </table>
-    </div>
-</section>
+---
 
+---
+
+<article class="overflow-y-auto h-full">
+  <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+    <h1 class="text-4xl font-bold">Lista de tours</h1>
+    <a
+      href="nuevo"
+      class="bg-fondo-place text-text-place text-sm py-2 px-4 rounded-4xl hover:bg-buttons hover:text-text-button"
+      aria-label="Crear nuevo Tour">Crear Tour</a
+    >
+  </header>
+  <section class="px-11 mb-10">
+    <div class="border border-table rounded-lg w-full">
+      <table class="min-w-full w-full table-fixed">
+        <thead>
+          <tr class="text-left border-b border-table font-medium text-sm">
+            <th class="py-2 px-4 font-normal w-1/4">Nombre</th>
+            <th class="py-2 font-normal w-1/4">Estado</th>
+            <th class="py-2 font-normal w-1/4">Total</th>
+            <th class="py-2 font-normal w-1/4">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+  </section>
 </article>
+<div
+  data-dialog-backdrop="delete"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+>
+  <div
+    data-dialog="delete"
+    class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+  >
+    <div
+      class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+    >
+      Eliminar Tour
+    </div>
+    <div
+      class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+    >
+      ¿Estás seguro de que deseas eliminar este tour? Esta acción no se puede
+      deshacer.
+    </div>
+    <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+      <button
+        data-dialog-close="true"
+        class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        type="button"
+      >
+        Cancel
+      </button>
+      <button
+        id="eliminar"
+        class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+        type="button"
+      >
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+import type { TourAdmin } from "../../types/tours.js";
+  import { Notyf } from "notyf";
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+    types: [
+      {
+        type: "custom-success",
+        background: "#16a34a",
+        icon: {
+          className: "notyf__icon-custom",
+          tagName: "div",
+        },
+      },
+      {
+        type: "custom-error",
+        background: "#dc2626",
+        icon: {
+          className: "notyf__icon-custom2",
+          tagName: "div",
+        },
+      },
+    ],
+  });
+  let id: string | null = null;
+  const tableBody = document.getElementById("table-body");
+
+  async function fetchData() {
+  try {
+    const response = await fetch("/aNKiNFLow/api/tours");
+    if (response.ok) {
+      const data = await response.json();
+      if (tableBody) {
+        tableBody.innerHTML = "";
+        data.forEach((tour: TourAdmin) => {
+          const row = document.createElement("tr");
+          row.className =
+            "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
+          row.innerHTML = `
+            <td class="pl-4 py-4">${tour.name}</td>
+            <td>
+              <span class="bg-fondo-place rounded-3xl px-8 py-2">
+                ${!tour.status ? "Activo" : "Pausado"}
+              </span>
+            </td>
+            <td>${tour.total_bookings}</td>
+            <td>
+              <button  type="button" class="text-text-place font-semibold cursor-pointer">Editar</a> |
+              <button  type="button" class="text-text-place font-semibold cursor-pointer">Pausar</a> |
+              <button  type="button" class="text-text-place font-semibold cursor-pointer">Ver</a> |
+              <button
+                type="button"
+                data-id="${tour.id}"
+                class="text-text-place font-semibold cursor-pointer"
+                data-dialog-target="delete"
+              >
+                Eliminar
+              </button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+        attachDialogListeners();
+      }
+    } else {
+      notyf.open({
+        type: "custom-error",
+        message: "Error al obtener los datos",
+      });
+    }
+  } catch (error) {
+    console.error("Error al obtener los datos:", error);
+  }
+}
+    fetchData();
+
+function attachDialogListeners() {
+  document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
+    const dialogId = trigger.getAttribute("data-dialog-target");
+    const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+    const backdrop = document.querySelector(
+      `[data-dialog-backdrop="${dialogId}"]`
+    );
+
+    function openDialog() {
+      dialog?.classList.remove("pointer-events-none", "opacity-0");
+      backdrop?.classList.remove("pointer-events-none", "opacity-0");
+      id = trigger.getAttribute("data-id");
+    }
+
+    function closeDialog() {
+      dialog?.classList.add("pointer-events-none", "opacity-0");
+      backdrop?.classList.add("pointer-events-none", "opacity-0");
+      id = null;
+    }
+
+    trigger.addEventListener("click", openDialog);
+    dialog
+      ?.querySelectorAll("[data-dialog-close]")
+      .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+    backdrop?.addEventListener("click", (event) => {
+      if (
+        event.target === backdrop &&
+        backdrop.hasAttribute("data-dialog-backdrop-close")
+      ) {
+        closeDialog();
+      }
+    });
+  });
+}
+  document.getElementById("eliminar")?.addEventListener("click", async () => {
+    try {
+      const response = await fetch(`/aNKiNFLow/api/tours?id=${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        notyf.open({
+          type: "custom-success",
+          message: "Tour eliminado con éxito",
+        });
+        
+      } else {
+        const data = await response.json();
+        notyf.open({
+          type: "custom-error",
+          message: data.error || "Error al crear el tour",
+        });
+      }
+    } catch (error) {
+      console.error("Error al eliminar el tour:", error);
+    }
+    fetchData();
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((btn) => btn.click());
+  });
+</script>
