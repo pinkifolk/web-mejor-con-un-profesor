@@ -8,13 +8,13 @@ const pool = new Pool({
 
 export async function GetDestinosPopulate() {
   try {
-  const res = await pool.query(
-    "SELECT * FROM tours WHERE status=false AND populate=true ORDER BY id"
-  );
-  if (res.rows.length === 0) {
-    throw new Error("No hay tours disponibles");
-  }
-  return res.rows;
+    const res = await pool.query(
+      "SELECT * FROM tours WHERE status=false AND populate=true ORDER BY id"
+    );
+    if (res.rows.length === 0) {
+      throw new Error("No hay tours disponibles");
+    }
+    return res.rows;
   } catch (error) {
     console.error("Error en funcion GetDestinos:", error);
     throw error;
@@ -22,13 +22,13 @@ export async function GetDestinosPopulate() {
 }
 export async function GetDestinosAll() {
   try {
-  const res = await pool.query(
-    "SELECT * FROM tours WHERE status=false ORDER BY id"
-  );
-  if (res.rows.length === 0) {
-    throw new Error("No hay tours disponibles");
-  }
-  return res.rows;
+    const res = await pool.query(
+      "SELECT * FROM tours WHERE status=false ORDER BY id"
+    );
+    if (res.rows.length === 0) {
+      throw new Error("No hay tours disponibles");
+    }
+    return res.rows;
   } catch (error) {
     console.error("Error en funcion GetDestinos:", error);
     throw error;
@@ -122,7 +122,7 @@ export async function NewTour(tour) {
         tour.timing,
         tour.persons,
         tour.slug,
-        tour.populate
+        tour.populate,
       ]
     );
     const id = res.rows[0].id;
@@ -166,6 +166,21 @@ export async function DeleteTour(id) {
   } catch (error) {
     console.error("Error en DeleteTour:", error);
     throw error;
+  }
+}
+export async function ChangeStatus(id, status) {
+  console.log(id)
+  try {
+    const res = await pool.query("UPDATE tours SET status=$1 WHERE id=$2 RETURNING*", [
+      status,
+      id,
+    ]);
+    if(res.rows.length === 0){
+      throw new Error("No se encontro el tour");
+    }
+    return true;
+  } catch(error) {
+    console.error("Error en ChangeStatus", error)
   }
 }
 export async function GetHours() {
@@ -241,7 +256,9 @@ function generarCodigoTicket() {
 export async function ConfirmBooking(data) {
   try {
     if (!isUuid(data.id)) {
-      throw new Error("No modificar la url de confirmación o el hash generado no es válido");
+      throw new Error(
+        "No modificar la url de confirmación o el hash generado no es válido"
+      );
     }
     const checkRes = await pool.query(
       "SELECT confirmation FROM booking WHERE hash = $1",
