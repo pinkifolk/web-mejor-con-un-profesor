@@ -1,141 +1,155 @@
 ---
-import BreadCrumbs from "@/components/BreadCrumbs.astro"
-import clock from "@/assets/clock.svg"
-import Start from "@/assets/Start.astro"
-import UserIcon from "@/assets/circle-user-round.svg"
+import BreadCrumbs from "@/components/BreadCrumbs.astro";
+import clock from "@/assets/clock.svg";
+import Start from "@/assets/Start.astro";
+import UserIcon from "@/assets/circle-user-round.svg";
+import { GetTourBySlug } from "../lib/db.js";
+import type { TourDetail } from "../types/tours";
+const { slug } = Astro.params;
+const tour:TourDetail = await GetTourBySlug(slug);
+const {
+  name,
+  description,
+  img,
+  duration,
+  max_people,
+  itinerary,
+  rating,
+  total_reviews,
+  comments,
+  rating_counts,
+} = tour;
 
 ---
-<section class="w-6xl p-4">
-    <nav aria-label="Breadcrumbs" class="mb-4">
-        <BreadCrumbs />
-    </nav>
-    <article>
-        <header>
-            <img src="#" alt="Imagen de tour Historia, cultura y recomendaciones de un local Santiago Chile" class="w-full h-64 object-cover rounded-lg mb-4" />
-            <h1 class="text-3xl font-bold mb-2">
-                Historia, cultura y recomendaciones de un local
-            </h1>
-            <p class="text-gray-700 mb-4 ">
-                <img src={clock.src} alt="Duracion del tour" class="inline-block w-4 h-4"> 
-                2 horas 30 minutos
-            </p>
-        </header>
-        <section aria-labelledby="descripcion-tour" class="mb-4">
-            <h2 id="descripcion-tour" class="text-xl font-semibold mb-2">Descripción</h2>
-            <p class="text-gray-700">
-                Este free tour le ayudará a comprender la historia chilena esencial vinculada a la actualidad pero en palabras simples y claras.También aprenderás sobre nuestra cultura, gastronomía y bebidas gracias a este amante del estilo de vida chileno. Además, durante el viaje, recibirás recomendaciones clave sobre lugares para visitar, los mejores restaurantes y bares de la ciudad, y las actividades imprescindibles en Santiago durante tu estancia.¡Al final del tour obtendrás más información sobre otras ciudades y lugares para visitar en Chile!
-            </p>
-        </section>
-        <section aria-labelledby="itinerary-tour" class="mb-4">
-            <h2 id="itinerary-tour" class="text-xl font-semibold mb-2">¿Qué veremos en este tour?</h2>
-            <p class="text-gray-700">Visitamos todas las joyas de la ciudad que no todo el mundo te mostrará como:</p>
-            <ul class="list-disc pl-5 text-gray-700">
-                <li>Plaza de Armas (plaza principal)</li>
-                <li>El museo de arte precolombino</li>
-                <li>Corte Suprema</li>
-                <li>Ex congreso nacional</li>
-                <li>El antiguo camino inca</li>
-                <li>El Palacio Presidencial</li>
-                <li>Edificio del mercado de valores</li>
-                <li>Nueva York (Sí, una zona llamada Nueva York en Santiago)</li>
-                <li>París y Londres (Sí, un barrio europeo en la ciudad)</li>
-                <li>Antiguo centro de detención secreto (régimen de Pinochet)</li>
-                <li>¡El edificio más antiguo de Santiago!</li>
-                <li>La ópera</li>
-                <li>Centro Cultural Gabriela Mistral (antigua sede de Pinochet)</li>
-                <li>Lastarria (un espacio gastronómico lleno de opciones también para vegetarianos y veganos)</li>
-            </ul>
-        </section>
-        <section aria-labelledby="review-tour" class="mb-4">
-            <h2 id="review-tour" class="text-xl font-semibold mb-2">Reseñas</h2>
+
+<section class="w-7xl p-4">
+  <nav aria-label="Breadcrumbs" class="mb-4">
+    <BreadCrumbs />
+  </nav>
+  <article>
+    <header>
+      <img
+        src={`img/${img}`}
+        alt="Imagen de tour Historia, cultura y recomendaciones de un local Santiago Chile"
+        class="w-full h-64 object-cover rounded-lg mb-4"
+      />
+      <h1 class="text-3xl font-bold mb-2">
+        {name}
+      </h1>
+      <p class="text-gray-700 mb-4">
+        <img
+          src={clock.src}
+          alt="Duracion del tour"
+          class="inline-block w-4 h-4"
+        />
+        {duration} · Máximo {max_people} personas
+      </p>
+    </header>
+    <section aria-labelledby="descripcion-tour" class="mb-4">
+      <h2 id="descripcion-tour" class="text-xl font-semibold mb-2">
+        Descripción
+      </h2>
+      <p class="text-gray-700">
+        {description}
+      </p>
+    </section>
+    <section aria-labelledby="itinerary-tour" class="mb-4">
+      <h2 id="itinerary-tour" class="text-xl font-semibold mb-2">
+        ¿Qué veremos en este tour?
+      </h2>
+      <p class="text-gray-700">
+        Visitamos todas las joyas de la ciudad que no todo el mundo te mostrará
+        como:
+      </p>
+      <ul class="list-disc pl-5 text-gray-700">
+        {itinerary.map((item) => <li>{item}</li>)}
+      </ul>
+    </section>
+    <section aria-labelledby="review-tour" class="mb-4">
+      <h2 id="review-tour" class="text-xl font-semibold mb-2">Reseñas</h2>
+      {
+        comments.length === 0 ? (
+          <p class="text-gray-700">No hay reseñas aún.</p>
+        ) : (
+          <>
             <div class="flex flex-col md:flex-row items-start md:items-center gap-8 p-4 mb-4">
-                <div class="text-center md:text-left p-4">
-                    <h3 class="text-6xl font-bold">4.8</h3>
-                    <p class="flex">
-                        <Start bg="#e82933" border="" />
-                        <Start bg="#e82933" border="" />
-                        <Start bg="#e82933" border="" />
-                        <Start bg="#e82933" border="" />
-                        <Start bg="#ffffff" border="#f2e8e8" />
-                    </p>
-                    <p>150 Reseñas</p>
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="mr-2">5</span>
-                        <div class="w-full bg-fondo-place rounded h-3">
-                            <div class="bg-buttons h-3 rounded" style="width: 80%;"></div>
-                        </div>
-                        <span class="text-sm text-gray-500">80%</span>
+              <div class="text-center md:text-left p-4">
+                <h3 class="text-6xl font-bold">{rating}</h3>
+                <p class="flex">
+                  {Number(rating) >= 1 ? (
+                    <Start bg="#e82933" border="" />
+                  ) : (
+                    <Start bg="#ffffff" border="#f2e8e8" />
+                  )}
+                  {Number(rating) >= 2 ? (
+                    <Start bg="#e82933" border="" />
+                  ) : (
+                    <Start bg="#ffffff" border="#f2e8e8" />
+                  )}
+                  {Number(rating) >= 3 ? (
+                    <Start bg="#e82933" border="" />
+                  ) : (
+                    <Start bg="#ffffff" border="#f2e8e8" />
+                  )}
+                  {Number(rating) >= 4 ? (
+                    <Start bg="#e82933" border="" />
+                  ) : (
+                    <Start bg="#ffffff" border="#f2e8e8" />
+                  )}
+                  {Number(rating) >= 5 ? (
+                    <Start bg="#e82933" border="" />
+                  ) : (
+                    <Start bg="#ffffff" border="#f2e8e8" />
+                  )}
+                </p>
+                <p>{total_reviews} Reseñas</p>
+              </div>
+              <div class="flex-1">
+                {rating_counts.map((rc) => (
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="mr-2">{rc.rating}</span>
+                    <div class="w-full bg-fondo-place rounded h-3">
+                      <div class="bg-buttons h-3 rounded" style={`width: ${rc.percentage}%;`} />
                     </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="mr-2">4</span>
-                        <div class="w-full bg-fondo-place rounded h-3">
-                        <div class="bg-buttons h-3 rounded" style="width: 15%;"></div>
-                        </div>
-                        <span class="text-sm text-gray-500">19%</span>
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="mr-2">3</span>
-                        <div class="w-full bg-fondo-place rounded h-3">
-                        <div class="bg-buttons h-3 rounded" style="width: 15%;"></div>
-                        </div>
-                        <span class="text-sm text-gray-500">19%</span>
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="mr-2">2</span>
-                        <div class="w-full bg-fondo-place rounded h-3">
-                        <div class="bg-buttons h-3 rounded" style="width: 15%;"></div>
-                        </div>
-                        <span class="text-sm text-gray-500">19%</span>
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="mr-2">1</span>
-                        <div class="w-full bg-fondo-place rounded h-3">
-                        <div class="bg-buttons h-3 rounded" style="width: 5%;"></div>
-                        </div>
-                        <span class="text-sm text-gray-500">2%</span>
-                    </div>
-                </div>
+                    <span class="text-sm text-gray-500">{rc.percentage}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <article class="p-6 bg-gray-100 rounded-lg mb-4">
+            {comments.map((comment) => (
+              <article class="p-6 bg-gray-100 rounded-lg mb-4">
                 <header class="flex items-center gap-4 mb-2">
-                    <img class="w-10 h-10 rounded-full" src={UserIcon.src} alt="Foto de perfil de María Pacheco" />
-                    <div>
-                    <h3 class="font-semibold text-base">María Pacheco</h3>
-                    <time class="text-sm text-gray-500" datetime="2025-07-27">Hace 2 días</time>
-                    </div>
+                  <img
+                    class="w-10 h-10 rounded-full"
+                    src={UserIcon.src}
+                    alt={`Foto de perfil de ${comment.name}`}
+                  />
+                  <div>
+                    <h3 class="font-semibold text-base">{comment.name}</h3>
+                    <time
+                      class="text-sm text-gray-500"
+                      datetime={new Date(comment.created_at).toISOString()}
+                    >
+                      {new Date(comment.created_at).toLocaleDateString()}
+                    </time>
+                  </div>
                 </header>
 
                 <section aria-label="Reseña del tour" class="mt-2">
-                    <div class="text-buttons mb-2" aria-label="Calificación: 5 estrellas">
-                    ★★★★★
-                    </div>
-                    <p class="text-sm text-gray-700">
-                    “Una experiencia inolvidable, el guía fue muy amable y aprendí mucho sobre la ciudad y sus bonitos lugares, Totalmente recomendado para todo turista Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum dicta magni veniam consequatur omnis maiores voluptates quae? Laudantium eos amet repudiandae explicabo, hic maxime ex, nostrum eligendi reiciendis eius impedit!”
-                    </p>
+                  <div
+                    class="text-buttons mb-2"
+                    aria-label={`Calificación: ${comment.rating} estrellas`}
+                  >
+                    {"★".repeat(comment.rating)}
+                    {"☆".repeat(5 - comment.rating)}
+                  </div>
+                  <p class="text-sm text-gray-700">{comment.comment}</p>
                 </section>
-            </article>
-            <article class="p-6 bg-gray-100 rounded-lg">
-                <header class="flex items-center gap-4 mb-2">
-                    <img class="w-10 h-10 rounded-full" src={UserIcon.src} alt="Foto de perfil de María Pacheco" />
-                    <div>
-                    <h3 class="font-semibold text-base">María Pacheco</h3>
-                    <time class="text-sm text-gray-500" datetime="2025-07-27">Hace 2 días</time>
-                    </div>
-                </header>
-
-                <section aria-label="Reseña del tour" class="mt-2">
-                    <div class="text-buttons mb-2" aria-label="Calificación: 5 estrellas">
-                    ★★★★★
-                    </div>
-                    <p class="text-sm text-gray-700">
-                    “Una experiencia inolvidable, el guía fue muy amable y aprendí mucho sobre la ciudad.”
-                    </p>
-                </section>
-            </article>
-        
-        </section>
-
-    </article>
+              </article>
+            ))}
+          </>
+        )
+      }
+    </section>
+  </article>
 </section>
