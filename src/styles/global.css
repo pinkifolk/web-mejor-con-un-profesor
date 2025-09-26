@@ -10,3 +10,13 @@
   --color-table : #E8D1D1;
 
 }
+.notyf__icon-custom {
+  background: url('../assets/check.svg') no-repeat center center / contain !important;
+  width: 30px;
+  height: 30px;
+}
+.notyf__icon-custom2 {
+  background: url('../assets/x.svg') no-repeat center center / contain !important;
+  width: 30px;
+  height: 30px;
+}
