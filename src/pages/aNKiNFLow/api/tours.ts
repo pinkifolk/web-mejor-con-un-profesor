@@ -1,12 +1,26 @@
 import type { APIRoute } from "astro";
-import { DeleteTour, GetToursAdmin, ChangeStatus } from "../../../lib/db.js";
+import {
+  DeleteTour,
+  GetToursAdmin,
+  ChangeStatus,
+  NewTour,
+  GetToursAdminById,
+} from "../../../lib/db.js";
 import fs from "fs";
 
-export const GET: APIRoute = async () => { 
+export const GET: APIRoute = async ({ request }) => {
   try {
-    const tours = await GetToursAdmin();
-    return new Response(JSON.stringify(tours), { status: 200 });
-  } catch (err:string|any) {
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+    if (id) {
+      const tours = await GetToursAdminById(id);
+      console.log(tours);
+      return new Response(JSON.stringify(tours), { status: 200 });
+    } else {
+      const tours = await GetToursAdmin();
+      return new Response(JSON.stringify(tours), { status: 200 });
+    }
+  } catch (err: string | any) {
     return new Response(
       JSON.stringify({ error: err.message || "Error al obtener los tours" }),
       {
@@ -14,11 +28,10 @@ export const GET: APIRoute = async () => {
       }
     );
   }
-}
+};
 export const POST: APIRoute = async ({ request }) => {
   try {
     const formData = await request.formData();
-    const { NewTour } = await import("../../../lib/db.js");
     const title = formData.get("title");
     const imgFile = formData.get("imgTour");
 
@@ -48,12 +61,12 @@ export const POST: APIRoute = async ({ request }) => {
       persons: formData.get("persons"),
       points: JSON.parse((formData.get("points") as string) || "[]"),
       slug: slug,
-      populate: formData.get("popular") === 'on' ? true : false,
+      populate: formData.get("popular") === "on" ? true : false,
       horario: JSON.parse((formData.get("horario") as string) || "[]"),
     };
     const newTour = await NewTour(tour);
     return new Response(JSON.stringify(newTour), { status: 200 });
-  } catch (err:string|any) {
+  } catch (err: string | any) {
     return new Response(
       JSON.stringify({ error: err.message || "Error al crear el tour" }),
       {
@@ -66,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
 export const DELETE: APIRoute = async ({ request }) => {
   try {
     const url = new URL(request.url);
-    const id  = url.searchParams.get("id");
+    const id = url.searchParams.get("id");
     if (!id) {
       return new Response(JSON.stringify({ error: "ID no válido" }), {
         status: 400,
@@ -74,7 +87,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     }
     const deleted = await DeleteTour(id);
     return new Response(JSON.stringify(deleted), { status: 200 });
-  } catch (err:string|any) {
+  } catch (err: string | any) {
     return new Response(
       JSON.stringify({ error: err.message || "Error al eliminar el tour" }),
       {
@@ -82,13 +95,13 @@ export const DELETE: APIRoute = async ({ request }) => {
       }
     );
   }
-}
+};
 export const PUT: APIRoute = async ({ request }) => {
   try {
     const url = new URL(request.url);
-    const id  = url.searchParams.get("id");
+    const id = url.searchParams.get("id");
     const status = url.searchParams.get("status");
-    const boolStatus = status === "true" ? false : true
+    const boolStatus = status === "true" ? false : true;
     if (!id) {
       return new Response(JSON.stringify({ error: "ID no válido" }), {
         status: 400,
@@ -99,9 +112,9 @@ export const PUT: APIRoute = async ({ request }) => {
         status: 400,
       });
     }
-    const deleted = await ChangeStatus(id,boolStatus);
+    const deleted = await ChangeStatus(id, boolStatus);
     return new Response(JSON.stringify(deleted), { status: 200 });
-  } catch (err:string|any) {
+  } catch (err: string | any) {
     return new Response(
       JSON.stringify({ error: err.message || "Error al eliminar el tour" }),
       {
@@ -109,4 +122,4 @@ export const PUT: APIRoute = async ({ request }) => {
       }
     );
   }
-}
+};
