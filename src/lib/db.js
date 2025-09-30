@@ -99,6 +99,30 @@ export async function GetToursAdmin() {
     throw error;
   }
 }
+export const GetToursAdminById = async (id) => {
+
+  try {
+    const res = await pool.query("SELECT * FROM tours WHERE id=$1", [id]);
+    if (res.rows.length === 0) {
+      throw new Error("No se encontro el tour");
+    }
+    const tour = res.rows[0];
+    const resItinerary = await pool.query(
+      "SELECT name FROM itinerary WHERE tour_id=$1",
+      [tour.id]
+    );
+    const resHours = await pool.query(
+      "SELECT H.hour FROM tours_hours TH LEFT JOIN hours H ON H.id=TH.hours_id WHERE tours_id=$1",
+      [tour.id]
+    );
+    tour.itinerary = resItinerary.rows.map((row) => row.name);
+    tour.hours = resHours.rows.map((row) => row.hour);
+    return tour;
+  } catch (error) {
+    console.error("Error en funcion GetToursAdminBiId:", error);
+    throw error;
+  }
+};
 export async function NewTour(tour) {
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
