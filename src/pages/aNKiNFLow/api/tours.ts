@@ -14,7 +14,6 @@ export const GET: APIRoute = async ({ request }) => {
     const id = url.searchParams.get("id");
     if (id) {
       const tours = await GetToursAdminById(id);
-      console.log(tours);
       return new Response(JSON.stringify(tours), { status: 200 });
     } else {
       const tours = await GetToursAdmin();
