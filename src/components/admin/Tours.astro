@@ -106,6 +106,38 @@
     </div>
   </div>
 </div>
+<!-- modal para ver -->
+<div
+  data-dialog-backdrop="showTour"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+>
+  <div
+    data-dialog="showTour"
+    class="relative m-4 p-4 w-4xl rounded-lg bg-white shadow-sm"
+  >
+    <div
+      class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+    >
+      <span id="titleShowModal"></span>
+    </div>
+    <div
+      class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+    >
+      <div id="bodyShowDetail" class="p-4 max-h-96 overflow-y-auto"></div>
+    </div>
+    <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+      <button
+        data-dialog-close="true"
+        class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+        type="button"
+      >
+        Aceptar
+      </button>
+    </div>
+  </div>
+</div>
 <script>
   import type { TourAdmin } from "../../types/tours.js";
   import { Notyf } from "notyf";
@@ -135,7 +167,12 @@
   let status: string | null = null;
   const tableBody = document.getElementById("table-body");
   const title = document.getElementById("title") as HTMLElement;
+  const titleShowModal = document.getElementById(
+    "titleShowModal"
+  ) as HTMLElement;
   const body = document.getElementById("body") as HTMLElement;
+  const btnChange = document.getElementById("change") as HTMLButtonElement;
+  const btnDelete = document.getElementById("delete") as HTMLButtonElement;
 
   async function getData() {
     try {
@@ -167,12 +204,15 @@
                 type="button" 
                 data-id="${tour.id}"
                 data-status="${tour.status}"
-                class="text-text-place font-semibold cursor-pointer" data-dialog-target="changeStatus"
+                class="text-text-place font-semibold cursor-pointer" 
+                data-dialog-target="changeStatus"
                 >${!tour.status ? "Pausar" : "Activar"}
               </button> |
               <button  
+                data-id="${tour.id}"  
                 type="button" 
                 class="text-text-place font-semibold cursor-pointer"
+                data-dialog-target="showTour"
                 >Ver
               </button> |
               <button
@@ -200,6 +240,39 @@
     }
   }
   getData();
+  async function showDetails(id: string | null) {
+    const bodyShowContent = document.getElementById(
+      "bodyShowDetail"
+    ) as HTMLImageElement;
+    try {
+      const response = await fetch(`/aNKiNFLow/api/tours?id=${id}`);
+      if (response.ok) {
+        const tour = await response.json();
+
+        if (bodyShowContent) {
+          bodyShowContent.scrollTop = 0;
+          titleShowModal.textContent = tour.name;
+          bodyShowContent.innerHTML = `
+          <img src="${`/img/${tour.img}`}" alt="Imagen del tour ${tour.name}" class="mb-4 w-full h-48 object-cover rounded-lg"/>
+          <p class="mb-4">${tour.description}</p>
+          <h3 class="font-semibold mb-2">Puntos de interés:</h3>
+          <ul class="list-disc list-inside mb-4">
+            ${tour.itinerary.map((point: string) => `<li>${point}</li>`).join("")}
+          </ul>
+          <h3 class="font-semibold mb-2">Horarios:</h3>
+          <ul class="list-disc list-inside">
+            ${tour.hours.map((schedule: string) => `<li>${schedule}</li>`).join("")}
+          </ul>
+        `;
+        }
+      } else {
+        bodyShowContent.textContent = "Error al cargar los detalles del tour.";
+      }
+    } catch (error) {
+      console.error("Error al obtener los detalles del tour:", error);
+      bodyShowContent.textContent = "Error al cargar los detalles del tour.";
+    }
+  }
 
   function attachDialogListeners() {
     document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
@@ -214,8 +287,23 @@
         backdrop?.classList.remove("pointer-events-none", "opacity-0");
         id = trigger.getAttribute("data-id");
         status = trigger.getAttribute("data-status");
-        title.textContent = `${status === "false" ? "Pausar el Tour" : "Activar el Tour"}`;
-        body.textContent = `${status === "false" ? "¿Estás seguro de que deseas Pausar este tour? Los usuarios no podrán reservarlo hasta que se reactive." : "¿Estás seguro de que deseas Activar este tour?"}`;
+
+        if (dialogId === "changeStatus") {
+          title.textContent = `${
+            status === "false" ? "Pausar el Tour" : "Activar el Tour"
+          }`;
+          body.textContent = `${
+            status === "false"
+              ? "¿Estás seguro de que deseas Pausar este tour? Los usuarios no podrán reservarlo hasta que se reactive."
+              : "¿Estás seguro de que deseas Activar este tour?"
+          }`;
+          btnChange.textContent = `${
+            status === "false" ? "Activar" : "Pausar"
+          }`;
+        }
+        if (dialogId === "showTour") {
+          showDetails(id);
+        }
       }
 
       function closeDialog() {
@@ -261,7 +349,7 @@
       console.error("Error al eliminar el tour:", error);
     }
   }
-  document.getElementById("delete")?.addEventListener("click", async () => {
+  btnDelete?.addEventListener("click", async () => {
     const response = await fetching(id, "DELETE", status);
     if (response) {
       notyf.open({
@@ -280,7 +368,7 @@
       .querySelectorAll<HTMLElement>("[data-dialog-close]")
       .forEach((btn) => btn.click());
   });
-  document.getElementById("change")?.addEventListener("click", async () => {
+  btnChange?.addEventListener("click", async () => {
     const response = await fetching(id, "PUT", status);
     if (response) {
       notyf.open({
