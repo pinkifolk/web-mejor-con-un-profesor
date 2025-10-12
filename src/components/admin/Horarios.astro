@@ -1,0 +1,386 @@
+---
+
+---
+
+<article class="overflow-y-auto h-full">
+  <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+    <h1 class="text-4xl font-bold">Horarios</h1>
+    <button
+      type="button"
+      class="bg-fondo-place text-text-place text-sm py-2 px-4 rounded-4xl hover:bg-buttons hover:text-text-button"
+      aria-label="Crear nuevo horario"
+      data-dialog-target="create"
+      >Crear Horario
+    </button>
+  </header>
+  <section class="px-11">
+    <div class="border border-table rounded-lg w-full">
+      <table class="min-w-full w-full table-fixed">
+        <thead>
+          <tr class="text-left border-b border-table font-medium text-sm">
+            <th class="py-2 px-4 font-normal">Horas</th>
+            <th class="py-2 font-normal w-1/4">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"> </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- modal para crear -->
+  <div
+    data-dialog-backdrop="create"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="create"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Crear Horario
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        <form action="">
+          <input
+            type="text"
+            id="nuevaHora"
+            name="nuevaHora"
+            class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+            required
+          />
+          <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+            <button
+              data-dialog-close="true"
+              class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+              type="button"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            >
+              Crear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- modal para eliminar -->
+  <div
+    data-dialog-backdrop="delete"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="delete"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Eliminar Horario
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        ¿Estás seguro de que deseas eliminar este horario? Esta acción no se
+        puede deshacer.
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+        <button
+          data-dialog-close="true"
+          class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          type="button"
+        >
+          Cancelar
+        </button>
+        <button
+          id="delete"
+          class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+          type="button"
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- modal para editar -->
+  <div
+    data-dialog-backdrop="edit"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="edit"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Editar horario
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        <input
+          type="text"
+          id="hora"
+          name="hora"
+          class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+          required
+        />
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+        <button
+          data-dialog-close="true"
+          class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          type="button"
+        >
+          Cancelar
+        </button>
+        <button
+          id="edited"
+          class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+          type="button"
+        >
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+  import { Notyf } from "notyf";
+  let id: string | null = null;
+  let hourSelected: string | null = null;
+
+  const tableBody = document.getElementById("table-body");
+  const btnEditar = document.getElementById("edited");
+  const btnEliminar = document.getElementById("delete");
+  const form = document.querySelector("form") as HTMLFormElement;
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+    types: [
+      {
+        type: "custom-success",
+        background: "#16a34a",
+        icon: {
+          className: "notyf__icon-custom",
+          tagName: "div",
+        },
+      },
+      {
+        type: "custom-error",
+        background: "#dc2626",
+        icon: {
+          className: "notyf__icon-custom2",
+          tagName: "div",
+        },
+      },
+    ],
+  });
+  async function getData() {
+    try {
+      const response = await fetch("/aNKiNFLow/api/hours");
+      if (response.ok) {
+        const data = await response.json();
+        if (tableBody) {
+          tableBody.innerHTML = "";
+          data.forEach((hour) => {
+            const row = document.createElement("tr");
+            row.className =
+              "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
+            row.innerHTML = `
+            <td class="pl-4 py-4">
+              ${hour.hour}
+            </td>
+            <td>
+              <button  
+                type="button" 
+                data-id="${hour.id}"
+                data-hour="${hour.hour}"
+                class="text-text-place font-semibold cursor-pointer"
+                data-dialog-target="edit"
+                >Editar
+              </button> |
+              <button
+                type="button"
+                data-id="${hour.id}"
+                class="text-text-place font-semibold cursor-pointer"
+                data-dialog-target="delete"
+              >
+                Eliminar
+              </button>
+            </td>
+          `;
+            tableBody.appendChild(row);
+          });
+          attachDialogListeners();
+        }
+      } else {
+        notyf.open({
+          type: "custom-error",
+          message: "Error al obtener los datos",
+        });
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    }
+  }
+  getData();
+  function attachDialogListeners() {
+    document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
+      const dialogId = trigger.getAttribute("data-dialog-target");
+      const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+      const backdrop = document.querySelector(
+        `[data-dialog-backdrop="${dialogId}"]`
+      );
+
+      function openDialog() {
+        dialog?.classList.remove("pointer-events-none", "opacity-0");
+        backdrop?.classList.remove("pointer-events-none", "opacity-0");
+        id = trigger.getAttribute("data-id");
+        hourSelected = trigger.getAttribute("data-hour");
+
+        if (dialogId === "edit") {
+          const inputsText = document.getElementById("hora");
+          inputsText.value = hourSelected;
+        }
+      }
+
+      function closeDialog() {
+        dialog?.classList.add("pointer-events-none", "opacity-0");
+        backdrop?.classList.add("pointer-events-none", "opacity-0");
+        id = null;
+        hourSelected = null;
+      }
+
+      trigger.addEventListener("click", openDialog);
+      dialog
+        ?.querySelectorAll("[data-dialog-close]")
+        .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+      backdrop?.addEventListener("click", (event) => {
+        if (
+          event.target === backdrop &&
+          backdrop.hasAttribute("data-dialog-backdrop-close")
+        ) {
+          closeDialog();
+        }
+      });
+    });
+  }
+  async function deleted(id: string | null) {
+    try {
+      const response = await fetch(`/aNKiNFLow/api/hours?id=${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        return true;
+      } else {
+        const data = await response.json();
+        return data;
+      }
+    } catch (error) {
+      console.error("Error al eliminar la hora:", error);
+    }
+  }
+ async function updated(id:string, hour:string) {
+  try {
+    const response = await fetch(`/aNKiNFLow/api/hours?id=${id}&hora=${hour}`, {
+      method: "PUT",
+    });
+
+    const data = await response.json(); // <-- parsear la respuesta siempre
+
+    if (!response.ok) {
+      throw new Error(data.error || "Error al actualizar la hora");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error al editar la hora:", error);
+    throw error;
+  }
+}
+  btnEliminar?.addEventListener("click", async () => {
+    const response = await deleted(id);
+    if (response) {
+      notyf.open({
+        type: "custom-success",
+        message: "Hora eliminada con éxito",
+      });
+    } else {
+      const err = response.json();
+      notyf.open({
+        type: "custom-error",
+        message: err.error || "Error al eliminar la hora",
+      });
+    }
+    getData();
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((btn) => btn.click());
+  });
+  btnEditar?.addEventListener("click", async (e) => {
+    const input = document.querySelector("#hora")
+    const hour = input?.value || "";
+   try {
+    const response = await updated(id, hour);
+
+    notyf.open({
+      type: "custom-success",
+      message: "Hora editada con éxito",
+    });
+  } catch (error) {
+    notyf.open({
+      type: "custom-error",
+      message: error.message || "Error al editar la hora",
+    });
+  }
+    getData();
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((btn) => btn.click());
+  });
+
+  form?.addEventListener("submit", async (e) => {
+    console.log("awui");
+    e.preventDefault();
+    const formData = new FormData(form);
+    const response = await fetch("/aNKiNFLow/api/hours", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (response.ok) {
+      notyf.open({
+        type: "custom-success",
+        message: "Hora creada con éxito",
+      });
+      form.reset();
+    } else {
+      const data = await response.json();
+      notyf.open({
+        type: "custom-error",
+        message: data.error || "Error al crear la Hora",
+      });
+      console.error("Error al crear la hora");
+    }
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((btn) => btn.click());
+    getData();
+  });
+</script>
