@@ -100,7 +100,6 @@ export async function GetToursAdmin() {
   }
 }
 export const GetToursAdminById = async (id) => {
-
   try {
     const res = await pool.query("SELECT * FROM tours WHERE id=$1", [id]);
     if (res.rows.length === 0) {
@@ -193,30 +192,18 @@ export async function DeleteTour(id) {
   }
 }
 export async function ChangeStatus(id, status) {
-  console.log(id)
+  console.log(id);
   try {
-    const res = await pool.query("UPDATE tours SET status=$1 WHERE id=$2 RETURNING*", [
-      status,
-      id,
-    ]);
-    if(res.rows.length === 0){
+    const res = await pool.query(
+      "UPDATE tours SET status=$1 WHERE id=$2 RETURNING*",
+      [status, id]
+    );
+    if (res.rows.length === 0) {
       throw new Error("No se encontro el tour");
     }
     return true;
-  } catch(error) {
-    console.error("Error en ChangeStatus", error)
-  }
-}
-export async function GetHours() {
-  try {
-    const res = await pool.query("SELECT * FROM hours ORDER BY id");
-    if (res.rows.length === 0) {
-      throw new Error("No hay horas disponibles");
-    }
-    return res.rows;
   } catch (error) {
-    console.error("Error en funcion GetHours:", error);
-    throw error;
+    console.error("Error en ChangeStatus", error);
   }
 }
 export async function GetHoursBySlug(slug) {
@@ -338,5 +325,76 @@ export async function RandomTour() {
   } catch (error) {
     console.error("Error en funcion RandomTour:", error);
     throw error;
+  }
+}
+// listar las horas
+
+export async function GetHours() {
+  try {
+    const res = await pool.query("SELECT * FROM hours ORDER BY id");
+    if (res.rows.length === 0) {
+      throw new Error("No hay horas disponibles");
+    }
+    return res.rows;
+  } catch (error) {
+    console.error("Error en funcion GetHours:", error);
+    throw error;
+  }
+}
+export async function deleteHour(id) {
+  try {
+    const res = await pool.query("DELETE FROM hours WHERE id=$1 RETURNING *", [
+      id,
+    ]);
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró la hora a eliminar");
+    }
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en deleteHour:", error);
+    throw error;
+  }
+}
+export async function NewHour(hora) {
+  try {
+    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hora]);
+    if (res.rows.length === 0) {
+      const create = await pool.query("INSERT INTO hours (hour) VALUES ($1)", [
+        hora,
+      ]);
+    } else {
+      console.log("la hora ya existe");
+    }
+  } catch (error) {
+    console.error("Error en deleteHour:", error);
+    throw error;
+  }
+}
+export async function ChangeStatusHour(id, hour) {
+  try {
+    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hour]);
+
+    if (res.rows.length > 0) {
+      return {
+        status: 400,
+        error: "Esta hora ya está creada",
+      };
+    }
+
+    const update = await pool.query(
+      "UPDATE hours SET hour=$1 WHERE id=$2 RETURNING *",
+      [hour, id]
+    );
+
+    return {
+      status: 200,
+      data: update.rows[0],
+    };
+  } catch (error) {
+    console.error("Error en ChangeStatusHour:", error);
+    return {
+      status: 500,
+      error: "Error interno del servidor",
+    };
   }
 }
