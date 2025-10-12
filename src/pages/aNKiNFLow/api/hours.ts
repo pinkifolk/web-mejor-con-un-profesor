@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { GetHours, deleteHour, NewHour, ChangeStatusHour } from "../../../lib/db.js";
-import { string } from "astro:schema";
 export const GET: APIRoute = async () => {
   try {
       const hours = await GetHours();
