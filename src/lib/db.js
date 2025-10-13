@@ -8,7 +8,6 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
 });
-console.log(import.meta.env)
 
 export async function GetDestinosPopulate() {
   try {
