@@ -19,7 +19,7 @@ export async function GetDestinosPopulate() {
     }
     return res.rows;
   } catch (error) {
-    console.error("Error en funcion GetDestinos:", error);
+    console.error("Error en funcion GetDestinosPopulate:", error);
     throw error;
   }
 }
