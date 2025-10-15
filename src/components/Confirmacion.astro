@@ -68,6 +68,7 @@
   import QRCode from "qrcode";
   import { thowConfetti } from "../utils/confetti";
   const ticket = document.getElementById("ticketReady") as HTMLElement;
+  const formulario = document.querySelector("form") as HTMLFormElement;
   const imgTourElement = document.getElementById("imgTour") as HTMLImageElement;
   const tourElement = document.getElementById("tour") as HTMLElement;
   const dateElement = document.getElementById("date") as HTMLElement;
@@ -125,6 +126,7 @@
           result.response;
         form.reset();
         ticket.classList.add("opacity-100");
+        formulario.classList.add("opacity-0")
         tourElement.textContent = tour;
         imgTourElement.src = imgTour;
         imgTourElement.alt = `Imagen del tour ${tour}`;
