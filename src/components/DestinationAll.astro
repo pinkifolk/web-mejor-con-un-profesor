@@ -1,27 +1,52 @@
 ---
-import  { GetDestinosAll } from '../lib/db.js';
-import type { Tour } from '../types/tours.js';
-const tours:Tour[] = await GetDestinosAll();
+
 ---
 <section class="p-4">
   <h1 class="text-2xl font-bold">Todo los Destinos</h1>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-5">
-    {tours.map((tour: any) => (
-      <a
-        href={tour.slug}
-        class="block duration-200 transform transition hover:scale-105"
-        aria-label={`Tour en ${tour.name}`}
-      >
-        <div class="w-full h-56 overflow-hidden rounded-xl">
-          <img
-            src={`img/${tour.img}`}
-            class="w-full h-full object-cover hover:shadow-xl"
-            alt={`Tour por ${tour.name}`}
-            title={`Tour por ${tour.name}`}
-          />
-        </div>
-        <p class="mt-2 text-lg font-semibold">{tour.name}</p>
-      </a>
-    ))}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-5" id="allDestine">
   </div>
 </section>
+<script>
+  import { actions } from "astro:actions";
+  import type { Tour } from "../types/tours.js";
+  document.addEventListener("DOMContentLoaded", async () => {
+    const destines = document.getElementById("allDestine") as HTMLDivElement;
+    let html = "";
+
+    try {
+      const { data, error } = await actions.GetDestinosAll();
+      if (error) {
+        console.error("Error al obtener destinos:", error);
+        destines.innerHTML = "<p class='text-red-500'>Error al cargar destinos</p>";
+        return;
+      }
+
+      if (!data || !data?.length) {
+        destines.innerHTML = "<p class='text-gray-500'>No hay destinos disponibles</p>";
+        return;
+      }
+      data.forEach((tour:Tour) => {
+        html += `
+          <a href="${tour.slug}" 
+             class="block duration-200 transform transition hover:scale-105"
+             aria-label="Tour en ${tour.name}">
+            <div class="w-full h-56 overflow-hidden rounded-xl">
+              <img
+                src="${tour.img}"
+                class="w-full h-full object-cover hover:shadow-xl"
+                alt="Tour por ${tour.name}"
+                title="Tour por ${tour.name}"
+              />
+            </div>
+            <p class="mt-2 text-2xl md:text-lg font-semibold">${tour.name}</p>
+          </a>
+        `;
+      });
+
+      destines.innerHTML = html;
+    } catch (err) {
+      console.error("Error inesperado:", err);
+      destines.innerHTML = "<p class='text-red-500'>Error al cargar destinos</p>";
+    }
+  });
+</script>
