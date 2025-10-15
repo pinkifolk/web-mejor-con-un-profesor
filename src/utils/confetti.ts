@@ -1,9 +1,16 @@
-import confetti from "canvas-confetti"
+import confetti from "canvas-confetti";
 
-export function thowConfetti(){
-    confetti({
-        particleCount:100,
-        spread:70,
-        origin: {y: 0.6}
-    })
+export function thowConfetti() {
+  confetti({
+    particleCount: 100,
+    spread: 100,
+    angle: 60,
+    origin: { x: 0, y: 1 },
+  });
+  confetti({
+    particleCount: 100,
+    spread: 100,
+    angle: 120,
+    origin: { x: 1, y: 1 },
+  });
 }
