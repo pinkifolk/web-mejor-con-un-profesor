@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { Storage } from "@google-cloud/storage";
 import {
   DeleteTour,
   GetToursAdmin,
@@ -6,7 +7,8 @@ import {
   NewTour,
   GetToursAdminById,
 } from "../../../lib/db.js";
-import fs from "fs";
+const storage = new Storage();
+const bucketName = "betterwhitateacher";
 
 export const GET: APIRoute = async ({ request }) => {
   try {
@@ -49,13 +51,21 @@ export const POST: APIRoute = async ({ request }) => {
     const newFileName = `${slug}.${ext}`;
     formData.set("imgTour", newFileName);
 
-    //cargar la imagen y obtener nnombre
-    const buffer = Buffer.from(await imgFile?.arrayBuffer());
-    await fs.promises.writeFile(`./public/img/${newFileName}`, buffer);
+    const buffer = Buffer.from(await imgFile.arrayBuffer());
+    const bucket = storage.bucket(bucketName);
+    const file = bucket.file(`img/${newFileName}`);
+
+    await file.save(buffer, {
+      metadata: { contentType: imgFile.type },
+      public: true, 
+    });
+
+    const urlImage = `https://storage.googleapis.com/${bucketName}/img/${newFileName}`;
+
     const tour = {
       title: formData.get("title"),
       description: formData.get("description"),
-      imgTour: newFileName,
+      imgTour: urlImage,
       timing: formData.get("timing"),
       persons: formData.get("persons"),
       points: JSON.parse((formData.get("points") as string) || "[]"),

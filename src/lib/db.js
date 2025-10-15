@@ -3,10 +3,7 @@ import { validate as isUuid } from "uuid";
 const { Pool } = postgress;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  connectionString: import.meta.env.DATABASE_URL,
 });
 
 export async function GetDestinosPopulate() {
