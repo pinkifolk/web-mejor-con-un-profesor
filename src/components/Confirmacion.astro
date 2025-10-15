@@ -82,7 +82,7 @@
             form.reset();
             ticket.classList.add('opacity-100');
             tourElement.textContent = tour;   
-            imgTourElement.src = `/img/${imgTour}`;
+            imgTourElement.src = imgTour;
             imgTourElement.alt = `Imagen del tour ${tour}`;
             dateElement.textContent =  new Date(date_booking).toLocaleDateString("es-ES", {
             weekday: "long",
