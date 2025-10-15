@@ -57,7 +57,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     await file.save(buffer, {
       metadata: { contentType: imgFile.type },
-      public: true, 
     });
 
     const urlImage = `https://storage.googleapis.com/${bucketName}/img/${newFileName}`;
