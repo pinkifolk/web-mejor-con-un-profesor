@@ -401,3 +401,42 @@ export async function ChangeStatusHour(id, hour) {
     };
   }
 }
+// lista del dashboard
+
+export async function GetDataFromDashboard() {
+  const today =
+    await pool.query(`SELECT T.name, T.img, B.adult personas, B.child ninos, to_char(B.hours, 'HH24:MI') AS hours
+                      FROM booking B 
+                      LEFT JOIN tours T ON T.id=B.tour_id
+                      WHERE DATE(B.date_booking) = CURRENT_DATE;`);
+  const nexts = await pool.query(`SELECT 
+                                  to_char(B.date_booking, 'DD/MM/YYYY') AS fecha_formateada, 
+                                  SUM(B.adult) personas, 
+                                  SUM(B.child) ninos,
+                                  to_char(B.hours, 'HH24:MI') AS hours
+                                  FROM booking B
+                                  WHERE B.date_booking BETWEEN NOW() AND NOW() + INTERVAL '4' DAY
+                                  GROUP BY B.id;`);
+  const total = await pool.query(`SELECT
+                                  COUNT(*) FILTER (
+                                    WHERE date(date_booking) >= date_trunc('week', CURRENT_DATE)
+                                      AND date(date_booking) < date_trunc('week', CURRENT_DATE) + INTERVAL '1 week'
+                                  ) AS total_semana,
+
+                                  COUNT(*) FILTER (
+                                    WHERE date(date_booking) >= date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago')
+                                      AND date(date_booking) < date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago') + INTERVAL '1 month'
+                                  ) AS total_mes,
+                                  COUNT(*) FILTER (
+                                    WHERE date(date_booking) >= date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago')
+                                      AND date(date_booking)< date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago') + INTERVAL '12 month'
+                                  ) AS total_ano
+                                FROM booking
+                                WHERE confirmation=TRUE;`);
+  return {
+    status: 200,
+    today: today.rows,
+    nexts: nexts.rows,
+    total: total.rows[0],
+  }                              
+}
