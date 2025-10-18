@@ -1,17 +1,24 @@
+---
+import type { GetTodayTour } from "../../types/tours";
+const { data } = Astro.props;
+---
+
 <div class="mb-6">
   <h2 class="text-2xl font-bold mb-4">Hoy</h2>
-  <div
-    class="border border-gray-300 rounded-lg p-4 flex justify-between items-center"
-  >
-    <div class="flex flex-col">
-      <p class="text-lg font-semibold">Tour de Historia de Santiago</p>
-      <p class="text-sm text-gray-500">6 Personas</p>
-      <p class="text-sm text-gray-500">Hora: 12:00 PM</p>
-    </div>
-    <img
-      src="#"
-      alt="Imagen del Tuor"
-      class="w-16 h-16 rounded-lg object-cover"
-    />
-  </div>
+  {
+    data.map((tour:GetTodayTour) => (
+      <div class="border border-gray-300 rounded-lg p-4 flex justify-between items-center">
+        <div class="flex flex-col">
+          <p class="text-lg font-semibold">{`Tour ${tour.name}`}</p>
+          <p class="text-sm text-gray-500">{`${tour.personas} Personas`}</p>
+          <p class="text-sm text-gray-500">{`Hora: ${tour.hours} Hrs`}</p>
+        </div>
+        <img
+          src={`../img/${tour.img}`}
+          alt={`Imagen del tour ${tour.name}`}
+          class="w-16 h-16 rounded-lg object-cover"
+        />
+      </div>
+    ))
+  }
 </div>

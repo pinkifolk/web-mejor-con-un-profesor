@@ -1,17 +1,21 @@
+---
+const { data } = Astro.props;
+const {total_semana, total_mes, total_ano} = data
+---
 <div class="mb-14">
   <h2 class="text-2xl font-bold mb-4">Estadísticas rápidas</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <div class="py-8 px-6 rounded-lg shadow-lg border border-text-button">
       <h3 class="text-lg font-normal mb-2">Semana</h3>
-      <p class="text-2xl font-bold">150</p>
+      <p class="text-2xl font-bold">{total_semana}</p>
     </div>
     <div class="py-8 px-6 rounded-lg shadow-lg border border-text-button">
       <h3 class="text-lg font-normal mb-2">Mes</h3>
-      <p class="text-2xl font-bold">25</p>
+      <p class="text-2xl font-bold">{total_mes}</p>
     </div>
     <div class="py-8 px-6 rounded-lg shadow-lg border border-text-button">
       <h3 class="text-lg font-normal mb-2">Total</h3>
-      <p class="text-2xl font-bold">500</p>
+      <p class="text-2xl font-bold">{total_ano}</p>
     </div>
   </div>
 </div>

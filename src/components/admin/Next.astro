@@ -1,25 +1,19 @@
+---
+import type { GetToursNext } from "../../types/tours";
+const { data } = Astro.props;
+---
 <div class="mb-6">
   <h2 class="text-2xl font-bold mb-4">Próximos Tours</h2>
   <div class="border border-gray-300 rounded-lg p-4">
-    <div class="flex flex-col hover:bg-gray-50 transition-colors p-4">
-      <p class="text-lg font-semibold">14/09/2025</p>
-      <p class="text-sm text-text-place">6 Personas</p>
-      <p class="text-sm text-text-place">Hora: 12:00 PM</p>
-    </div>
-    <div class="flex flex-col hover:bg-gray-50 transition-colors p-4">
-      <p class="text-lg font-semibold">14/09/2025</p>
-      <p class="text-sm text-text-place">6 Personas</p>
-      <p class="text-sm text-text-place">Hora: 12:00 PM</p>
-    </div>
-    <div class="flex flex-col hover:bg-gray-50 transition-colors p-4">
-      <p class="text-lg font-semibold">14/09/2025</p>
-      <p class="text-sm text-text-place">6 Personas</p>
-      <p class="text-sm text-text-place">Hora: 12:00 PM</p>
-    </div>
-    <div class="flex flex-col hover:bg-gray-50 transition-colors p-4">
-      <p class="text-lg font-semibold">14/09/2025</p>
-      <p class="text-sm text-text-place">6 Personas</p>
-      <p class="text-sm text-text-place">Hora: 12:00 PM</p>
-    </div>
+    {
+      data.map((next: GetToursNext) =>(
+        <div class="flex flex-col hover:bg-gray-50 transition-colors p-4">
+          <p class="text-lg font-semibold">{next.fecha_formateada}</p>
+          <p class="text-sm text-text-place">{`${next.personas} Personas`}</p>
+          <p class="text-sm text-text-place">{`Hora: ${next.hours} Hrs`}</p>
+        </div>
+
+      ))
+    }
   </div>
 </div>
