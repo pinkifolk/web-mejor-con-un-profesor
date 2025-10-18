@@ -14,7 +14,7 @@ const { data } = Astro.props;
           <p class="text-sm text-gray-500">{`Hora: ${tour.hours} Hrs`}</p>
         </div>
         <img
-          src={`../img/${tour.img}`}
+          src={tour.img}
           alt={`Imagen del tour ${tour.name}`}
           class="w-16 h-16 rounded-lg object-cover"
         />
