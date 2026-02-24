@@ -3,12 +3,16 @@
 ---
 
 <section class="flex justify-center items-center h-full">
-  <form action="" class="flex flex-col gap-4 p-6 max-w-sm w-full shadow-2xl rounded" aria-labelledby="form-title">
+  <form
+    action=""
+    class="flex flex-col gap-4 p-6 max-w-sm w-full shadow-2xl rounded"
+    aria-labelledby="form-title"
+  >
     <h1 id="form-title" class="text-xl font-bold text-center">
       Better With a Teacher
     </h1>
     <div class="flex flex-col">
-      <label for="username" class="mb-1">Email:</label>
+      <label for="email" class="mb-1">Email:</label>
       <input
         type="email"
         id="email"
@@ -39,3 +43,52 @@
     </button>
   </form>
 </section>
+<script>
+  import { Notyf } from "notyf";
+  const form = document.querySelector("form") as HTMLFormElement;
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+    types: [
+      {
+        type: "custom-success",
+        background: "#16a34a",
+        icon: {
+          className: "notyf__icon-custom",
+          tagName: "div",
+        },
+      },
+      {
+        type: "custom-error",
+        background: "#dc2626",
+        icon: {
+          className: "notyf__icon-custom2",
+          tagName: "div",
+        },
+      },
+    ],
+  });
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const response = await fetch("/aNKiNFLow/api/login", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+    if (response.ok) {
+      if(!data.twofa){
+       sessionStorage.setItem("loginToken", data.token);
+       window.location.href = "/aNKiNFLow/activacion"; 
+      }else{
+        window.location.href = "/aNKiNFLow/verificacion"; 
+      }
+    } else {
+      notyf.open({
+        type: "custom-error",
+        message: data.error || "Credenciales Incorrectas",
+      });
+      console.error("Error al validar los datos");
+    }
+  });
+</script>

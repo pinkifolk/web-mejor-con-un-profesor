@@ -9,12 +9,22 @@
     aria-labelledby="form-title"
   >
     <h1 id="form-title" class="text-xl font-bold text-center">
-      Ingresa el codigo de verificación
+      Activacion de 2 factores
     </h1>
     <p class="text-center text-sm">
-      Por favor ingresa el código de 6 dígitos que aparece en la aplicación de tu móvil.
+      Como medida de seguridad necesitamos que agregues un segundo factor para
+      iniciar la sesión. Para esto debes instalar en tu móvil la aplicación
+      <a
+        class="text-blue-500 underline"
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=es_CL&pli=1"
+        >Autenticador de Google</a
+      >
+      y agregues la autentificacion mediante este QR
     </p>
     <div class="flex flex-col">
+      <img id="qr" alt="QR de autenticación" />
       <input
         type="text"
         id="verification-code"
@@ -34,7 +44,8 @@
 <script>
   import { Notyf } from "notyf";
   const form = document.querySelector("form") as HTMLFormElement;
-  const token = sessionStorage.getItem("loginToken");
+  const qr = document.getElementById("qr") as HTMLImageElement;
+  const token = sessionStorage.getItem("loginToken") || "";
   const notyf = new Notyf({
     duration: 3000,
     position: { x: "center", y: "bottom" },
@@ -60,22 +71,16 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
-    formData.append("token", token || "");
-    const response = await fetch("/aNKiNFLow/api/2fa", {
+    formData.append("token", token);
+    const response = await fetch("/aNKiNFLow/api/verificar-2fa", {
       method: "POST",
-      body: formData,
+      body:formData
     });
     const data = await response.json();
-    if (response.ok) {
-      if (data.success) {
-        sessionStorage.setItem("loginToken", data.token)
-        window.location.href = "/aNKiNFLow/dashboard";
-      }else{
-        notyf.open({
-        type: "custom-error",
-        message: data.message || "Credenciales Incorrectas",
-      });
-      }
+     if (response.ok) {
+        if(data.success){
+          window.location.href = "/aNKiNFLow/dashboard"; 
+        }
     } else {
       notyf.open({
         type: "custom-error",
@@ -84,4 +89,24 @@
       console.error("Error al validar los datos");
     }
   });
+
+  async function getQR() {
+    const res = await fetch("/aNKiNFLow/api/activar-2fa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      qr.src = data.qr;
+    } else {
+      notyf.open({
+        type: "custom-error",
+        message: data.message || "Error con la generacion del QR",
+      });
+    }
+  }
+
+  getQR();
 </script>

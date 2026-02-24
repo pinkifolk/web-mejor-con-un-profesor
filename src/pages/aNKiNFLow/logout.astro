@@ -1,0 +1,18 @@
+---
+import { defineAction } from "astro:actions";
+
+export const server = {
+  logout: defineAction({
+    handler: async (_, context) => {
+      context.cookies.delete("loginToken", { path: "/" });
+      return { success: true };
+    },
+  }),
+};
+---
+
+<form method="POST" action={server.logout}>
+  <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded">
+    Cerrar sesión
+  </button>
+</form>
