@@ -3,16 +3,18 @@ import { validate as isUuid } from "uuid";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// al pasar a qa debe cambiarse  el import meta por process y activar el ssl
-const pepper = process.env.PEPPER;
-const secret = process.env.SECRET;
-const { Pool } = postgress;
 
+const DATABASE_URL = process.env.DATABASE_URL || import.meta.env.DATABASE_URL;
+const PEPPER = process.env.PEPPER || import.meta.env.PEPPER;
+const SECRET = process.env.SECRET || import.meta.env.SECRET;
+
+const { Pool } = postgress;
+// al pasar a qa debe activarse el ssl
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  connectionString: DATABASE_URL,
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
 });
 
 export async function GetDestinosPopulate() {
@@ -466,7 +468,7 @@ export async function GetUsers() {
 }
 export async function NewUser(name, email, password) {
   try {
-    const hash = await bcrypt.hash(password + pepper, 12);
+    const hash = await bcrypt.hash(password + PEPPER, 12);
     const res = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
@@ -497,14 +499,14 @@ export async function ValidateLogin(usuario, clave) {
     }
 
     const user = res.rows[0];
-    const match = await bcrypt.compare(clave + pepper, user.password);
+    const match = await bcrypt.compare(clave + PEPPER, user.password);
 
     if (!match) {
       return { success: false, message: "Contraseña incorrecta" };
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name },
-      secret,
+      SECRET,
       { expiresIn: "10m" }
     );
     
@@ -514,11 +516,11 @@ export async function ValidateLogin(usuario, clave) {
     throw error;
   }
 }
-export async function SetSecret2FA(id, secret) {
+export async function SetSecret2FA(id, SECRET) {
   try {
     const res = await pool.query(
       "UPDATE users SET two_factor_secret = $1 WHERE id = $2",
-      [secret, id]
+      [SECRET, id]
     );
     return res.rows[0];
   } catch (error) {

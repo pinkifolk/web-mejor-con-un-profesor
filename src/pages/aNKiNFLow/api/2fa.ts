@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import speakeasy from "speakeasy";
 import { GetFactorCode } from "@/lib/db";
 
-const secret = import.meta.env.SECRET;
+const SECRET = process.env.SECRET || import.meta.env.SECRET;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -11,7 +11,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const token = formData.get("token") as string;
     const code = formData.get("verification-code");
-    const decode = jwt.verify(token, secret) as { id: string; email: string } ;
+    const decode = jwt.verify(token, SECRET) as { id: string; email: string } ;
 
     const factor = await GetFactorCode(decode.id);
 
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
     const sessionToken = jwt.sign(
       { id: decode.id, email: decode.email },
-      secret,
+      SECRET,
       { expiresIn: "1h" }
     );
 

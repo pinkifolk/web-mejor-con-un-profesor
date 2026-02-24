@@ -4,11 +4,13 @@ import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import { SetSecret2FA } from "@/lib/db";
 
-const secret = import.meta.env.SECRET;
+
+const SECRET = process.env.SECRET || import.meta.env.SECRET;
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { token } = await request.json();
-    const decode = jwt.verify(token, secret) as { id: string; email: string };
+    const decode = jwt.verify(token, SECRET) as { id: string; email: string };
     const secretqr = speakeasy.generateSecret({
       name: `Better With a Teacher (${decode.email})`,
     });
