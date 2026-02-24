@@ -3,7 +3,7 @@ import { validate as isUuid } from "uuid";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-
+const SSL = process.env.SSL || import.meta.env.SSL;
 const DATABASE_URL = process.env.DATABASE_URL || import.meta.env.DATABASE_URL;
 const PEPPER = process.env.PEPPER || import.meta.env.PEPPER;
 const SECRET = process.env.SECRET || import.meta.env.SECRET;
@@ -12,9 +12,7 @@ const { Pool } = postgress;
 // al pasar a qa debe activarse el ssl
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  // ssl: {
-  //   rejectUnauthorized: false,
-  // },
+  ssl: SSL === "true" ? { rejectUnauthorized: false } : false,
 });
 
 export async function GetDestinosPopulate() {
