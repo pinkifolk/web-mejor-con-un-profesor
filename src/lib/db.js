@@ -1,12 +1,17 @@
 import postgress from "pg";
 import { validate as isUuid } from "uuid";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const pepper = import.meta.env.PEPPER;
+const secret = import.meta.env.SECRET;
 const { Pool } = postgress;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  connectionString: import.meta.env.DATABASE_URL,
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
 });
 
 export async function GetDestinosPopulate() {
@@ -210,6 +215,7 @@ export async function ChangeStatus(id, status) {
   }
 }
 export async function GetHoursBySlug(slug) {
+  console.log(slug)
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
       slug,
@@ -366,10 +372,10 @@ export async function NewHour(hora) {
         hora,
       ]);
     } else {
-      console.log("la hora ya existe");
+      throw new Error("la hora ya existe");
     }
   } catch (error) {
-    console.error("Error en deleteHour:", error);
+    console.error("Error en NewHour:", error);
     throw error;
   }
 }
@@ -438,5 +444,115 @@ export async function GetDataFromDashboard() {
     today: today.rows,
     nexts: nexts.rows,
     total: total.rows[0],
-  }                              
+  };
 }
+
+// listar usuarios
+
+export async function GetUsers() {
+  try {
+    const res = await pool.query(
+      "SELECT id, name, email, status FROM users ORDER BY id"
+    );
+    // if (res.rows.length === 0) {
+    //   throw new Error("No hay usuarios disponibles");
+    // }
+    return res.rows;
+  } catch (error) {
+    console.error("Error en funcion GetDestinosPopulate:", error);
+    throw error;
+  }
+}
+export async function NewUser(name, email, password) {
+  try {
+    const hash = await bcrypt.hash(password + pepper, 12);
+    const res = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    if (res.rows.length === 0) {
+      const create = await pool.query(
+        "INSERT INTO users (name,email,password, two_factor_enabled, two_factor_secret, two_factor_code) VALUES ($1,$2,$3,FALSE,NULL,NULL) RETURNING id, name, email",
+        [name, email, hash]
+      );
+    } else {
+      throw new Error("Este usuario ya está creado");
+    }
+  } catch (error) {
+    console.error("Error en NewUser:", error);
+    throw error;
+  }
+}
+
+// login
+
+export async function ValidateLogin(usuario, clave) {
+  try {
+    const res = await pool.query(
+      "SELECT id, name, email, password, two_factor_enabled FROM users WHERE email = $1",
+      [usuario]
+    );
+    if (res.rowCount === 0) {
+      return { success: false, message: "Usuario no encontrado" };
+    }
+
+    const user = res.rows[0];
+    const match = await bcrypt.compare(clave + pepper, user.password);
+
+    if (!match) {
+      return { success: false, message: "Contraseña incorrecta" };
+    }
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name },
+      secret,
+      { expiresIn: "10m" }
+    );
+    
+    return { success: true, twofa: user.two_factor_enabled, token: token };
+  } catch (error) {
+    console.error("Error en ValidateLogin:", error);
+    throw error;
+  }
+}
+export async function SetSecret2FA(id, secret) {
+  try {
+    const res = await pool.query(
+      "UPDATE users SET two_factor_secret = $1 WHERE id = $2",
+      [secret, id]
+    );
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en SetSecret2FA:", error);
+    throw error;
+  }
+}
+export async function GetFactorCode(id) {
+  try {
+    const res = await pool.query(
+      "SELECT two_factor_secret FROM users WHERE id = $1",
+      [id]
+    );
+    if (res.rowCount === 0) {
+      throw new Error("Usuario no encontrado");
+    }
+    return res.rows[0].two_factor_secret;
+  } catch (error) {
+    console.error("Error en GetFactorCode:", error);
+    throw error;
+  }
+}
+export async function Actived2FA(id) {
+  try {
+    const res = await pool.query(
+      "UPDATE users SET two_factor_enabled = true WHERE id = $1",
+      [id]
+    );
+    if (res.rowCount === 0) {
+      throw new Error("Usuario no encontrado");
+    }
+    return true;
+  } catch (error) {
+    console.error("Error en Actived2FA:", error);
+    throw error;
+  }
+}
+
