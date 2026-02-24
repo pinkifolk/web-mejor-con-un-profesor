@@ -60,11 +60,16 @@ export type GetTodayTour = {
   personas: number;
   ninos: number;
   hours: string;
-
 };
-export type GetToursNext ={
-    fecha_formateada: string;
-    personas: string;
-    ninos: string;
-    hours: string;
-}
+export type GetToursNext = {
+  fecha_formateada: string;
+  personas: string;
+  ninos: string;
+  hours: string;
+};
+export type Users = {
+  id: number;
+  name: string;
+  email: string;
+  status: boolean;
+};
