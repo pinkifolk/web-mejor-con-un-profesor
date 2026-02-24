@@ -3,15 +3,16 @@ import { validate as isUuid } from "uuid";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const pepper = import.meta.env.PEPPER;
-const secret = import.meta.env.SECRET;
+// al pasar a qa debe cambiarse  el import meta por process y activar el ssl
+const pepper = process.env.PEPPER;
+const secret = process.env.SECRET;
 const { Pool } = postgress;
 
 const pool = new Pool({
-  connectionString: import.meta.env.DATABASE_URL,
-  // ssl: {
-  //   rejectUnauthorized: false,
-  // },
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export async function GetDestinosPopulate() {
