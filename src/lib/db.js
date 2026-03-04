@@ -130,8 +130,8 @@ export async function NewBooking(booking) {
   try {
     const res = await pool.query(
       `
-                              INSERT INTO booking (adult, child, date_booking, hours, tour_id, confirmation, ticket, hash, created_at, updated_at)
-                            VALUES ($1, $2, $3, $4, (SELECT id FROM tours WHERE slug=$5), false, NULL, (SELECT uuid_generate_v4()), NOW(), NULL)
+                              INSERT INTO booking (adult, child, date_booking, hour_id, tour_id, confirmation, ticket, hash, created_at, updated_at)
+                            VALUES ($1, $2, $3, $4, (SELECT id FROM tours WHERE slug=$5), false, NULL, (SELECT gen_random_uuid()), NOW(), NULL)
                             RETURNING hash
                         `,
       [
@@ -176,7 +176,7 @@ export async function ConfirmBooking(data) {
       UPDATE booking 
       SET name = $1, last_name = $2, email= $3, phone= $4, confirmation = true, ticket = $5, updated_at = NOW() 
       WHERE hash = $6
-      RETURNING tour_id, adult, child, date_booking, to_char(hours, 'HH24:MI') AS hours, ticket as ticketid
+      RETURNING tour_id
     `,
       [
         data.nombre,
@@ -191,12 +191,10 @@ export async function ConfirmBooking(data) {
       throw new Error("Reserva no encontrada");
     }
     const tourRes = await pool.query(
-      "SELECT name, img FROM tours WHERE id=$1",
+      "SELECT T.name, T.img, B.adult, B.child, B.date_booking, H.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN hours H ON H.id=B.hour_id WHERE T.id=$1",
       [res.rows[0].tour_id],
     );
-    res.rows[0].tour = tourRes.rows[0].name;
-    res.rows[0].imgTour = tourRes.rows[0].img;
-    return res.rows[0];
+    return tourRes.rows[0];
   } catch (error) {
     console.error("Error en ConfirmBooking:", error);
     throw error;
@@ -222,16 +220,18 @@ export async function RandomTour() {
 
 export async function GetDataFromDashboard() {
   const today =
-    await pool.query(`SELECT T.name, T.img, B.adult personas, B.child ninos, to_char(B.hours, 'HH24:MI') AS hours
+    await pool.query(`SELECT T.name, T.img, B.adult personas, B.child ninos, H.hour hours
                       FROM booking B 
                       LEFT JOIN tours T ON T.id=B.tour_id
+                      LEFT JOIN hours H ON H.id=B.hour_id
                       WHERE DATE(B.date_booking) = CURRENT_DATE;`);
   const nexts = await pool.query(`SELECT 
                                   to_char(B.date_booking, 'DD/MM/YYYY') AS fecha_formateada, 
                                   SUM(B.adult) personas, 
                                   SUM(B.child) ninos,
-                                  to_char(B.hours, 'HH24:MI') AS hours
+                                  H.hour
                                   FROM booking B
+                                  LEFT JOIN hours H ON H.id=B.hour_id
                                   WHERE B.date_booking BETWEEN NOW() AND NOW() + INTERVAL '4' DAY
                                   GROUP BY B.id;`);
   const total = await pool.query(`SELECT
