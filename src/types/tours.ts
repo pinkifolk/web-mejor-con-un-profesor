@@ -45,6 +45,8 @@ export type TourAdmin = {
   img: string;
   status: boolean;
   total_bookings: number;
+  itinerary: [string];
+  hours: [string];
 };
 export type Hours = {
   id: number;
