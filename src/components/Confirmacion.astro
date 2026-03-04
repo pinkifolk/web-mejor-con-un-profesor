@@ -66,6 +66,7 @@
 
 <script>
   import QRCode from "qrcode";
+  import { Notyf } from "notyf";
   import { thowConfetti } from "../utils/confetti";
   const ticket = document.getElementById("ticketReady") as HTMLElement;
   const imgTourElement = document.getElementById("imgTour") as HTMLImageElement;
@@ -76,9 +77,30 @@
   const childElement = document.getElementById("child") as HTMLElement;
   const qrElement = document.getElementById("qr") as HTMLImageElement;
   const btnConfirmar = document.getElementById(
-    "btnConfirmar"
+    "btnConfirmar",
   ) as HTMLButtonElement;
-
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+    types: [
+      {
+        type: "custom-success",
+        background: "#16a34a",
+        icon: {
+          className: "notyf__icon-custom",
+          tagName: "div",
+        },
+      },
+      {
+        type: "custom-error",
+        background: "#dc2626",
+        icon: {
+          className: "notyf__icon-custom2",
+          tagName: "div",
+        },
+      },
+    ],
+  });
   const form = document.querySelector("form") as HTMLFormElement;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -97,7 +119,7 @@
     }
     if (!id) {
       alert(
-        "ID de reserva no encontrado. Por favor, regrese a la página de reservas."
+        "ID de reserva no encontrado. Por favor, regrese a la página de reservas.",
       );
       return;
     }
@@ -121,13 +143,13 @@
 
       if (response.ok) {
         const result = await response.json();
-        const { ticketid, imgTour, tour, date_booking, hours, adult, child } =
+        const { ticketid, img, name, date_booking, hours, adult, child } =
           result.response;
         form.reset();
         ticket.classList.add("opacity-100");
-        tourElement.textContent = tour;
-        imgTourElement.src = imgTour;
-        imgTourElement.alt = `Imagen del tour ${tour}`;
+        tourElement.textContent = name;
+        imgTourElement.src = img;
+        imgTourElement.alt = `Imagen del tour ${name}`;
         dateElement.textContent = new Date(date_booking).toLocaleDateString(
           "es-ES",
           {
@@ -135,7 +157,7 @@
             year: "numeric",
             month: "long",
             day: "numeric",
-          }
+          },
         );
         hourElement.textContent = `Hora: ${hours}`;
         adultElement.textContent = `${adult} Adulto${adult > 1 ? "s" : ""}`;
@@ -150,13 +172,17 @@
         thowConfetti();
       } else {
         const errorResult = await response.json();
-        alert(errorResult.message);
+        notyf.open({
+          type: "custom-error",
+          message: errorResult.message,
+        });
       }
     } catch (error) {
       console.error("Error:", error);
-      alert(
-        "Ocurrió un error al procesar la reserva. Por favor, inténtelo de nuevo."
-      );
+      notyf.open({
+        type: "custom-error",
+        message: `Ocurrió un error al procesar la reserva. Por favor, inténtelo de nuevo.`,
+      });
     }
   });
 </script>
