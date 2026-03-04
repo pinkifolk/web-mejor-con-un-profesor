@@ -1,7 +1,5 @@
 import type { APIRoute } from "astro";
 import { NewBooking } from "../../lib/db.js";
-import type { a } from "node_modules/tailwindcss/dist/types-B254mqw1.mjs";
-
 export const POST: APIRoute = async ({ request }) => {
   try {
     const data = await request.json();
