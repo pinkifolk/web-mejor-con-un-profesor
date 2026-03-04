@@ -6,6 +6,11 @@ import UserIcon from "@/assets/circle-user-round.svg";
 import { GetTourBySlug } from "../lib/db.js";
 import type { TourDetail } from "../types/tours";
 const { slug } = Astro.params;
+if (!slug) {
+  return Astro.redirect("/404");
+}
+const referer = Astro.request.headers.get('referer');
+
 const tour:TourDetail = await GetTourBySlug(slug);
 const {
   name,
@@ -24,7 +29,7 @@ const {
 
 <section class="md:w-7xl p-4">
   <nav aria-label="Breadcrumbs" class="mb-4">
-    <BreadCrumbs />
+    <BreadCrumbs slug={slug} referer={referer} />
   </nav>
   <article>
     <header>
