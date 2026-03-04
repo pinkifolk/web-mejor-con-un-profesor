@@ -15,10 +15,11 @@ const pool = new Pool({
   ssl: SSL === "true" ? { rejectUnauthorized: false } : false,
 });
 
+// funciones para usuarios generales
 export async function GetDestinosPopulate() {
   try {
     const res = await pool.query(
-      "SELECT * FROM tours WHERE status=false AND populate=true ORDER BY id"
+      "SELECT * FROM tours WHERE status=false AND populate=true ORDER BY id",
     );
     if (res.rows.length === 0) {
       throw new Error("No hay tours disponibles");
@@ -32,7 +33,7 @@ export async function GetDestinosPopulate() {
 export async function GetDestinosAll() {
   try {
     const res = await pool.query(
-      "SELECT * FROM tours WHERE status=false ORDER BY id"
+      "SELECT * FROM tours WHERE status=false ORDER BY id",
     );
     if (res.rows.length === 0) {
       throw new Error("No hay tours disponibles");
@@ -51,15 +52,15 @@ export async function GetTourBySlug(slug) {
   const tour = res.rows[0];
   const resItinerary = await pool.query(
     "SELECT name FROM itinerary WHERE tour_id=$1",
-    [tour.id]
+    [tour.id],
   );
   const reviewsRes = await pool.query(
     `SELECT AVG(rating) rating, COUNT(*) total FROM tour_reviews WHERE tour_id=$1;`,
-    [tour.id]
+    [tour.id],
   );
   const commetnsRes = await pool.query(
     `SELECT name,comment,rating,created_at FROM tour_reviews WHERE tour_id=$1 ORDER BY id;`,
-    [tour.id]
+    [tour.id],
   );
   tour.comments = commetnsRes.rows.map((row) => ({
     name: row.name,
@@ -75,7 +76,7 @@ export async function GetTourBySlug(slug) {
       WHERE tour_id = $1
       GROUP BY rating
       ORDER BY rating DESC;`,
-    [tour.id]
+    [tour.id],
   );
   tour.itinerary = resItinerary.rows.map((row) => row.name);
   tour.rating = reviewsRes.rows[0].rating
@@ -88,135 +89,7 @@ export async function GetTourBySlug(slug) {
   }));
   return tour;
 }
-export async function GetToursAdmin() {
-  try {
-    const res = await pool.query(`SELECT 
-                                T.id,
-                                T.name,
-                                COUNT(B.id) total_bookings,
-                                T.status
-                                FROM tours T 
-                                LEFT JOIN booking B ON B.tour_id=T.id AND B.confirmation= true 
-                                GROUP BY T.id
-                                ORDER BY T.id;`);
-    if (res.rows.length === 0) {
-      throw new Error("No hay tours disponibles");
-    }
-    return res.rows;
-  } catch (error) {
-    console.error("Error en funcion GetToursAdmin:", error);
-    throw error;
-  }
-}
-export const GetToursAdminById = async (id) => {
-  try {
-    const res = await pool.query("SELECT * FROM tours WHERE id=$1", [id]);
-    if (res.rows.length === 0) {
-      throw new Error("No se encontro el tour");
-    }
-    const tour = res.rows[0];
-    const resItinerary = await pool.query(
-      "SELECT name FROM itinerary WHERE tour_id=$1",
-      [tour.id]
-    );
-    const resHours = await pool.query(
-      "SELECT H.hour FROM tours_hours TH LEFT JOIN hours H ON H.id=TH.hours_id WHERE tours_id=$1",
-      [tour.id]
-    );
-    tour.itinerary = resItinerary.rows.map((row) => row.name);
-    tour.hours = resHours.rows.map((row) => row.hour);
-    return tour;
-  } catch (error) {
-    console.error("Error en funcion GetToursAdminBiId:", error);
-    throw error;
-  }
-};
-export async function NewTour(tour) {
-  try {
-    const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
-      tour.slug,
-    ]);
-    if (fineSlug.rows.length > 0) {
-      throw new Error(
-        "ya existe un tour con ese nombre, por favor elegir otro"
-      );
-    }
-    const res = await pool.query(
-      `
-                              INSERT INTO tours (name, description, img, duration, "max_people",slug,status,populate)
-                            VALUES ($1, $2, $3, $4, $5, $6,false, $7)
-                            RETURNING *
-                        `,
-      [
-        tour.title,
-        tour.description,
-        tour.imgTour,
-        tour.timing,
-        tour.persons,
-        tour.slug,
-        tour.populate,
-      ]
-    );
-    const id = res.rows[0].id;
-    if (!id) {
-      throw new Error("Error al crear el tour");
-    }
-    const points = tour.points;
-    if (points && Array.isArray(points)) {
-      for (const p of points) {
-        await pool.query(
-          `INSERT INTO itinerary (tour_id, name) VALUES ($1, $2)`,
-          [id, p]
-        );
-      }
-    }
-    const horario = tour.horario;
-    if (horario && Array.isArray(horario)) {
-      for (const h of horario) {
-        await pool.query(
-          `INSERT INTO tours_hours (tours_id, hours_id) VALUES ($1, $2)`,
-          [id, h]
-        );
-      }
-    }
-
-    return res.rows[0];
-  } catch (error) {
-    console.error("Error en NewTour:", error);
-    throw error;
-  }
-}
-export async function DeleteTour(id) {
-  try {
-    const res = await pool.query("DELETE FROM tours WHERE id=$1 RETURNING *", [
-      id,
-    ]);
-    if (res.rows.length === 0) {
-      throw new Error("No se encontró el tour a eliminar");
-    }
-    return res.rows[0];
-  } catch (error) {
-    console.error("Error en DeleteTour:", error);
-    throw error;
-  }
-}
-export async function ChangeStatus(id, status) {
-  console.log(id);
-  try {
-    const res = await pool.query(
-      "UPDATE tours SET status=$1 WHERE id=$2 RETURNING*",
-      [status, id]
-    );
-    if (res.rows.length === 0) {
-      throw new Error("No se encontro el tour");
-    }
-    return true;
-  } catch (error) {
-    console.error("Error en ChangeStatus", error);
-  }
-}
 export async function GetHoursBySlug(slug) {
-  console.log(slug)
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
       slug,
@@ -227,7 +100,7 @@ export async function GetHoursBySlug(slug) {
 
     const res = await pool.query(
       "SELECT H.id, H.hour FROM tours T LEFT JOIN tours_hours TH ON TH.tours_id=T.id LEFT JOIN hours H ON H.id=TH.hours_id WHERE slug=$1",
-      [slug]
+      [slug],
     );
     return res.rows;
   } catch (error) {
@@ -245,7 +118,7 @@ export async function GetAvailability(date, slug) {
     }
     const res = await pool.query(
       "SELECT COALESCE(SUM(adult), 0) + COALESCE(SUM(child), 0) AS total, T.max_people - (COALESCE(SUM(adult), 0) + COALESCE(SUM(child), 0)) AS disponible FROM tours T LEFT JOIN booking B ON T.id = B.tour_id AND B.date_booking = $1 AND confirmation= false WHERE T.slug = $2 GROUP BY T.id",
-      [date, slug]
+      [date, slug],
     );
     return res.rows;
   } catch (error) {
@@ -261,7 +134,13 @@ export async function NewBooking(booking) {
                             VALUES ($1, $2, $3, $4, (SELECT id FROM tours WHERE slug=$5), false, NULL, (SELECT uuid_generate_v4()), NOW(), NULL)
                             RETURNING hash
                         `,
-      [booking.adultos, booking.ninos, booking.date, booking.hour, booking.slug]
+      [
+        booking.adultos,
+        booking.ninos,
+        booking.date,
+        booking.hour,
+        booking.slug,
+      ],
     );
     return res.rows[0].hash;
   } catch (error) {
@@ -278,12 +157,12 @@ export async function ConfirmBooking(data) {
   try {
     if (!isUuid(data.id)) {
       throw new Error(
-        "No modificar la url de confirmación o el hash generado no es válido"
+        "No modificar la url de confirmación o el hash generado no es válido",
       );
     }
     const checkRes = await pool.query(
       "SELECT confirmation FROM booking WHERE hash = $1",
-      [data.id]
+      [data.id],
     );
     if (checkRes.rows.length === 0) {
       throw new Error("No se encontró la reserva, favor intentar nuevamente");
@@ -306,14 +185,14 @@ export async function ConfirmBooking(data) {
         data.telefono,
         generarCodigoTicket(),
         data.id,
-      ]
+      ],
     );
     if (res.rows.length === 0) {
       throw new Error("Reserva no encontrada");
     }
     const tourRes = await pool.query(
       "SELECT name, img FROM tours WHERE id=$1",
-      [res.rows[0].tour_id]
+      [res.rows[0].tour_id],
     );
     res.rows[0].tour = tourRes.rows[0].name;
     res.rows[0].imgTour = tourRes.rows[0].img;
@@ -326,7 +205,7 @@ export async function ConfirmBooking(data) {
 export async function RandomTour() {
   try {
     const res = await pool.query(
-      "SELECT slug FROM tours WHERE status=false ORDER BY RANDOM() LIMIT 1"
+      "SELECT slug FROM tours WHERE status=false ORDER BY RANDOM() LIMIT 1",
     );
     if (res.rows.length === 0) {
       throw new Error("No hay tours disponibles");
@@ -337,78 +216,9 @@ export async function RandomTour() {
     throw error;
   }
 }
-// listar las horas
 
-export async function GetHours() {
-  try {
-    const res = await pool.query("SELECT * FROM hours ORDER BY id");
-    if (res.rows.length === 0) {
-      throw new Error("No hay horas disponibles");
-    }
-    return res.rows;
-  } catch (error) {
-    console.error("Error en funcion GetHours:", error);
-    throw error;
-  }
-}
-export async function deleteHour(id) {
-  try {
-    const res = await pool.query("DELETE FROM hours WHERE id=$1 RETURNING *", [
-      id,
-    ]);
-    if (res.rows.length === 0) {
-      throw new Error("No se encontró la hora a eliminar");
-    }
-    return res.rows[0];
-  } catch (error) {
-    console.error("Error en deleteHour:", error);
-    throw error;
-  }
-}
-export async function NewHour(hora) {
-  try {
-    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hora]);
-    if (res.rows.length === 0) {
-      const create = await pool.query("INSERT INTO hours (hour) VALUES ($1)", [
-        hora,
-      ]);
-    } else {
-      throw new Error("la hora ya existe");
-    }
-  } catch (error) {
-    console.error("Error en NewHour:", error);
-    throw error;
-  }
-}
-export async function ChangeStatusHour(id, hour) {
-  try {
-    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hour]);
-
-    if (res.rows.length > 0) {
-      return {
-        status: 400,
-        error: "Esta hora ya está creada",
-      };
-    }
-
-    const update = await pool.query(
-      "UPDATE hours SET hour=$1 WHERE id=$2 RETURNING *",
-      [hour, id]
-    );
-
-    return {
-      status: 200,
-      data: update.rows[0],
-    };
-  } catch (error) {
-    console.error("Error en ChangeStatusHour:", error);
-    return {
-      status: 500,
-      error: "Error interno del servidor",
-    };
-  }
-}
-// lista del dashboard
+// funciones para usuarios administradores
+// dashboard
 
 export async function GetDataFromDashboard() {
   const today =
@@ -447,20 +257,220 @@ export async function GetDataFromDashboard() {
     total: total.rows[0],
   };
 }
+// Tours
+export async function GetToursAdmin() {
+  try {
+    const res = await pool.query(`SELECT 
+                                T.id,
+                                T.name,
+                                COUNT(B.id) total_bookings,
+                                T.status
+                                FROM tours T 
+                                LEFT JOIN booking B ON B.tour_id=T.id AND B.confirmation= true 
+                                GROUP BY T.id
+                                ORDER BY T.id;`);
+    if (res.rows.length === 0) {
+      throw new Error("No hay tours disponibles");
+    }
+    return res.rows;
+  } catch (error) {
+    console.error("Error en funcion GetToursAdmin:", error);
+    throw error;
+  }
+}
+export const GetToursAdminById = async (id) => {
+  try {
+    const res = await pool.query("SELECT * FROM tours WHERE id=$1", [id]);
+    if (res.rows.length === 0) {
+      throw new Error("No se encontro el tour");
+    }
+    const tour = res.rows[0];
+    const resItinerary = await pool.query(
+      "SELECT name FROM itinerary WHERE tour_id=$1",
+      [tour.id],
+    );
+    const resHours = await pool.query(
+      "SELECT H.hour FROM tours_hours TH LEFT JOIN hours H ON H.id=TH.hours_id WHERE tours_id=$1",
+      [tour.id],
+    );
+    tour.itinerary = resItinerary.rows.map((row) => row.name);
+    tour.hours = resHours.rows.map((row) => row.hour);
+    return tour;
+  } catch (error) {
+    console.error("Error en funcion GetToursAdminBiId:", error);
+    throw error;
+  }
+};
+export async function NewTour({
+  title,
+  description,
+  imgTour,
+  timing,
+  horario,
+  points,
+  persons,
+  popular,
+  slug,
+}) {
+  try {
+    const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
+      slug,
+    ]);
+    if (fineSlug.rows.length > 0) {
+      throw new Error(
+        "ya existe un tour con ese nombre, por favor elegir otro",
+      );
+    }
+    const res = await pool.query(
+      `
+                              INSERT INTO tours (name, description, img, duration, "max_people",slug,status,populate)
+                            VALUES ($1, $2, $3, $4, $5, $6,false, $7)
+                            RETURNING *
+                        `,
+      [
+        title,
+        description,
+        imgTour,
+        timing,
+        parseInt(persons),
+        slug,
+        popular || false,
+      ],
+    );
+    const id = res.rows[0].id;
+    if (!id) {
+      throw new Error("Error al crear el tour");
+    }
+    const pointsArray =
+    typeof points === "string" ? JSON.parse(points) : points;
+    console.log({id, pointsArray});
+    if (Array.isArray(pointsArray) && pointsArray.length > 0) {
+      await pool.query(
+        `INSERT INTO itinerary (tour_id, name) 
+     SELECT $1, unnest($2::text[])`,
+        [id, pointsArray],
+      );
+    }
 
-// listar usuarios
+    const horariosArray =
+      typeof horario === "string" ? JSON.parse(horario) : horario;
+    if (Array.isArray(horariosArray)) {
+      for (const h of horariosArray) {
+        await pool.query(
+          `INSERT INTO tours_hours (tours_id, hours_id) VALUES ($1, $2)`,
+          [id, h],
+        );
+      }
+    }
 
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en NewTour:", error);
+    throw error;
+  }
+}
+export async function DeleteTour(id) {
+  try {
+    const res = await pool.query("DELETE FROM tours WHERE id=$1 RETURNING *", [
+      id,
+    ]);
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró el tour a eliminar");
+    }
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en DeleteTour:", error);
+    throw error;
+  }
+}
+export async function ChangeStatus(id, status) {
+  try {
+    const res = await pool.query(
+      "UPDATE tours SET status=$1 WHERE id=$2 RETURNING*",
+      [status, id],
+    );
+    if (res.rows.length === 0) {
+      throw new Error("No se encontro el tour");
+    }
+    return true;
+  } catch (error) {
+    console.error("Error en ChangeStatus", error);
+  }
+}
+
+// Horas
+export async function GetHours() {
+  try {
+    const res = await pool.query("SELECT * FROM hours ORDER BY hour");
+    if (res.rows.length === 0) {
+      throw new Error("No hay horas disponibles");
+    }
+    return res.rows;
+  } catch (error) {
+    console.error("Error en funcion GetHours:", error);
+    throw error;
+  }
+}
+export async function NewHour(hora) {
+  try {
+    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hora]);
+
+    if (res.rows.length === 1) {
+      throw new Error("la hora ya existe");
+    }
+    const create = await pool.query(
+      "INSERT INTO hours (hour) VALUES ($1) RETURNING *",
+      [hora],
+    );
+    return create.rows[0];
+  } catch (error) {
+    console.error("Error en NewHour:", error);
+    throw error;
+  }
+}
+export async function deleteHour(id) {
+  try {
+    const res = await pool.query("DELETE FROM hours WHERE id=$1 RETURNING *", [
+      id,
+    ]);
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró la hora a eliminar");
+    }
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en deleteHour:", error);
+    throw error;
+  }
+}
+
+export async function updateHour(id, hour) {
+  try {
+    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hour]);
+
+    if (res.rows.length === 1) {
+      throw new Error("La hora ya existe, por favor elegir otra hora");
+    }
+
+    const update = await pool.query(
+      "UPDATE hours SET hour=$1 WHERE id=$2 RETURNING *",
+      [hour, id],
+    );
+
+    return update.rows[0];
+  } catch (error) {
+    console.error("Error en updateHour:", error);
+    throw error;
+  }
+}
+// usuarios
 export async function GetUsers() {
   try {
     const res = await pool.query(
-      "SELECT id, name, email, status FROM users ORDER BY id"
+      "SELECT id, name, email, status FROM users ORDER BY id",
     );
-    // if (res.rows.length === 0) {
-    //   throw new Error("No hay usuarios disponibles");
-    // }
     return res.rows;
   } catch (error) {
-    console.error("Error en funcion GetDestinosPopulate:", error);
+    console.error("Error en funcion GetUsers:", error);
     throw error;
   }
 }
@@ -470,16 +480,78 @@ export async function NewUser(name, email, password) {
     const res = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
-    if (res.rows.length === 0) {
-      const create = await pool.query(
-        "INSERT INTO users (name,email,password, two_factor_enabled, two_factor_secret, two_factor_code) VALUES ($1,$2,$3,FALSE,NULL,NULL) RETURNING id, name, email",
-        [name, email, hash]
-      );
-    } else {
-      throw new Error("Este usuario ya está creado");
+    if (res.rows.length === 1) {
+      throw new Error("El usuario ya existe, por favor elegir otro email");
     }
+    const create = await pool.query(
+      "INSERT INTO users (name,email,password, two_factor_enabled, two_factor_secret, two_factor_code) VALUES ($1,$2,$3,FALSE,NULL,NULL) RETURNING id, name, email",
+      [name, email, hash],
+    );
+    return create.rows[0];
   } catch (error) {
     console.error("Error en NewUser:", error);
+    throw error;
+  }
+}
+export async function resetPasswordUser(id, password) {
+  try {
+    const res = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    if (res.rows.length === 0) {
+      throw new Error("Usuario no encontrado");
+    }
+    const hash = await bcrypt.hash(password + PEPPER, 12);
+    const update = await pool.query(
+      "UPDATE users SET password=$1 WHERE id=$2 RETURNING name,email,status",
+      [hash, id],
+    );
+
+    return {
+      status: 200,
+      data: update.rows[0],
+    };
+  } catch (error) {}
+}
+export async function updateUser(id, name, email, estado) {
+  try {
+    const res = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+
+    if (res.rows.length === 0) {
+      return {
+        status: 404,
+        error: "Usuario no encontrado",
+      };
+    }
+
+    const update = await pool.query(
+      "UPDATE users SET name=$1, email=$2, status=$3 WHERE id=$4 RETURNING name,email,status",
+      [name, email, estado, id],
+    );
+
+    return {
+      status: 200,
+      data: update.rows[0],
+    };
+  } catch (error) {
+    console.error("Error en updateUser:", error);
+    return {
+      status: 500,
+      error: "Error interno del servidor",
+    };
+  }
+}
+
+export async function deleteUser(id) {
+  try {
+    const res = await pool.query(
+      "DELETE FROM users WHERE id=$1 RETURNING name,email,status",
+      [id],
+    );
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró el usuario a eliminar");
+    }
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en deleteUser:", error);
     throw error;
   }
 }
@@ -490,7 +562,7 @@ export async function ValidateLogin(usuario, clave) {
   try {
     const res = await pool.query(
       "SELECT id, name, email, password, two_factor_enabled FROM users WHERE email = $1",
-      [usuario]
+      [usuario],
     );
     if (res.rowCount === 0) {
       return { success: false, message: "Usuario no encontrado" };
@@ -505,9 +577,9 @@ export async function ValidateLogin(usuario, clave) {
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name },
       SECRET,
-      { expiresIn: "10m" }
+      { expiresIn: "10m" },
     );
-    
+
     return { success: true, twofa: user.two_factor_enabled, token: token };
   } catch (error) {
     console.error("Error en ValidateLogin:", error);
@@ -518,7 +590,7 @@ export async function SetSecret2FA(id, SECRET) {
   try {
     const res = await pool.query(
       "UPDATE users SET two_factor_secret = $1 WHERE id = $2",
-      [SECRET, id]
+      [SECRET, id],
     );
     return res.rows[0];
   } catch (error) {
@@ -530,7 +602,7 @@ export async function GetFactorCode(id) {
   try {
     const res = await pool.query(
       "SELECT two_factor_secret FROM users WHERE id = $1",
-      [id]
+      [id],
     );
     if (res.rowCount === 0) {
       throw new Error("Usuario no encontrado");
@@ -545,7 +617,7 @@ export async function Actived2FA(id) {
   try {
     const res = await pool.query(
       "UPDATE users SET two_factor_enabled = true WHERE id = $1",
-      [id]
+      [id],
     );
     if (res.rowCount === 0) {
       throw new Error("Usuario no encontrado");
@@ -556,4 +628,3 @@ export async function Actived2FA(id) {
     throw error;
   }
 }
-
