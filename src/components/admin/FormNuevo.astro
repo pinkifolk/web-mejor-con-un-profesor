@@ -5,7 +5,7 @@ import { GetHours } from '../../lib/db.js';
 const data:Hours[] = await GetHours();
 ---
 
-<form action="" class="w-lg">
+<form class="w-lg">
   <h2 class="text-2xl font-semibold mb-4">Información Básica</h2>
   <div class="mb-4">
     <label for="title" class="block text-[16px] font-medium mb-2">Titulo</label>
@@ -84,19 +84,19 @@ const data:Hours[] = await GetHours();
   </div>
   <h2 class="text-2xl font-semibold mb-4">Puntos</h2>
   <div class="mb-4">
-    <label for="title-point" class="block text-[16px] font-medium mb-2">
+    <label for="titlePoint" class="block text-[16px] font-medium mb-2">
       Título
     </label>
     <div class="flex gap-2">
       <input
         type="text"
-        id="title-point"
-        name="title-point"
+        id="titlePoint"
+        name="titlePoint"
         class="flex-1 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
         placeholder="Ingrese el título del punto"
       />
       <button
-        id="add-point"
+        id="addPoint"
         type="button"
         class="px-4 py-2 rounded-lg hover:bg-table cursor-pointer"
       >
@@ -106,7 +106,7 @@ const data:Hours[] = await GetHours();
   </div>
 
   <div
-    id="points-list"
+    id="pointsList"
     class="border border-table mb-4 rounded-lg p-2 flex flex-wrap gap-2"
   >
   </div>
@@ -144,6 +144,7 @@ const data:Hours[] = await GetHours();
   </div>
 </form>
 <script>
+  import { actions } from "astro:actions";
   import Sortable from "sortablejs";
   import { Notyf } from "notyf";
   const notyf = new Notyf({
@@ -170,9 +171,9 @@ const data:Hours[] = await GetHours();
   });
 
   const form = document.querySelector("form");
-  const input = document.getElementById("title-point") as HTMLInputElement;
-  const addBtn = document.getElementById("add-point");
-  const list = document.getElementById("points-list");
+  const input = document.getElementById("titlePoint") as HTMLInputElement;
+  const addBtn = document.getElementById("addPoint");
+  const list = document.getElementById("pointsList");
   let draggedItem = null;
 
   function createTag(text: string) {
@@ -203,7 +204,7 @@ const data:Hours[] = await GetHours();
   });
 
   if (typeof window !== "undefined") {
-    Sortable.create(document.getElementById("points-list"), {
+    Sortable.create(document.getElementById("pointsList"), {
       animation: 150,
       ghostClass: "opacity-50",
     });
@@ -224,25 +225,22 @@ const data:Hours[] = await GetHours();
     formData.append("points", JSON.stringify(points));
     formData.append("horario", JSON.stringify(horarios));
 
-    const response = await fetch("/aNKiNFLow/api/tours", {
-      method: "POST",
-      body: formData,
-    }); 
+    const {data, error} = await actions.tours.create(formData);
 
-    if (response.ok) {
-      notyf.open({
-        type: "custom-success",
-        message: "Tour creado con éxito",
-      });
-      form.reset();
-      list!.innerHTML = "";
-    } else {
-      const data = await response.json();
-      notyf.open({
-        type: "custom-error",
-        message: data.error || "Error al crear el tour",
-      });
-      console.error("Error al crear el tour");
-    }
+    if (error) {
+        const zodError = error.issues?.[0]?.message;
+        const errorMessage = zodError || error.message || "Error desconocido";
+        notyf.open({
+          type: "custom-error",
+          message: errorMessage,
+        });
+      } else {
+        notyf.open({
+          type: "custom-success",
+          message: `Tour creado exitosamente`,
+        });
+        form.reset();
+        list?.querySelectorAll("span").forEach(tag => tag.remove());
+      }
   });
 </script>

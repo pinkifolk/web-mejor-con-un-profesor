@@ -4,7 +4,6 @@
 
 <section class="flex justify-center items-center h-full">
   <form
-    action=""
     class="flex flex-col gap-4 p-6 max-w-sm w-full shadow-2xl rounded"
     aria-labelledby="form-title"
   >
@@ -44,6 +43,7 @@
   </form>
 </section>
 <script>
+  import { actions } from "astro:actions";
   import { Notyf } from "notyf";
   const form = document.querySelector("form") as HTMLFormElement;
   const notyf = new Notyf({
@@ -71,24 +71,21 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
-    const response = await fetch("/aNKiNFLow/api/login", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    if (response.ok) {
-      if(!data.twofa){
-       sessionStorage.setItem("loginToken", data.token);
-       window.location.href = "/aNKiNFLow/activacion"; 
-      }else{
-        window.location.href = "/aNKiNFLow/verificacion"; 
-      }
-    } else {
-      notyf.open({
-        type: "custom-error",
-        message: data.error || "Credenciales Incorrectas",
-      });
-      console.error("Error al validar los datos");
+    const { data, error } = await actions.login.login(formData);
+
+    if (!data?.success || error) {
+        return notyf.open({
+          type: "custom-error",
+          message: data?.message || error?.message || "Error desconocido",
+        });
     }
+    sessionStorage.setItem("loginToken", data.token);
+
+    if (data.twofa) {
+        window.location.href = "/aNKiNFLow/verificacion"; 
+    } else {
+        window.location.href = "/aNKiNFLow/activacion"; 
+    }
+  
   });
 </script>

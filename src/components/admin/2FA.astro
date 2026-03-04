@@ -17,8 +17,8 @@
     <div class="flex flex-col">
       <input
         type="text"
-        id="verification-code"
-        name="verification-code"
+        id="verificationCode"
+        name="verificationCode"
         required
         class="p-2 bg-fondo-place text-center rounded focus:outline-none focus:ring-2 focus:ring-text-place"
       />
@@ -32,6 +32,7 @@
   </form>
 </section>
 <script>
+  import { actions } from "astro:actions";
   import { Notyf } from "notyf";
   const form = document.querySelector("form") as HTMLFormElement;
   const token = sessionStorage.getItem("loginToken");
@@ -61,27 +62,15 @@
     e.preventDefault();
     const formData = new FormData(form);
     formData.append("token", token || "");
-    const response = await fetch("/aNKiNFLow/api/2fa", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    if (response.ok) {
-      if (data.success) {
-        sessionStorage.setItem("loginToken", data.token)
-        window.location.href = "/aNKiNFLow/dashboard";
+    const {data, error} = await actions.login.verify2FA(formData);
+ 
+    if (data && data.success) {
+      window.location.href = "/aNKiNFLow/dashboard";
       }else{
         notyf.open({
         type: "custom-error",
-        message: data.message || "Credenciales Incorrectas",
+        message: data?.message || error?.message || "Credenciales Incorrectas",
       });
       }
-    } else {
-      notyf.open({
-        type: "custom-error",
-        message: data.message || "Credenciales Incorrectas",
-      });
-      console.error("Error al validar los datos");
-    }
   });
 </script>

@@ -24,7 +24,7 @@
             <th class="py-2 font-normal w-1/4">Acción</th>
           </tr>
         </thead>
-        <tbody id="table-body"> </tbody>
+        <tbody id="table-body"></tbody>
       </table>
     </div>
   </section>
@@ -48,7 +48,7 @@
       <div
         class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
       >
-        <form action="">
+        <form>
           <label for="name" class="block text-[16px] font-medium">Nombre</label>
           <input
             type="text"
@@ -65,14 +65,14 @@
             class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
             required
           />
-          <label for="pass" class="block text-[16px] font-medium"
+          <label for="password" class="block text-[16px] font-medium"
             >Contraseña</label
           >
           <div class="flex gap-4 items-center">
             <input
               type="password"
-              id="pass"
-              name="pass"
+              id="password"
+              name="password"
               class="flex-1 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
               required
             />
@@ -92,6 +92,7 @@
               Cancelar
             </button>
             <button
+              id="create"
               type="submit"
               class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
             >
@@ -119,28 +120,30 @@
     >
       Eliminar Usuario
     </div>
-    <div
-      class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
-    >
-      ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede
-      deshacer.
-    </div>
-    <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
-      <button
-        data-dialog-close="true"
-        class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        type="button"
+    <form>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
       >
-        Cancelar
-      </button>
-      <button
-        id="delete"
-        class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-        type="button"
-      >
-        Eliminar
-      </button>
-    </div>
+        ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se
+        puede deshacer.
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+        <button
+          data-dialog-close="true"
+          class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          type="button"
+        >
+          Cancelar
+        </button>
+        <button
+          id="delete"
+          class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+          type="submit"
+        >
+          Eliminar
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 <!-- modal para editar -->
@@ -154,51 +157,129 @@
     data-dialog="edit"
     class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
   >
-    <div
-      class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
-    >
-      Editar Usuario
-    </div>
-    <div
-      class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
-    >
-      <input
-        type="text"
-        id="hora"
-        name="hora"
-        class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-        required
-      />
-    </div>
-    <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
-      <button
-        data-dialog-close="true"
-        class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        type="button"
+    <form>
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
       >
-        Cancelar
-      </button>
-      <button
-        id="edited"
-        class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-        type="button"
+        Editar Usuario
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
       >
-        Actualizar
-      </button>
-    </div>
+        <label for="name" class="block text-[16px] font-medium">Nombre</label>
+        <input
+          type="text"
+          id="editName"
+          name="editName"
+          class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+          required
+        />
+        <label for="email" class="block text-[16px] font-medium">Email</label>
+        <input
+          type="email"
+          id="editEmail"
+          name="editEmail"
+          class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+          required
+        />
+        <label for="status" class="block text-[16px] font-medium">Estado</label>
+        <input
+          type="checkbox"
+          id="editStatus"
+          name="editStatus"
+          class="w-5 h-5 text-buttons bg-fondo-place rounded focus:ring-buttons focus:ring-2 focus:ring-offset-0"
+        />
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+        <button
+          data-dialog-close="true"
+          class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          type="button"
+        >
+          Cancelar
+        </button>
+        <button
+          id="update"
+          class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+          type="submit"
+        >
+          Actualizar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- modal para resetear la clave -->
+<div
+  data-dialog-backdrop="reset"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+>
+  <div
+    data-dialog="reset"
+    class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+  >
+    <form>
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Resetear Contraseña
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        <label for="passwordNew" class="block text-[16px] font-medium"
+          >Contraseña</label
+        >
+        <input
+          type="password"
+          id="passwordNew"
+          name="passwordNew"
+          class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+          required
+        />
+        <label for="repitPassword" class="block text-[16px] font-medium"
+          >Repetir Contraseña</label
+        >
+        <input
+          type="password"
+          id="repitPassword"
+          name="repitPassword"
+          class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+          required
+        />
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+        <button
+          data-dialog-close="true"
+          class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          type="button"
+        >
+          Cancelar
+        </button>
+        <button
+          id="resetPassword"
+          class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+          type="submit"
+        >
+          Restablecer
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
+  import { actions } from "astro:actions";
   import { Notyf } from "notyf";
   import type { Users } from "@/types/tours";
   let id: string | null = null;
-  let hourSelected: string | null = null;
 
   const tableBody = document.getElementById("table-body");
-  const btnEditar = document.getElementById("edited");
-  const btnEliminar = document.getElementById("delete");
-  const form = document.querySelector("form") as HTMLFormElement;
+  const forms = document.querySelectorAll(
+    "form",
+  ) as NodeListOf<HTMLFormElement>;
   const notyf = new Notyf({
     duration: 3000,
     position: { x: "center", y: "bottom" },
@@ -223,9 +304,9 @@
   });
   async function getData() {
     try {
-      const response = await fetch("/aNKiNFLow/api/users");
-      if (response.ok) {
-        const data = await response.json();
+      const { data, error } = await actions.users.read();
+
+      if (data) {
         if (tableBody) {
           tableBody.innerHTML = "";
           data.forEach((user: Users) => {
@@ -250,17 +331,28 @@
                 type="button" 
                 data-id="${user.id}"
                 data-user="${user.name}"
-                class="text-text-place font-semibold cursor-pointer"
+                data-email="${user.email}"
+                data-status="${user.status}"
+                class="text-text-place font-semibold cursor-pointer border-r border-table px-2"
                 data-dialog-target="edit"
-                >Editar
-              </button> |
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+              </button>
               <button
                 type="button"
                 data-id="${user.id}"
-                class="text-text-place font-semibold cursor-pointer"
+                class="text-text-place font-semibold cursor-pointer  border-r border-table px-2"
+                data-dialog-target="reset"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M223.5-423.5Q200-447 200-480t23.5-56.5Q247-560 280-560t56.5 23.5Q360-513 360-480t-23.5 56.5Q313-400 280-400t-56.5-23.5ZM280-240q-100 0-170-70T40-480q0-100 70-170t170-70q67 0 121.5 33t86.5 87h352l120 120-180 180-80-60-80 60-85-60h-47q-32 54-86.5 87T280-240Zm0-80q56 0 98.5-34t56.5-86h125l58 41 82-61 71 55 75-75-40-40H435q-14-52-56.5-86T280-640q-66 0-113 47t-47 113q0 66 47 113t113 47Z"/></svg>
+              </button>
+              <button
+                type="button"
+                data-id="${user.id}"
+                class="text-text-place font-semibold cursor-pointer px-2"
                 data-dialog-target="delete"
               >
-                Eliminar
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
               </button>
             </td>
           `;
@@ -284,18 +376,43 @@
       const dialogId = trigger.getAttribute("data-dialog-target");
       const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
       const backdrop = document.querySelector(
-        `[data-dialog-backdrop="${dialogId}"]`
+        `[data-dialog-backdrop="${dialogId}"]`,
       );
 
       function openDialog() {
-        dialog?.classList.remove("pointer-events-none", "opacity-0");
-        backdrop?.classList.remove("pointer-events-none", "opacity-0");
-        id = trigger.getAttribute("data-id");
-        hourSelected = trigger.getAttribute("data-hour");
+        [dialog, backdrop].forEach((el) =>
+          el?.classList.remove("pointer-events-none", "opacity-0"),
+        );
+        const {
+          id: dataId,
+          user,
+          email,
+          status,
+        } = (trigger as HTMLElement).dataset;
+        id = dataId ?? null;
 
         if (dialogId === "edit") {
-          const inputsText = document.getElementById("hora");
-          inputsText.value = hourSelected;
+          const config = [
+            { selector: "editName", value: user, type: "value" },
+            { selector: "editEmail", value: email, type: "value" },
+            {
+              selector: "editStatus",
+              value: status === "true",
+              type: "checked",
+            },
+          ];
+          config.forEach(({ selector, value, type }) => {
+            const input = document.getElementById(
+              selector,
+            ) as HTMLInputElement | null;
+            if (!input) return;
+
+            if (type === "checked") {
+              input.checked = value as boolean;
+            } else {
+              input.value = (value as string) || "";
+            }
+          });
         }
       }
 
@@ -303,7 +420,6 @@
         dialog?.classList.add("pointer-events-none", "opacity-0");
         backdrop?.classList.add("pointer-events-none", "opacity-0");
         id = null;
-        hourSelected = null;
       }
 
       trigger.addEventListener("click", openDialog);
@@ -320,108 +436,50 @@
       });
     });
   }
-  async function deleted(id: string | null) {
-    try {
-      const response = await fetch(`/aNKiNFLow/api/hours?id=${id}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        return true;
-      } else {
-        const data = await response.json();
-        return data;
-      }
-    } catch (error) {
-      console.error("Error al eliminar la hora:", error);
-    }
-  }
-  async function updated(id: string, hour: string) {
-    try {
-      const response = await fetch(
-        `/aNKiNFLow/api/hours?id=${id}&hora=${hour}`,
-        {
-          method: "PUT",
+  forms.forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const buttonSubmit = event.submitter as HTMLButtonElement;
+      buttonSubmit.disabled = true;
+
+      async function actionsModel(action: string) {
+        if (id && (action === "update" || action === "delete" || action === "resetPassword")) {
+          formData.append("id", id);
         }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar la hora");
+        switch (action) {
+          case "create":
+            return await actions.users.create(formData);
+          case "update":
+            return await actions.users.update(formData);
+          case "delete":
+            return await actions.users.delete(formData);
+          case "resetPassword":
+            return await actions.users.resetpassword(formData);
+          default:
+            throw new Error("Acción no reconocida");
+        }
       }
-
-      return data;
-    } catch (error) {
-      console.error("Error al editar la hora:", error);
-      throw error;
-    }
-  }
-  btnEliminar?.addEventListener("click", async () => {
-    const response = await deleted(id);
-    if (response) {
-      notyf.open({
-        type: "custom-success",
-        message: "Hora eliminada con éxito",
-      });
-    } else {
-      const err = response.json();
-      notyf.open({
-        type: "custom-error",
-        message: err.error || "Error al eliminar la hora",
-      });
-    }
-    getData();
-    document
-      .querySelectorAll<HTMLElement>("[data-dialog-close]")
-      .forEach((btn) => btn.click());
-  });
-  btnEditar?.addEventListener("click", async (e) => {
-    const input = document.querySelector("#hora");
-    const hour = input?.value || "";
-    try {
-      const response = await updated(id, hour);
-
-      notyf.open({
-        type: "custom-success",
-        message: "Hora editada con éxito",
-      });
-    } catch (error) {
-      notyf.open({
-        type: "custom-error",
-        message: error.message || "Error al editar la hora",
-      });
-    }
-    getData();
-    document
-      .querySelectorAll<HTMLElement>("[data-dialog-close]")
-      .forEach((btn) => btn.click());
-  });
-
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const response = await fetch("/aNKiNFLow/api/users", {
-      method: "POST",
-      body: formData,
+      const response = await actionsModel(buttonSubmit.id);
+      console.log("Response:", response);
+      if (response.error) {
+        const zodError = response.error.issues?.[0]?.message;
+        const errorMessage = zodError || response.error.message || "Error desconocido";
+        notyf.open({
+          type: "custom-error",
+          message: errorMessage,
+        });
+      } else {
+        notyf.open({
+          type: "custom-success",
+          message: `Usuario ${buttonSubmit.id === "create" ? "creado" : buttonSubmit.id === "update" || buttonSubmit.id === "resetPassword" ? "actualizado" : "eliminado"} exitosamente`,
+        });
+        getData();
+        document
+          .querySelectorAll<HTMLElement>("[data-dialog-close]")
+          .forEach((btn) => btn.click());
+      }
+      buttonSubmit.disabled = false;
     });
-
-    if (response.ok) {
-      notyf.open({
-        type: "custom-success",
-        message: "Usuario creado con éxito",
-      });
-      form.reset();
-    } else {
-      const data = await response.json();
-      notyf.open({
-        type: "custom-error",
-        message: data.error || "Error al crear el usuario",
-      });
-      console.error("Error al crear el usuario");
-    }
-    document
-      .querySelectorAll<HTMLElement>("[data-dialog-close]")
-      .forEach((btn) => btn.click());
-    getData();
   });
 </script>

@@ -27,8 +27,8 @@
       <img id="qr" alt="QR de autenticación" />
       <input
         type="text"
-        id="verification-code"
-        name="verification-code"
+        id="verificationCode"
+        name="verificationCode"
         required
         class="p-2 bg-fondo-place text-center rounded focus:outline-none focus:ring-2 focus:ring-text-place"
       />
@@ -42,6 +42,7 @@
   </form>
 </section>
 <script>
+  import { actions } from "astro:actions";
   import { Notyf } from "notyf";
   const form = document.querySelector("form") as HTMLFormElement;
   const qr = document.getElementById("qr") as HTMLImageElement;
@@ -72,39 +73,29 @@
     e.preventDefault();
     const formData = new FormData(form);
     formData.append("token", token);
-    const response = await fetch("/aNKiNFLow/api/verificar-2fa", {
-      method: "POST",
-      body:formData
-    });
-    const data = await response.json();
-     if (response.ok) {
-        if(data.success){
-          window.location.href = "/aNKiNFLow/dashboard"; 
-        }
+    const {data, error} = await actions.login.verify2FA(formData);
+    if (data && data.success) {
+        window.location.href = "/aNKiNFLow/dashboard"; 
     } else {
       notyf.open({
         type: "custom-error",
-        message: data.message || "Credenciales Incorrectas",
+        message: data?.message || error?.message || "Credenciales Incorrectas",
       });
       console.error("Error al validar los datos");
     }
   });
 
   async function getQR() {
-    const res = await fetch("/aNKiNFLow/api/activar-2fa", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
+    const {data, error} = await actions.login.activa2FA({token});
 
-    const data = await res.json();
-    if (res.ok && data.success) {
-      qr.src = data.qr;
-    } else {
+    if(!data?.success){
       notyf.open({
         type: "custom-error",
-        message: data.message || "Error con la generacion del QR",
+        message: "No pudimos generar el QR",
       });
+    }
+    if (data?.qr) {
+      qr.src = data.qr;
     }
   }
 
