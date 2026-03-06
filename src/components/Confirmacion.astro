@@ -4,8 +4,9 @@
 
     <div class="mb-4">
       <label for="nombre" class="block text-[16px] font-medium mb-2"
-        >Nombre</label
-      >
+        >Nombre
+        <span class="text-red-800 align-middle">*</span>
+      </label>
       <input
         type="text"
         id="nombre"
@@ -17,8 +18,9 @@
     </div>
     <div class="mb-4">
       <label for="apellido" class="block text-[16px] font-medium mb-2"
-        >Apellido</label
-      >
+        >Apellido
+        <span class="text-red-800 align-middle">*</span>
+      </label>
       <input
         type="text"
         id="apellido"
@@ -29,8 +31,9 @@
       />
     </div>
     <div class="mb-4">
-      <label for="email" class="block text-[16px] font-medium mb-2">Email</label
-      >
+      <label for="email" class="block text-[16px] font-medium mb-2"
+        >Email <span class="text-red-800 align-middle">*</span>
+      </label>
       <input
         type="email"
         id="email"
@@ -42,7 +45,9 @@
     </div>
     <div class="mb-4">
       <label for="telefono" class="block text-[16px] font-medium mb-2"
-        >Teléfono</label
+        >Teléfono
+     <span class="text-red-800 align-middle">*</span>
+    </label
       >
       <input
         type="tel"
@@ -106,21 +111,26 @@
     e.preventDefault();
 
     const formData = new FormData(form);
-    const nombre = formData.get("nombre");
-    const apellido = formData.get("apellido");
-    const email = formData.get("email");
-    const telefono = formData.get("telefono");
+    const nombre = (formData.get("nombre") ?? "").toString().trim();
+    const apellido = (formData.get("apellido") ?? "").toString().trim();
+    const email = (formData.get("email") ?? "").toString().trim();
+    const telefono = (formData.get("telefono") ?? "").toString().trim();
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
+    console.log(telefono);
 
     if (!nombre || !apellido || !email || !telefono) {
-      alert("Por favor, complete todos los campos.");
+      notyf.open({
+        type: "custom-error",
+        message: `Por favor, complete todos los campos.`,
+      });
       return;
     }
     if (!id) {
-      alert(
-        "ID de reserva no encontrado. Por favor, regrese a la página de reservas.",
-      );
+      notyf.open({
+        type: "custom-error",
+        message: `ID de reserva no encontrado. Por favor, regrese a la página de reservas.`,
+      });
       return;
     }
 
