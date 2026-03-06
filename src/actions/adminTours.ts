@@ -127,10 +127,12 @@ export const toursActions = {
   delete: defineAction({
     input: z.object({
       id: z.string(),
+     
     }),
     handler: async ({ id }) => {
       const deleteTour = await DeleteTour(id);
       return JSON.parse(JSON.stringify(deleteTour));
     },
   }),
+
 };
