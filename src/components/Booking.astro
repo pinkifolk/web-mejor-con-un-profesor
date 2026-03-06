@@ -74,7 +74,7 @@ const validarHoras = Array.isArray(data)
           class={`flex flex-wrap ${validarHoras.length > 4 ? "justify-start gap-4" : "justify-between"} my-6`}
         >
           {validarHoras.map((hour: Hours) => (
-            <div class="relative">
+            <div class="relative my-2">
               <input
                 type="radio"
                 name="horario"

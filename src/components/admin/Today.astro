@@ -6,19 +6,265 @@ const { data } = Astro.props;
 <div class="mb-6">
   <h2 class="text-2xl font-bold mb-4">Hoy</h2>
   {
-    data.map((tour:GetTodayTour) => (
-      <div class="border border-gray-300 rounded-lg p-4 flex justify-between items-center">
-        <div class="flex flex-col">
-          <p class="text-lg font-semibold">{`Tour ${tour.name}`}</p>
-          <p class="text-sm text-gray-500">{`${tour.personas} Personas`}</p>
-          <p class="text-sm text-gray-500">{`Hora: ${tour.hours} Hrs`}</p>
+    data.map((tour: GetTodayTour) => {
+      const borderStatus = {
+        cancelled: "border-red-500 bg-red-50/30 line-through opacity-70",
+        confirmed: "border-green-500 bg-green-50/30",
+        pending: "border-amber-500",
+      };
+      const statusClass =
+        borderStatus[tour.status as keyof typeof borderStatus] ||
+        "border-gray-300";
+
+      return (
+        <div
+          class={`border border-gray-300 hover:bg-slate-50 rounded-lg p-4 flex justify-between items-center my-2 cursor-pointer ${statusClass}`}
+          data-dialog-target="acciones"
+          data-number={tour.id}
+          data-hour={tour.hourid}
+        >
+          <div class="flex flex-col">
+            <p class="text-lg font-semibold">{`Tour ${tour.name}`}</p>
+            <p class="text-sm text-gray-500">{`${tour.personas} Personas`}</p>
+            <p class="text-sm text-gray-500">{`Hora: ${tour.hours} Hrs`}</p>
+          </div>
+
+          <img
+            src={tour.img}
+            alt={`Imagen del tour ${tour.name}`}
+            class="w-16 h-16 rounded-lg object-cover"
+          />
         </div>
-        <img
-          src={tour.img}
-          alt={`Imagen del tour ${tour.name}`}
-          class="w-16 h-16 rounded-lg object-cover"
-        />
-      </div>
-    ))
+      );
+    })
   }
+  <!-- modal para cerrar el tour -->
+  <div
+    data-dialog-backdrop="acciones"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="acciones"
+      class="relative m-4 p-4 w-3/4 min-w-[75%] max-w-75%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex justify-between items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        <h2 class="text-bold text-2xl" id="title"></h2>
+        <button data-dialog-close="close" class="cursor-pointer">X</button>
+      </div>
+      <form>
+        <div
+          class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+        >
+          <span class="text-md text-slate-500 text-pretty text-justify">
+            Al precionar <strong class="font-semibold">Cancelar Tour</strong> estas
+            indicado que no vas a hacer el Tour, Si precionas <strong
+              class="font-semibold">Cerrar Tour</strong
+            > pausaremos el Tour solo en la hora agendada
+          </span>
+          <div
+            class="relative flex flex-col w-full h-full overflow-scroll text-gray-700 bg-white shadow-md rounded-lg bg-clip-border mt-10"
+          >
+            <table class="w-full text-left table-auto min-w-max">
+              <thead>
+                <tr>
+                  <th class="p-4 border-b border-slate-300 bg-slate-50">
+                    <p
+                      class="block text-sm font-normal leading-none text-slate-500"
+                    >
+                      Nombre
+                    </p>
+                  </th>
+                  <th class="p-4 border-b border-slate-300 bg-slate-50">
+                    <p
+                      class="block text-sm font-normal leading-none text-slate-500"
+                    >
+                      Email
+                    </p>
+                  </th>
+                  <th class="p-4 border-b border-slate-300 bg-slate-50">
+                    <p
+                      class="block text-sm font-normal leading-none text-slate-500"
+                    >
+                      Adultos
+                    </p>
+                  </th>
+                  <th class="p-4 border-b border-slate-300 bg-slate-50">
+                    <p
+                      class="block text-sm font-normal leading-none text-slate-500"
+                    >
+                      Niños
+                    </p>
+                  </th>
+                  <th class="p-4 border-b border-slate-300 bg-slate-50">
+                    <p
+                      class="block text-sm font-normal leading-none text-slate-500"
+                    >
+                      Telefono
+                    </p>
+                  </th>
+                  <th class="p-4 border-b border-slate-300 bg-slate-50">
+                    <p
+                      class="block text-sm font-normal leading-none text-slate-500"
+                    >
+                      Total
+                    </p>
+                  </th>
+                </tr>
+              </thead>
+              <tbody> </tbody>
+            </table>
+          </div>
+          <div class="flex justify-end mr-14">
+            <table>
+              <tr>
+                <td class="p-4 font-bold">Total Personas:</td>
+                <td class="p-4" id="totals">3</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+          <button
+            name="action"
+            value="cancelTour"
+            class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="submit"
+          >
+            Cancelar Tour
+          </button>
+          <button
+            name="action"
+            value="confirmTour"
+            class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            type="submit"
+          >
+            Confirmar Tour
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+<script>
+  import { actions } from "astro:actions";
+  import type { DetailBokings } from "../../types/tours";
+  const tableBody = document.querySelector("tbody") as HTMLTableSectionElement;
+  const form = document.querySelector("form") as HTMLFormElement;
+  let id: string | undefined = "";
+  let hour: string | undefined = "";
+  attachDialogListeners();
+  function attachDialogListeners() {
+    document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
+      const dialogId = trigger.getAttribute("data-dialog-target");
+      const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+      const backdrop = document.querySelector(
+        `[data-dialog-backdrop="${dialogId}"]`,
+      );
+
+      async function openDialog() {
+        dialog?.classList.remove("pointer-events-none", "opacity-0");
+        backdrop?.classList.remove("pointer-events-none", "opacity-0");
+
+        if (dialogId === "acciones") {
+          id = (trigger as HTMLElement).dataset.number || "";
+          hour = (trigger as HTMLElement).dataset.hour || "";
+          const { data, error } = await actions.boking.readDetail({
+            id,
+            hour,
+          });
+
+          if (data.length > 0 || tableBody) {
+            const totals = data.reduce(
+              (acc: number, res: DetailBokings) =>
+                acc + parseInt(String(res.total)),
+              0,
+            );
+            const title = `${data[0].name_tour} - ${data[0].hour}`;
+            tableBody.innerHTML = "";
+            data.forEach((bookings: DetailBokings) => {
+              const row = document.createElement("tr");
+              row.className = "hover:bg-slate-50";
+              row.innerHTML = `
+              <td class="p-4 border-b border-slate-200">
+                <p class="block text-sm text-slate-800">${bookings.name}</p>
+              </td>
+              <td class="p-4 border-b border-slate-200">
+                <p class="block text-sm text-slate-800">${bookings.email}</p>
+              </td>
+              <td class="p-4 border-b border-slate-200">
+                <p class="block text-sm text-slate-800">${bookings.adult}</p>
+              </td>
+              <td class="p-4 border-b border-slate-200">
+                <p class="block text-sm text-slate-800">${bookings.child}</p>
+              </td>
+              <td class="p-4 border-b border-slate-200">
+                <p class="block text-sm text-slate-800">${bookings.phone}</p>
+              </td>
+              <td class="p-4 border-b border-slate-200">
+                <p class="block text-sm text-slate-800">${bookings.total}</p>
+              </td>
+            `;
+              tableBody.appendChild(row);
+            });
+            const totalsElement = dialog?.querySelector("#totals");
+            if (totalsElement) {
+              totalsElement.innerHTML = totals;
+            }
+            const titleElement = dialog?.querySelector("#title");
+            if (titleElement) {
+              titleElement.innerHTML = title;
+            }
+          } else {
+            console.log("no hay datos");
+          }
+        }
+      }
+
+      function closeDialog() {
+        dialog?.classList.add("pointer-events-none", "opacity-0");
+        backdrop?.classList.add("pointer-events-none", "opacity-0");
+        id = "";
+        hour = "";
+      }
+
+      trigger.addEventListener("click", openDialog);
+      dialog
+        ?.querySelectorAll("[data-dialog-close]")
+        .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+      backdrop?.addEventListener("click", (event) => {
+        if (
+          event.target === backdrop &&
+          backdrop.hasAttribute("data-dialog-backdrop-close")
+        ) {
+          closeDialog();
+        }
+      });
+    });
+  }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitter = e.submitter as HTMLButtonElement;
+    if (submitter.value === "cancelTour") {
+      const { data, error } = await actions.boking.actions({
+        id: id || "",
+        hour: hour || "",
+        accion: "cancelado",
+      });
+    } else {
+      const { data, error } = await actions.boking.actions({
+        id: id || "",
+        hour: hour || "",
+        accion: "confirmado",
+      });
+    }
+    form.reset();
+    document
+      .querySelectorAll<HTMLElement>("[data-dialog-close]")
+      .forEach((btn) => btn.click());
+    location.reload();
+  });
+</script>

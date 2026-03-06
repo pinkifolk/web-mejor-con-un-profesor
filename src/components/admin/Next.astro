@@ -9,8 +9,9 @@ const { data } = Astro.props;
       data.map((next: GetToursNext) =>(
         <div class="flex flex-col hover:bg-gray-50 transition-colors p-4">
           <p class="text-lg font-semibold">{next.fecha_formateada}</p>
+          <p class="text-sm text-text-place">{`Tour: ${next.name}`}</p>
           <p class="text-sm text-text-place">{`${next.personas} Personas`}</p>
-          <p class="text-sm text-text-place">{`Hora: ${next.hours} Hrs`}</p>
+          <p class="text-sm text-text-place">{`Hora: ${next.hour} Hrs`}</p>
         </div>
 
       ))
