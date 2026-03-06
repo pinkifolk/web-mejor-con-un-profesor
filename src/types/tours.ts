@@ -57,21 +57,34 @@ export type Availability = {
   disponible: string;
 };
 export type GetTodayTour = {
+  id: number;
   name: string;
   img: string;
   personas: number;
   ninos: number;
   hours: string;
+  hourid: string;
+  status: string;
 };
 export type GetToursNext = {
   fecha_formateada: string;
+  name: string;
   personas: string;
   ninos: string;
-  hours: string;
+  hour: string;
 };
 export type Users = {
   id: number;
   name: string;
   email: string;
   status: boolean;
+};
+export type DetailBokings = {
+  name: string;
+  email: string;
+  adult: string;
+  child: string;
+  phone: string;
+  total: number;
+  hour: string;
 };

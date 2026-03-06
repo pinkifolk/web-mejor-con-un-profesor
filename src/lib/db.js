@@ -99,7 +99,7 @@ export async function GetHoursBySlug(slug) {
     }
 
     const res = await pool.query(
-      "SELECT H.id, H.hour FROM tours T LEFT JOIN tours_hours TH ON TH.tours_id=T.id LEFT JOIN hours H ON H.id=TH.hours_id WHERE slug=$1",
+      "SELECT H.id, H.hour FROM tours T LEFT JOIN tours_hours TH ON TH.tours_id=T.id LEFT JOIN hours H ON H.id=TH.hours_id WHERE slug=$1 AND TH.status=false ORDER BY TH.id",
       [slug],
     );
     return res.rows;
@@ -117,7 +117,7 @@ export async function GetAvailability(date, slug) {
       throw new Error("El tour no existe favor verificar el tour");
     }
     const res = await pool.query(
-      "SELECT COALESCE(SUM(adult), 0) + COALESCE(SUM(child), 0) AS total, T.max_people - (COALESCE(SUM(adult), 0) + COALESCE(SUM(child), 0)) AS disponible FROM tours T LEFT JOIN booking B ON T.id = B.tour_id AND B.date_booking = $1 AND confirmation= false WHERE T.slug = $2 GROUP BY T.id",
+      "SELECT COALESCE(SUM(adult), 0) + COALESCE(SUM(child), 0) AS total, T.max_people - (COALESCE(SUM(adult), 0) + COALESCE(SUM(child), 0)) AS disponible FROM tours T LEFT JOIN booking B ON T.id = B.tour_id AND B.date_booking = $1 AND confirmation= true WHERE T.slug = $2 GROUP BY T.id",
       [date, slug],
     );
     return res.rows;
@@ -220,22 +220,26 @@ export async function RandomTour() {
 
 export async function GetDataFromDashboard() {
   const today =
-    await pool.query(`SELECT T.name, T.img, B.adult personas, B.child ninos, H.hour hours
-                      FROM booking B 
-                      LEFT JOIN tours T ON T.id=B.tour_id
-                      LEFT JOIN hours H ON H.id=B.hour_id
-                      WHERE DATE(B.date_booking) = CURRENT_DATE;`);
-  const nexts = await pool.query(`SELECT 
-                                  to_char(B.date_booking, 'DD/MM/YYYY') AS fecha_formateada, 
-                                  SUM(B.adult) personas, 
-                                  SUM(B.child) ninos,
-                                  H.hour
-                                  FROM booking B
+    await pool.query(`SELECT T.id, T.name, T.img, SUM(B.adult) personas, SUM(B.child) ninos, H.hour AS hours, H.id hourId, string_agg(DISTINCT B.status, ', ') as status
+                                  FROM booking B 
+                                  LEFT JOIN tours T ON T.id=B.tour_id
                                   LEFT JOIN hours H ON H.id=B.hour_id
-                                  WHERE B.date_booking BETWEEN NOW() AND NOW() + INTERVAL '4' DAY
-                                  GROUP BY B.id;`);
+                                  WHERE DATE(B.date_booking) = CURRENT_DATE
+                                  GROUP BY T.id, H.id;`);
+  const nexts = await pool.query(`SELECT 
+                                    T.name,
+                                    to_char(B.date_booking, 'DD/MM/YYYY') AS fecha_formateada, 
+                                    SUM(B.adult) personas, 
+                                    SUM(B.child) ninos,
+                                    H.hour
+                                    FROM booking B
+                                    LEFT JOIN tours T ON T.id=B.tour_id
+                                    LEFT JOIN hours H ON H.id=B.hour_id
+                                    WHERE B.date_booking BETWEEN NOW() AND NOW() + INTERVAL '5' DAY
+                                    GROUP BY B.id, H.id,T.id;`);
+
   const total = await pool.query(`SELECT
-                                  COUNT(*) FILTER (
+                                      COUNT(*) FILTER (
                                     WHERE date(date_booking) >= date_trunc('week', CURRENT_DATE)
                                       AND date(date_booking) < date_trunc('week', CURRENT_DATE) + INTERVAL '1 week'
                                   ) AS total_semana,
@@ -257,6 +261,37 @@ export async function GetDataFromDashboard() {
     total: total.rows[0],
   };
 }
+// booking admin
+export async function DetailBooking(id, hourId) {
+  const tour = await pool.query(
+    `SELECT T.name name_tour, B.name, B.email, B.adult, B.child, B.phone, COALESCE(B.adult, 0) + COALESCE(B.child, 0) total, H.hour FROM booking B LEFT JOIN tours T ON T.id=B.tour_id LEFT JOIN hours H ON H.id=B.hour_id WHERE T.id=$1 AND H.id=$2 GROUP BY B.id, H.id,T.id;
+`,
+    [id, hourId],
+  );
+  return tour.rows;
+}
+
+export async function ActionsBooking(id, hourId, actions) {
+  if (actions === "cancelado") {
+    // si se cancela, cambiar el status a cancelled y enviar correos a los usuarios
+    const action = await pool.query(
+      `UPDATE booking SET status='cancelled' WHERE tour_id=$1 AND hour_id=$2 RETURNING *`,
+      [id, hourId],
+    );
+    // queda pendiente el envio de correo
+    return action.rows[0];
+  } else {
+     const action = await pool.query(
+      `UPDATE booking SET status='confirmed' WHERE tour_id=$1 AND hour_id=$2 RETURNING *`,
+      [id, hourId],
+    );
+    return action.rows[0];
+    // si se confirma hay que cambiar el status a confirmed y avisar a los usuarios
+  }
+
+  return { id, hourId, actions };
+}
+
 // Tours
 export async function GetToursAdmin() {
   try {
@@ -342,8 +377,8 @@ export async function NewTour({
       throw new Error("Error al crear el tour");
     }
     const pointsArray =
-    typeof points === "string" ? JSON.parse(points) : points;
-    console.log({id, pointsArray});
+      typeof points === "string" ? JSON.parse(points) : points;
+    console.log({ id, pointsArray });
     if (Array.isArray(pointsArray) && pointsArray.length > 0) {
       await pool.query(
         `INSERT INTO itinerary (tour_id, name) 
