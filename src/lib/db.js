@@ -176,7 +176,7 @@ export async function ConfirmBooking(data) {
       UPDATE booking 
       SET name = $1, last_name = $2, email= $3, phone= $4, confirmation = true, ticket = $5, updated_at = NOW() 
       WHERE hash = $6
-      RETURNING tour_id
+      RETURNING id
     `,
       [
         data.nombre,
@@ -191,9 +191,11 @@ export async function ConfirmBooking(data) {
       throw new Error("Reserva no encontrada");
     }
     const tourRes = await pool.query(
-      "SELECT T.name, T.img, B.adult, B.child, B.date_booking, H.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN hours H ON H.id=B.hour_id WHERE T.id=$1",
-      [res.rows[0].tour_id],
+      "SELECT T.name, T.img, B.adult, B.child, B.date_booking, H.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN hours H ON H.id=B.hour_id WHERE B.id=$1",
+      [res.rows[0].id],
     );
+    console.log(tourRes.rows[0]);
+    console.log(res.rows[0].id)
     return tourRes.rows[0];
   } catch (error) {
     console.error("Error en ConfirmBooking:", error);
