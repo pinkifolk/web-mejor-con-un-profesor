@@ -1,10 +1,17 @@
+---
+import { ui } from "@/i18n/ui";
+
+const { lang } = Astro.params;
+const t = ui[lang || "es"];
+
+---
 <section class="md:p-18 p-5">
   <form class="md:max-w-lg md:mx-auto">
-    <h2 class="text-2xl font-bold mb-4">Tu información</h2>
+    <h2 class="text-2xl font-bold mb-4">{t["confirm.title"]}</h2>
 
     <div class="mb-4">
       <label for="nombre" class="block text-[16px] font-medium mb-2"
-        >Nombre
+        >{t["confirm.name"]}
         <span class="text-red-800 align-middle">*</span>
       </label>
       <input
@@ -13,12 +20,12 @@
         name="nombre"
         class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
         required
-        placeholder="Ingrese su nombre"
+        placeholder={t["confirm.name.label"]}
       />
     </div>
     <div class="mb-4">
       <label for="apellido" class="block text-[16px] font-medium mb-2"
-        >Apellido
+        >{t["confirm.last_name"]}
         <span class="text-red-800 align-middle">*</span>
       </label>
       <input
@@ -27,12 +34,12 @@
         name="apellido"
         class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
         required
-        placeholder="Ingrese su apellido"
+        placeholder={t["confirm.last_name.label"]}
       />
     </div>
     <div class="mb-4">
       <label for="email" class="block text-[16px] font-medium mb-2"
-        >Email <span class="text-red-800 align-middle">*</span>
+        >{t["confirm.email"]} <span class="text-red-800 align-middle">*</span>
       </label>
       <input
         type="email"
@@ -40,12 +47,12 @@
         name="email"
         class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
         required
-        placeholder="Ingrese su correo electrónico"
+        placeholder={t["confirm.email.label"]}
       />
     </div>
     <div class="mb-4">
       <label for="telefono" class="block text-[16px] font-medium mb-2"
-        >Teléfono
+        >{t["confirm.phone"]}
      <span class="text-red-800 align-middle">*</span>
     </label
       >
@@ -55,7 +62,7 @@
         name="telefono"
         class="w-full p-3 mb-2 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
         required
-        placeholder="Ingrese su número telefónico"
+        placeholder={t["confirm.phone.label"]}
       />
     </div>
 
@@ -64,7 +71,7 @@
       id="btnConfirmar"
       class="bg-buttons text-text-button cursor-pointer w-full py-3 px-4 rounded-full"
     >
-      Confirmar Reserva
+      {t["confirm.button"]}
     </button>
   </form>
 </section>

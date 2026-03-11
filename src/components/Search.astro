@@ -1,5 +1,6 @@
 ---
 import Lupa from '../assets/lupa.svg'
+const { placeholder } = Astro.props;
 ---
 <section class="relative p-4">
     <div class="absolute left-8 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -10,6 +11,6 @@ import Lupa from '../assets/lupa.svg'
         id="search" 
         name="search" 
         class="w-full pl-12 p-4 rounded-2xl bg-fondo-place text-text-place focus:outline-none focus:ring-2 focus:ring-text-place" 
-        placeholder="Buscar experiencias o destinos"
+        placeholder={placeholder}
     >
 </section>

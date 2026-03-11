@@ -1,10 +1,13 @@
 ---
 import { GetDestinosAll } from "@/lib/db";
 import type { Tour } from "@/types/tours";
+import { ui } from "@/i18n/ui";
 const data = await GetDestinosAll();
+const { lang } = Astro.params;
+const t = ui[lang || "es"];
 ---
 <section class="p-4">
-  <h1 class="text-2xl font-bold">Todo los Destinos</h1>
+  <h1 class="text-2xl font-bold">{t["tours.title"]}</h1>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-5" id="allDestine">
     {
     data.length > 0 ? (

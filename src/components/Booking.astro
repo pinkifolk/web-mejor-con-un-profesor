@@ -1,8 +1,12 @@
 ---
-const { slug } = Astro.params;
 import { GetHoursBySlug } from "../lib/db.js";
 import type { Hours } from "@/types/tours";
+import { ui } from "@/i18n/ui";
+
+const { slug } = Astro.params;
 const data: Hours = await GetHoursBySlug(slug);
+const { lang } = Astro.params;
+const t = ui[lang || "es"];
 
 const validarHoras = Array.isArray(data)
   ? data.filter((h) => h.id !== null && h.hour !== null)
@@ -10,10 +14,10 @@ const validarHoras = Array.isArray(data)
 ---
 
 <aside class="md:w-1/2 md:p-4">
-  <h2 class="text-2xl font-bold mb-4">Reserva tu recorrido</h2>
+  <h2 class="text-2xl font-bold mb-4">{t["detail.title"]}</h2>
   <section class="mb-6" aria-labelledby="fecha-heading">
     <h2 id="fecha-heading" class="text-xl font-bold mb-4">
-      Selecciona una fecha
+      {t["detail.date"]}
     </h2>
     <input
       type="date"
@@ -24,15 +28,18 @@ const validarHoras = Array.isArray(data)
     />
   </section>
   <section class="mb-6" aria-labelledby="participantes-heading">
-    <h2 id="participantes-heading" class="text-xl font-bold">Participantes</h2>
+    <h2 id="participantes-heading" class="text-xl font-bold">
+      {t["detail.persons"]}
+    </h2>
     <p class="text-red-600 font-bold text-sm mb-4">
-      <span id="cupos">0</span> Cupos disponible
+      <span id="cupos">0</span>
+      {t["detail.count"]}
     </p>
     <div
       class="flex justify-between gap-4 mb-4 items-center counter"
       data-type="adultos"
     >
-      <label class="text-lg">Adulto</label>
+      <label class="text-lg">{t["detail.adult"]}</label>
       <div class="flex items-center gap-2">
         <button
           class="decrement bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer"
@@ -49,7 +56,7 @@ const validarHoras = Array.isArray(data)
       class="flex justify-between gap-4 mb-4 items-center counter"
       data-type="ninos"
     >
-      <label class="text-lg">Niños</label>
+      <label class="text-lg">{t["detail.children"]}</label>
       <div class="flex items-center gap-2">
         <button
           class="decrement bg-fondo-place text-black w-9 h-9 rounded-full cursor-pointer"
@@ -66,7 +73,7 @@ const validarHoras = Array.isArray(data)
 
   <section class="mb-6" aria-labelledby="horario-heading">
     <h2 id="horario-heading" class="text-xl font-bold mb-4">
-      Elige un horario
+      {t["detail.hours"]}
     </h2>
     {
       validarHoras.length > 0 ? (
@@ -92,7 +99,7 @@ const validarHoras = Array.isArray(data)
           ))}
         </div>
       ) : (
-        <p>Sin Horas disponibles</p>
+        <p>{t["detail.no.hours"]}</p>
       )
     }
   </section>
@@ -101,12 +108,16 @@ const validarHoras = Array.isArray(data)
       id="resumen-heading"
       class="text-xl font-bold pb-5 border-b border-gray-300"
     >
-      Resumen de la reserva
+      {t["detail.resum"]}
     </h2>
     <div class="grid grid-cols-3 mt-4 text-text-place">
       <div class="col-span-1">
-        <p class="text-sm">Adultos: <span data-summary="adultos">0</span></p>
-        <p class="text-sm">Niños: <span data-summary="ninos">0</span></p>
+        <p class="text-sm">
+          {t["detail.resum.adult"]}: <span data-summary="adultos">0</span>
+        </p>
+        <p class="text-sm">
+          {t["detail.resum.child"]}: <span data-summary="ninos">0</span>
+        </p>
       </div>
       <div class="col-span-2">
         <p class="text-sm" id="dateSelected"></p>
@@ -118,7 +129,7 @@ const validarHoras = Array.isArray(data)
     id="reservar"
     name="reservar"
     class="bg-buttons px-4 py-2 w-full rounded-4xl text-text-button font-semibold cursor-pointer opacity-0 transition-opacity duration-1000 ease-in-out"
-    >Reservar</button
+    >{t["detail.button"]}</button
   >
 </aside>
 
@@ -127,21 +138,22 @@ const validarHoras = Array.isArray(data)
   const enviarBtn = document.getElementById("reservar") as HTMLButtonElement;
   const cupos = document.getElementById("cupos") as HTMLSpanElement;
   const detailsDate = document.getElementById(
-    "dateSelected"
+    "dateSelected",
   ) as HTMLParagraphElement;
   const detailsHour = document.getElementById(
-    "HoursSelected"
+    "HoursSelected",
   ) as HTMLParagraphElement;
   const hoursSelected = document.getElementsByName(
-    "horario"
+    "horario",
   ) as NodeListOf<HTMLInputElement>;
   let cuposDisponibles = parseInt(cupos.textContent || "0", 10);
   const slug = fechaInput.dataset.slug;
+  const lang = localStorage.getItem("preferred-lang");
 
   fechaInput.addEventListener("change", async () => {
     const selectedDate = fechaInput.value;
     detailsDate.textContent = new Date(
-      `${selectedDate}T00:00:00`
+      `${selectedDate}T00:00:00`,
     ).toLocaleDateString("es-ES", {
       weekday: "long",
       year: "numeric",
@@ -151,7 +163,7 @@ const validarHoras = Array.isArray(data)
     if (selectedDate) {
       try {
         const response = await fetch(
-          `/api/availability?date=${selectedDate}&slug=${slug}`
+          `/api/availability?date=${selectedDate}&slug=${slug}`,
         );
         const data = await response.json();
         cupos.textContent = data.disponible;
@@ -168,10 +180,10 @@ const validarHoras = Array.isArray(data)
     let count = 0;
     const span = couterEl.querySelector(".count") as HTMLSpanElement;
     const decrementBtn = couterEl.querySelector(
-      ".decrement"
+      ".decrement",
     ) as HTMLButtonElement;
     const incrementBtn = couterEl.querySelector(
-      ".increment"
+      ".increment",
     ) as HTMLButtonElement;
     const type = (couterEl as HTMLElement).dataset.type;
     const summaryEl = document.querySelector(`[data-summary="${type}"]`);
@@ -199,7 +211,8 @@ const validarHoras = Array.isArray(data)
   hoursSelected.forEach((hour) => {
     hour.addEventListener("change", () => {
       if (hour.checked) {
-        detailsHour.textContent = `Hora: ${hour.value}`;
+        const spanElement = document.querySelector(`[for="${hour.id}"]`);
+        detailsHour.textContent = `Hora: ${spanElement?.innerHTML}`;
         enviarBtn.classList.add("opacity-100");
       }
     });
@@ -253,6 +266,6 @@ const validarHoras = Array.isArray(data)
     } catch (error) {
       console.error("Error al guardar en localStorage:", error);
     }
-    window.location.href = `/confirmacion?${hash}`;
+    window.location.href = `${lang}/confirmacion?${hash}`;
   });
 </script>

@@ -5,10 +5,15 @@ import Start from "@/assets/Start.astro";
 import UserIcon from "@/assets/circle-user-round.svg";
 import { GetTourBySlug } from "../lib/db.js";
 import type { TourDetail } from "../types/tours";
+import { ui } from "@/i18n/ui";
+
+const { lang } = Astro.params;
+const t = ui[lang || "es"];
 const { slug } = Astro.params;
 if (!slug) {
   return Astro.redirect("/404");
 }
+
 const referer = Astro.request.headers.get('referer');
 
 const tour:TourDetail = await GetTourBySlug(slug);
@@ -48,12 +53,12 @@ const {
           alt="Duracion del tour"
           class="inline-block w-4 h-4"
         />
-        {duration} · Máximo {max_people} personas
+        {duration} · {t['detail.max']} {max_people} {t['detail.people']}
       </p>
     </header>
     <section aria-labelledby="descripcion-tour" class="mb-4">
       <h2 id="descripcion-tour" class="text-xl font-semibold mb-2">
-        Descripción
+        {t['detail.description']}
       </h2>
       <p class="text-gray-700">
         {description}
@@ -61,21 +66,20 @@ const {
     </section>
     <section aria-labelledby="itinerary-tour" class="mb-4">
       <h2 id="itinerary-tour" class="text-xl font-semibold mb-2">
-        ¿Qué veremos en este tour?
+        {t['detail.showTours']}
       </h2>
       <p class="text-gray-700">
-        Visitamos todas las joyas de la ciudad que no todo el mundo te mostrará
-        como:
+        {t['detail.showTours.description']}
       </p>
       <ul class="list-disc pl-5 text-gray-700">
         {itinerary.map((item) => <li>{item}</li>)}
       </ul>
     </section>
     <section aria-labelledby="review-tour" class="mb-4">
-      <h2 id="review-tour" class="text-xl font-semibold mb-2">Reseñas</h2>
+      <h2 id="review-tour" class="text-xl font-semibold mb-2">{t['detail.comment']}</h2>
       {
         comments.length === 0 ? (
-          <p class="text-gray-700">No hay reseñas aún.</p>
+          <p class="text-gray-700">{t['detail.no.comment']}</p>
         ) : (
           <>
             <div class="flex flex-col md:flex-row items-start md:items-center gap-8 p-4 mb-4">

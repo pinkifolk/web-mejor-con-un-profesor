@@ -2,10 +2,13 @@
 import Layout from '@/layouts/Layout.astro'
 import Search from '@/components/Search.astro'
 import Destination from '@/components/Destination.astro'
+import { ui } from "@/i18n/ui";
 const { lang } = Astro.params;
+const t = ui[lang || "es"];
+
 ---
 
 <Layout lang={lang}>
-    <Search lang={lang} />
-    <Destination lang={lang}/>
+    <Search placeholder={t['input.search']} />
+    <Destination title={t['home.title']} />
 </Layout>
