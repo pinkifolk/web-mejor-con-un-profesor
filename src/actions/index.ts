@@ -1,13 +1,13 @@
 import { userActions } from "./adminUsers";
-import { hourActions } from "./adminHours"; 
 import { toursActions } from "./adminTours"; 
 import { loginActions } from "./adminLogin";
 import { bokingAction } from "./adminBoking";
+import { LanguagesAction } from "./adminLanguages";
 
 export const server = {
   login : loginActions,
   tours: toursActions,
-  hours: hourActions,
+  languages: LanguagesAction,
   users: userActions,
   boking: bokingAction
 
