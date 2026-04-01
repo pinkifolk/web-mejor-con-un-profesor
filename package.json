@@ -17,6 +17,7 @@
     "bcryptjs": "^3.0.2",
     "canvas-confetti": "^1.9.3",
     "jsonwebtoken": "^9.0.2",
+    "litepicker": "^2.0.12",
     "notyf": "^3.10.0",
     "pg": "8.16.3",
     "qrcode": "1.5.4",
