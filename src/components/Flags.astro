@@ -1,0 +1,26 @@
+---
+import Magic from '@/assets/magic.svg'
+import { GetLanguages } from "@/lib/db";
+import type { Languages } from "@/types/tours";
+
+const flags: Languages[] = await GetLanguages();
+---
+
+<div class="flex gap-2 mb-3" data-field-group="title">
+  {
+    flags.map((flag:Languages, index) => (
+      <button
+        type="button"
+        data-lang={flag.code}
+        class="lang-btn flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-full text-xs transition-all"
+
+      >
+        <div set:html={flag.icon_svg} class="w-6 h-6"></div>
+        {flag.code.toUpperCase()}
+      </button>
+    ))
+  }
+  <button class="magic text-slate-400 ml-3 opacity-0 transition-all delay-100 cursor-pointer" title="Generar traducciones automáticas">
+    <Magic />
+  </button>
+</div>

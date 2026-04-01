@@ -1,0 +1,568 @@
+---
+import Flags from "@/components/Flags.astro";
+import Add from "@/assets/add.svg";
+import Chevron from "@/assets/chevron.svg";
+import ImagenUpload from "@/assets/image-upload.svg";
+import type { Languages } from "../../types/tours.js";
+import { GetLanguages } from "../../lib/db.js";
+
+const flags: Languages[] = await GetLanguages();
+---
+
+<div class="relative ml-8">
+  <form id="main-tour-form">
+    <div
+      id="elementlanguages"
+      class="element-panel opacity-0 transition-all duration-300"
+    >
+      <div class="w-lg">
+        <h2 class="text-2xl font-semibold mb-4">
+          Selecciona los lenguajes del Tour
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          {
+            flags.map((flag: Languages) => (
+              <label class="cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="langs"
+                  value={flag.code}
+                  class="hidden peer"
+                />
+                <span class="inline-flex items-center gap-2 px-3 py-1 bg-white border rounded-full peer-checked:bg-selected peer-checked:text-white transition-colors cursor-pointer">
+                  <div
+                    set:html={flag.icon_svg}
+                    class="w-5 h-5 flex shrink-0 items-center justify-center"
+                  />
+                  <span class="text-sm font-medium">{flag.name}</span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </div>
+      <div class="flex justify-end mt-5">
+        <button
+          type="button"
+          onclick="handleLanguageStep()"
+          class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
+          >Siguiente</button
+        >
+      </div>
+    </div>
+    <div
+      id="elementgeneral"
+      class="element-panel opacity-0 transition-all duration-300"
+    >
+      <div class="w-lg">
+        <h2 class="text-2xl font-semibold mb-4">Información Básica</h2>
+        <Flags />
+        <div id="form-general" class="mb-4">
+          <label class="block text-[16px] font-medium mb-2">
+            Título
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <div class="lang-content es">
+            <input
+              name="title_es"
+              class="w-full p-3 bg-fondo-place rounded-lg mb-2"
+              placeholder="Ingrese el titulo en Español"
+              required
+            />
+          </div>
+          <div class="lang-content pt hidden">
+            <input
+              name="title_pt"
+              class="w-full p-3 bg-fondo-place rounded-lg mb-2"
+              placeholder="Ingrese el titulo en Português"
+            />
+          </div>
+          <div class="lang-content en hidden">
+            <input
+              name="title_en"
+              class="w-full p-3 bg-fondo-place rounded-lg mb-2"
+              placeholder="Ingrese el titulo en English"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-[16px] font-medium mb-2">
+              Descripción
+              <span class="text-red-800 align-middle">*</span>
+            </label>
+            <div class="lang-content es">
+              <textarea
+                name="desc_es"
+                class="w-full p-3 bg-fondo-place rounded-lg"
+                placeholder="Ingrese la descripcion en Español"
+                rows="4"
+                required></textarea>
+            </div>
+            <div class="lang-content pt hidden">
+              <textarea
+                name="desc_pt"
+                class="w-full p-3 bg-fondo-place rounded-lg"
+                placeholder="Ingrese la descripcion en Português"
+                rows="4"></textarea>
+            </div>
+            <div class="lang-content en hidden">
+              <textarea
+                name="desc_en"
+                class="w-full p-3 bg-fondo-place rounded-lg"
+                placeholder="Ingrese la descripcion en English"
+                rows="4"></textarea>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label for="description" class="block text-[16px] font-medium mb-2"
+              >Como encontrarme
+              <span class="text-red-800 align-middle">*</span>
+            </label>
+            <div class="lang-content es">
+              <textarea
+                name="find_es"
+                class="w-full p-3 bg-fondo-place rounded-lg"
+                placeholder="Ingrese la ubicacion de encuentro en Español"
+                rows="4"
+                required></textarea>
+            </div>
+            <div class="lang-content pt hidden">
+              <textarea
+                name="find_pt"
+                class="w-full p-3 bg-fondo-place rounded-lg"
+                placeholder="Ingrese la ubicacion de encuentro en Português"
+                rows="4"></textarea>
+            </div>
+            <div class="lang-content en hidden">
+              <textarea
+                name="find_en"
+                class="w-full p-3 bg-fondo-place rounded-lg"
+                placeholder="Ingrese la ubicacion de encuentro en English"
+                rows="4"></textarea>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label for="timing" class="block text-[16px] font-medium mb-2"
+              >Duración
+              <span class="text-red-800 align-middle">*</span>
+            </label>
+            <input
+              type="text"
+              id="timing"
+              name="timing"
+              class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+              required
+              placeholder="Ingrese la duración del tour (e.g., 2 Horas)"
+              autocomplete="timing"
+            />
+          </div>
+          <div class="mb-4">
+            <label for="persons" class="block text-[16px] font-medium mb-2"
+              >Max personas
+              <span class="text-red-800 align-middle">*</span>
+            </label>
+            <input
+              type="number"
+              id="persons"
+              name="persons"
+              class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+              required
+              placeholder="Ingrese la cantidad máxima de personas"
+              autocomplete="persons"
+            />
+          </div>
+          <div class="mb-4">
+            <label for="popular" class="block text-[16px] font-medium mb-2"
+              >Mostrar al inicio</label
+            >
+            <input
+              type="checkbox"
+              id="popular"
+              name="popular"
+              class="w-5 h-5 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+            />
+          </div>
+          <div class="flex justify-end mb-20">
+            <button
+              type="button"
+              onclick="handleGeneralStep()"
+              class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
+              >Siguiente</button
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      id="elementroute"
+      class="element-panel opacity-0 transition-all duration-300"
+    >
+      <h2 class="text-2xl font-semibold mb-4">Puntos</h2>
+      <div class="mb-4 w-lg">
+        <label for="titlePoint" class="block text-[16px] font-medium mb-2">
+          Título
+        </label>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="titlePoint"
+            name="titlePoint"
+            class="flex-1 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+            placeholder="Ingrese el título del punto"
+          />
+          <button
+            id="addPoint"
+            type="button"
+            class="px-4 py-2 rounded-lg hover:bg-table cursor-pointer"
+          >
+            <Add />
+          </button>
+        </div>
+      </div>
+
+      <div id="pointsList" class="flex flex-col gap-4"></div>
+      <div class="flex justify-end mb-20 mt-4">
+        <button
+          type="button"
+          onclick="handleRouteStep()"
+          class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
+          >Siguiente</button
+        >
+      </div>
+    </div>
+    <div
+      id="elementphoto"
+      class="element-panel opacity-0 transition-all duration-300 w-lg"
+    >
+      <div class="flex items-center justify-center w-full">
+        <label
+          for="imgTour"
+          class="flex flex-col items-center justify-center w-full h-64 bg-neutral-secondary-medium border-2 border-dashed border-slate-500 rounded-md cursor-pointer hover:bg-fondo-place/25"
+        >
+          <div
+            class="flex flex-col items-center justify-center text-body pt-5 pb-6"
+          >
+            <ImagenUpload class="w-10 h-10" />
+            <p class="mb-2 text-sm">
+              <span class="font-semibold">Selecciona la imagen que va a tener el tour
+            </p>
+            <p class="text-xs mb-2">Formato Webp *</p>
+            <p class="text-xs px-5 text-center font-sans">¿Tienes tu imagen en JPG, PNG, JPEG?.. Prueba la herramienta <a href="https://squoosh.app/" class="font-bold" target="_blank">Squoosh</a> para optimizar tu imagen sin perder calidad 👌</p>
+          </div>
+          <input id="imgTour" name="imgTour" type="file" class="hidden" />
+        </label>
+      </div>
+      <div class="flex justify-end mb-20 mt-4">
+        <button
+          type="button"
+          onclick="handlePhotoStep()"
+          class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
+          >Siguiente</button
+        >
+      </div>
+    </div>
+    <div
+      id="elementhours"
+      class="element-panel element-panel opacity-0 transition-all duration-300"
+    >
+      <div class="mb-4 w-lg">
+        <h2 class="text-2xl font-semibold mb-4">Horarios</h2>
+        <button
+          type="button"
+          class="bg-fondo px-6 py-2 rounded-full hover:bg-gray-200 transition-colors"
+          data-dialog-target="create"
+        >
+          + Crear Horario
+        </button>
+
+        <div id="horario-list-display" class="flex flex-col gap-3 mt-4">
+          {
+            flags.map((flag) => (
+              <div data-type={flag.code}  data-accordion-trigger data-target={`details-${flag.code}`} class="border border-slate-200 shadow-sm w-full p-4 rounded-lg overflow-hidden bg-white hover:shadow-md">
+                <div class="flex justify-between gap-4">
+                  <div class="flex-1 flex items-center gap-4">
+                    <span class="w-6 h-6" set:html={flag.icon_svg} />
+                    <p class="font-medium">{flag.name}</p>
+                    <p class="bg-slate-100 px-3 py-1 rounded-full font-semibold text-xs">
+                      Horarios 
+                      <span id={`count-${flag.code}`}>0</span>
+                    </p>
+                  </div>
+                  <Chevron class="js-chevron text-gray-400" />
+                </div>
+                <div id={`details-${flag.code}`} class="hidden mt-5"></div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      <div class="flex justify-end mb-20">
+        <button
+          type="submit"
+          class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
+          >Publicar</button
+        >
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  import { actions } from "astro:actions";
+  import { Notyf } from "notyf";
+  import type {LanguageAccumulator, Schedule} from '@/types/tours';
+
+  declare global {
+    interface Window {
+      handleLanguageStep: () => void;
+      handleGeneralStep: () => void;
+      handleRouteStep: () => void;
+      handlePhotoStep: () => void;
+      removeSchedule: (index: number) => void;
+    }
+  }
+
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+  });
+  const menuItems = document.querySelectorAll("#edit-config li");
+  const panels = document.querySelectorAll(".element-panel");
+  const mainForm = document.getElementById("main-tour-form") as HTMLFormElement;
+  let langsSelect: string[] = [];
+  let schedulesList: Schedule[] = [];
+
+  function showStep(optionName: string) {
+    panels.forEach((panel) => {
+      panel.classList.add("opacity-0", "invisible", "absolute");
+
+      if (panel.id === `element${optionName}`) {
+        panel.classList.remove("opacity-0", "invisible", "absolute");
+        panel.classList.add("opacity-100");
+      }
+    });
+
+    menuItems.forEach((item) => {
+      if (item.getAttribute("data-option") === optionName) {
+        item.classList.add("bg-fondo-place", "border-text-place");
+      } else {
+        item.classList.remove("bg-fondo-place", "border-text-place");
+      }
+    });
+  }
+
+  menuItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      const option = item.getAttribute("data-option");
+      if (option) showStep(option);
+    });
+  });
+
+  showStep("languages");
+
+  // validaciones
+  window.handleLanguageStep = () => {
+    if (validateLanguages()) {
+      const nextStepBtn = document.querySelector('[data-option="general"]');
+      if (nextStepBtn) (nextStepBtn as HTMLElement).click();
+
+      ["data-lang", "data-type","data-options"].forEach(attr => {
+        document.querySelectorAll(`[${attr}]`).forEach(el => el.classList.add("hidden"));
+        langsSelect.forEach(code => {
+          document.querySelector(`[${attr}="${code}"]`)?.classList.remove("hidden");
+        });
+      });
+    } else {
+      notyf.error("Selecciona al menos un idioma");
+    }
+  };
+  window.handleGeneralStep = () => {
+    if (validateGeneral()) {
+      const nextStepBtn = document.querySelector('[data-option="route"]');
+      if (nextStepBtn) (nextStepBtn as HTMLElement).click();
+    } else {
+      notyf.error("Por favor, completa los campos obligatorios de este paso.");
+    }
+  };
+  window.handleRouteStep = () => {
+    if (validateRoute()) {
+      const nextStepBtn = document.querySelector('[data-option="photo"]');
+      if (nextStepBtn) (nextStepBtn as HTMLElement).click();
+    } else {
+      notyf.error("Por favor, debe ingresar al menos un punto.");
+    }
+  };
+  window.handlePhotoStep = () => {
+    if (validatePhoto()) {
+      const nextStepBtn = document.querySelector('[data-option="hours"]');
+      if (nextStepBtn) (nextStepBtn as HTMLElement).click();
+    } else {
+      notyf.error("Por favor, debe ingresar una imagen.");
+    }
+  };
+
+  function validateLanguages() {
+    const container = document.getElementById(
+      "elementlanguages",
+    ) as HTMLElement;
+    const checked = container.querySelectorAll('input[name="langs"]:checked');
+    langsSelect = [];
+    langsSelect = Array.from(checked).map(
+      (input) => (input as HTMLInputElement).value,
+    );
+    return checked.length > 0;
+  }
+
+  function validateGeneral() {
+    const container = document.getElementById("elementgeneral") as HTMLElement;
+    const inputs = container.querySelectorAll(
+      "input[required], textarea[required]",
+    );
+    let isValid = true;
+    inputs.forEach((input) => {
+      const el = input as HTMLInputElement;
+      let fieldValid = true;
+
+      if (el.type === "number") {
+        if (isNaN(el.valueAsNumber) || el.value === "") {
+          fieldValid = false;
+        }
+      } else {
+        if (!el.value.trim()) {
+          fieldValid = false;
+        }
+      }
+      if (!fieldValid) isValid = false;
+    });
+    return isValid;
+  }
+
+  function validateRoute() {
+    const container = document.getElementById("elementroute") as HTMLElement;
+    const points = container.querySelector("#pointsList");
+    const totalPoint = points?.querySelectorAll("span").length || 0;
+    return totalPoint > 0;
+  }
+  function validatePhoto() {
+    const container = document.getElementById("elementphoto") as HTMLElement;
+    const input = container.querySelector('#imgTour') as HTMLInputElement;
+
+    if (!input.files || input.files.length === 0) return false; 
+    const file = input.files[0];
+    const allowedTypes = ['image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      notyf.error("Formato no permitido. Usar solo WebP.");
+      input.value = "";
+      return false;
+    }
+    return true;
+  }
+
+  mainForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(mainForm);
+    const languages = formData.getAll("langs");
+    const points: string[] = [];
+    const pointsList = document.getElementById("pointsList");
+    pointsList?.querySelectorAll("span").forEach((tag) => {
+      const text = tag.textContent?.replace("×", "").trim();
+      if (text) points.push(text);
+    });
+
+    formData.append("points", JSON.stringify(points));
+    formData.append("languages", JSON.stringify(languages));
+    formData.append("schedules", JSON.stringify(schedulesList));
+
+    try {
+      const response = await actions.tours.create(formData);
+      if (response.error) {
+        const zodError = response.error.issues?.[0]?.message;
+        const errorMessage =
+          zodError || response.error.message || "Error desconocido";
+        notyf.error(errorMessage);
+      } else {
+        notyf.success(`Tour creado correctamente`);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+      notyf.error("Error de red. Intenta nuevamente.");
+    }
+  });
+
+  window.addEventListener("schedulesUpdated", (e) =>{
+    schedulesList = (e as CustomEvent).detail.allSchedules;
+    const counts = schedulesList.reduce((acc:LanguageAccumulator, curr:Schedule) => {
+        const lang = curr.idioma.toLowerCase();
+        if (acc.hasOwnProperty(lang)) {
+            acc[lang]++;
+        } else {
+            acc[lang] = 1;
+        }
+        return acc;
+    }, { es: 0, pt: 0, en: 0 });
+
+    if(document.getElementById('count-es')) (document.getElementById('count-es') as HTMLElement).textContent = counts.es.toString();
+    if(document.getElementById('count-pt')) (document.getElementById('count-pt') as HTMLElement).textContent = counts.pt.toString();
+    if(document.getElementById('count-en')) (document.getElementById('count-en') as HTMLElement).textContent = counts.en.toString();
+
+    document.querySelectorAll('[id^="details-"]').forEach(container => {
+      container.innerHTML = ''; 
+    });
+    const daysMap: { [key: string]: string } = {
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mié",
+      "4": "Jue",
+      "5": "Vie",
+      "6": "Sáb",
+      "7": "Dom"
+    };
+    schedulesList.forEach((s: Schedule, index: number) => {
+        const lang = s.idioma.toLowerCase();
+        const container = document.getElementById(`details-${lang}`);
+       
+        const daysLabels = s.dias_semana.map(d => daysMap[d] || d).join(', ');
+
+        if (container) {
+            const detailHTML = `
+                <div class="flex items-start justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm mb-2">
+                    <div class="space-y-1">
+                        <p class="font-bold text-slate-800 text-sm">${s.nombre}</p>
+                        <p class="text-xs text-slate-500 uppercase font-medium">Tipo: ${s.tipo_configuracion}</p>
+                        <p class="text-xs text-slate-500 uppercase font-medium">Dias: ${daysLabels}</p>
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            ${s.horas_salida.map(h => `
+                                <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-100">${h}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button onclick="removeSchedule(${index})" class="text-slate-500 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                    </button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', detailHTML);
+        }
+    });
+
+  })
+  document.querySelectorAll('[data-accordion-trigger]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('button')) return;
+      const targetId = btn.getAttribute('data-target');
+      const targetEl = document.getElementById(targetId!);
+      const chevron = btn.querySelector('.js-chevron');
+      if (targetEl && chevron) {
+        const isHidden = targetEl.classList.contains('hidden');
+        
+        if (isHidden) {
+          targetEl.classList.remove('hidden');
+          chevron.classList.add('rotate-180');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          targetEl.classList.add('hidden');
+          chevron.classList.remove('rotate-180');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  });
+</script>

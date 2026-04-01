@@ -49,7 +49,10 @@
         class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
       >
         <form>
-          <label for="name" class="block text-[16px] font-medium">Nombre</label>
+          <label for="name" class="block text-[16px] font-medium"
+            >Nombre
+            <span class="text-red-800 align-middle">*</span>
+          </label>
           <input
             type="text"
             id="name"
@@ -57,7 +60,10 @@
             class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
             required
           />
-          <label for="email" class="block text-[16px] font-medium">Email</label>
+          <label for="email" class="block text-[16px] font-medium"
+            >Email
+            <span class="text-red-800 align-middle">*</span>
+          </label>
           <input
             type="email"
             id="email"
@@ -66,8 +72,9 @@
             required
           />
           <label for="password" class="block text-[16px] font-medium"
-            >Contraseña</label
-          >
+            >Contraseña
+            <span class="text-red-800 align-middle">*</span>
+          </label>
           <div class="flex gap-4 items-center">
             <input
               type="password"
@@ -444,7 +451,12 @@
       buttonSubmit.disabled = true;
 
       async function actionsModel(action: string) {
-        if (id && (action === "update" || action === "delete" || action === "resetPassword")) {
+        if (
+          id &&
+          (action === "update" ||
+            action === "delete" ||
+            action === "resetPassword")
+        ) {
           formData.append("id", id);
         }
         switch (action) {
@@ -461,10 +473,10 @@
         }
       }
       const response = await actionsModel(buttonSubmit.id);
-      console.log("Response:", response);
       if (response.error) {
         const zodError = response.error.issues?.[0]?.message;
-        const errorMessage = zodError || response.error.message || "Error desconocido";
+        const errorMessage =
+          zodError || response.error.message || "Error desconocido";
         notyf.open({
           type: "custom-error",
           message: errorMessage,

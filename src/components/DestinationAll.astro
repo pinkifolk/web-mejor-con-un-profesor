@@ -14,16 +14,16 @@ const t = ui[lang || "es"];
       data.map((tour: Tour) => (
         <a href={`${tour.slug}`} 
            class="block duration-200 transform transition hover:scale-105"
-           aria-label={`Tour en ${tour.name}`}>
+           aria-label={`Tour en ${tour[`name_${lang}`] || tour.name_es}`}>
           <div class="w-full h-56 overflow-hidden rounded-xl">
             <img
               src={`${tour.img}`}
               class="w-full h-full object-cover hover:shadow-xl"
-              alt={`Tour por ${tour.name}`}
-              title={`Tour por ${tour.name}`}
+              alt={`Tour por ${tour[`name_${lang}`] || tour.name_es }`}
+              title={`Tour por ${tour[`name_${lang}`] || tour.name_es }`}
             />
           </div>
-          <p class="mt-2 text-2xl md:text-lg font-semibold">{tour.name}</p>
+          <p class="mt-2 text-2xl md:text-lg font-semibold">{tour[`name_${lang}`] || tour.name_es}</p>
         </a>
       ))
     ) : (

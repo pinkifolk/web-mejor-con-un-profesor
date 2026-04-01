@@ -1,0 +1,382 @@
+---
+
+---
+
+<article class="overflow-y-auto h-full">
+  <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+    <h1 class="text-4xl font-bold">Idiomas</h1>
+    <button
+      type="button"
+      class="bg-fondo-place text-text-place text-sm py-2 px-4 rounded-4xl hover:bg-buttons hover:text-text-button"
+      aria-label="Crear nuevo horario"
+      data-dialog-target="create"
+      >Crear Idioma
+    </button>
+  </header>
+  <section class="px-11">
+    <div class="border border-table rounded-lg w-full">
+      <table class="min-w-full w-full table-fixed">
+        <thead>
+          <tr class="text-left border-b border-table font-medium text-sm">
+            <th class="py-2 px-4 font-normal">Bandera</th>
+            <th class="py-2 px-4 font-normal">Idioma</th>
+            <th class="py-2 px-4 font-normal">Codigo</th>
+            <th class="py-2 font-normal w-1/4">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"> </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- modal para crear -->
+  <div
+    data-dialog-backdrop="create"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="create"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Crear Idioma
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        <form action="">
+          <label for="name" class="block text-[16px] font-medium"
+            >Nombre
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+            required
+            placeholder="Nombre del nuevo idioma"
+          />
+          <label for="code" class="block text-[16px] font-medium"
+            >Codigo del idioma
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <input
+            type="text"
+            id="code"
+            name="code"
+            class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+            required
+            placeholder="Codigo ES, EN, AM, EC"
+          />
+          <label for="icon" class="block text-[16px] font-medium">Icono
+             <span class="text-red-800 align-middle">*</span>
+          </label>
+          <p class="text-xs my-2 text-gray-50">
+            Para obtener el icono ingresa a <a
+              class="font-semibold"
+              target="_blank"
+              href="https://nucleoapp.com/svg-flag-icons">nucleoapp</a
+            > busca la bandera y pincha sobre ella. Luego pega el contenido aqui
+          </p>
+          <textarea
+            name="icon"
+            class="w-full p-3 bg-fondo-place rounded-lg"
+            placeholder="Pega el contenido de la pagina Nucleoapp"
+            rows="4"></textarea>
+
+          <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+            <button
+              data-dialog-close="true"
+              class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+              type="button"
+            >
+              Cancelar
+            </button>
+            <button
+              id="create"
+              type="submit"
+              class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            >
+              Crear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- modal para eliminar -->
+  <div
+    data-dialog-backdrop="delete"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="delete"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Eliminar Horario
+      </div>
+      <form>
+        <div
+          class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+        >
+          ¿Estás seguro de que deseas eliminar este horario? Esta acción no se
+          puede deshacer.
+        </div>
+        <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+          <button
+            data-dialog-close="true"
+            class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="button"
+          >
+            Cancelar
+          </button>
+          <button
+            id="delete"
+            class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            type="submit"
+          >
+            Eliminar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- modal para editar -->
+  <div
+    data-dialog-backdrop="edit"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="edit"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Editar horario
+      </div>
+      <form>
+        <div
+          class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+        >
+          <input
+            type="text"
+            id="editHour"
+            name="editHour"
+            class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+            required
+          />
+        </div>
+        <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+          <button
+            data-dialog-close="true"
+            class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="button"
+          >
+            Cancelar
+          </button>
+          <button
+            id="update"
+            class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            type="submit"
+          >
+            Actualizar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</article>
+
+<script>
+  import { actions } from "astro:actions";
+  import { Notyf } from "notyf";
+  import type { Languages } from "@/types/tours";
+  let id: string | null = null;
+
+  const tableBody = document.getElementById("table-body");
+  const forms = document.querySelectorAll(
+    "form",
+  ) as NodeListOf<HTMLFormElement>;
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+    types: [
+      {
+        type: "custom-success",
+        background: "#16a34a",
+        icon: {
+          className: "notyf__icon-custom",
+          tagName: "div",
+        },
+      },
+      {
+        type: "custom-error",
+        background: "#dc2626",
+        icon: {
+          className: "notyf__icon-custom2",
+          tagName: "div",
+        },
+      },
+    ],
+  });
+  async function getData() {
+    try {
+      const { data, error } = await actions.languages.read();
+      if (data) {
+        if (tableBody) {
+          tableBody.innerHTML = "";
+          data.forEach((langs: Languages) => {
+            const row = document.createElement("tr");
+            row.className =
+              "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
+            row.innerHTML = `
+              <td class="pl-4 py-4">
+                ${langs.icon_svg}
+              </td>
+              <td class="pl-4 py-4">
+                ${langs.name}
+              </td>
+              <td class="pl-4 py-4">
+                ${langs.code.toUpperCase()}
+              </td>
+              <td>
+                <button  
+                  type="button" 
+                  data-id="${langs.id}"
+                  data-hour="${langs.hour}"
+                  class="text-text-place font-semibold cursor-pointer border-r border-table px-2"
+                  data-dialog-target="edit"
+                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+                </button> 
+                <button
+                  type="button"
+                  data-id="${langs.id}"
+                  class="text-text-place font-semibold cursor-pointer px-2"
+                  data-dialog-target="delete"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                </button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+          attachDialogListeners();
+        }
+      } else {
+        notyf.open({
+          type: "custom-error",
+          message: "Error al obtener los datos",
+        });
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    }
+  }
+  getData();
+  function attachDialogListeners() {
+    document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
+      const dialogId = trigger.getAttribute("data-dialog-target");
+      const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+      const backdrop = document.querySelector(
+        `[data-dialog-backdrop="${dialogId}"]`,
+      );
+
+      function openDialog() {
+        [dialog, backdrop].forEach((el) =>
+          el?.classList.remove("pointer-events-none", "opacity-0"),
+        );
+        const { id: dataId, hour } = (trigger as HTMLElement).dataset;
+        id = dataId ?? null;
+
+        if (dialogId === "edit") {
+          const config = [{ selector: "editHour", value: hour, type: "value" }];
+          config.forEach(({ selector, value, type }) => {
+            const input = document.getElementById(
+              selector,
+            ) as HTMLInputElement | null;
+            if (!input) return;
+            input.value = (value as string) || "";
+          });
+        }
+      }
+
+      function closeDialog() {
+        dialog?.classList.add("pointer-events-none", "opacity-0");
+        backdrop?.classList.add("pointer-events-none", "opacity-0");
+        id = null;
+      }
+
+      trigger.addEventListener("click", openDialog);
+      dialog
+        ?.querySelectorAll("[data-dialog-close]")
+        .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+      backdrop?.addEventListener("click", (event) => {
+        if (
+          event.target === backdrop &&
+          backdrop.hasAttribute("data-dialog-backdrop-close")
+        ) {
+          closeDialog();
+        }
+      });
+    });
+  }
+  forms.forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const buttonSubmit = event.submitter as HTMLButtonElement;
+      buttonSubmit.disabled = true;
+
+      async function actionsModel(action: string) {
+        if (id && (action === "update" || action === "delete")) {
+          formData.append("id", id);
+        }
+        switch (action) {
+          case "create":
+            return await actions.hours.create(formData);
+          case "update":
+            return await actions.hours.update(formData);
+          case "delete":
+            return await actions.hours.delete(formData);
+          default:
+            throw new Error("Acción no reconocida");
+        }
+      }
+      const response = await actionsModel(buttonSubmit.id);
+      if (response.error) {
+        const zodError = response.error.issues?.[0]?.message;
+        const errorMessage =
+          zodError || response.error.message || "Error desconocido";
+        notyf.open({
+          type: "custom-error",
+          message: errorMessage,
+        });
+      } else {
+        notyf.open({
+          type: "custom-success",
+          message: `Horario ${buttonSubmit.id === "create" ? "creado" : buttonSubmit.id === "update" ? "actualizado" : "eliminado"} exitosamente`,
+        });
+        getData();
+        document
+          .querySelectorAll<HTMLElement>("[data-dialog-close]")
+          .forEach((btn) => btn.click());
+      }
+      form.reset();
+      buttonSubmit.disabled = false;
+    });
+  });
+</script>

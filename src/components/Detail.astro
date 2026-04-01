@@ -1,10 +1,12 @@
 ---
 import BreadCrumbs from "@/components/BreadCrumbs.astro";
-import clock from "@/assets/clock.svg";
+import Clock from "@/assets/clock.svg";
 import Start from "@/assets/Start.astro";
+import Verify from "@/assets/verify.svg";
+import Cup from "@/assets/cup.svg";
 import UserIcon from "@/assets/circle-user-round.svg";
-import { GetTourBySlug } from "../lib/db.js";
-import type { TourDetail } from "../types/tours";
+import { GetTourBySlug } from "@/lib/db";
+import type { TourDetail } from "@/types/tours";
 import { ui } from "@/i18n/ui";
 
 const { lang } = Astro.params;
@@ -14,12 +16,13 @@ if (!slug) {
   return Astro.redirect("/404");
 }
 
-const referer = Astro.request.headers.get('referer');
+const referer = Astro.request.headers.get("referer");
 
-const tour:TourDetail = await GetTourBySlug(slug);
+
+const tour: TourDetail = await GetTourBySlug(slug);
+const name = tour[`name_${lang}`] || tour.name_es;
+const description = tour[`description_${lang}`] || tour.description_es;
 const {
-  name,
-  description,
   img,
   duration,
   max_people,
@@ -29,7 +32,6 @@ const {
   comments,
   rating_counts,
 } = tour;
-
 ---
 
 <section class="md:w-7xl p-4">
@@ -38,6 +40,7 @@ const {
   </nav>
   <article>
     <header>
+      <img class="w-34 absolute -ml-5 -mt-7" src="/img/best_tour.webp" alt="" />
       <img
         src={img}
         alt={`Imagen de tour ${name}, cultura y recomendaciones explicadas por un profesor`}
@@ -47,18 +50,20 @@ const {
       <h1 class="text-3xl font-bold mb-2">
         {name}
       </h1>
-      <p class="text-gray-700 mb-4">
-        <img
-          src={clock.src}
-          alt="Duracion del tour"
-          class="inline-block w-4 h-4"
-        />
-        {duration} · {t['detail.max']} {max_people} {t['detail.people']}
-      </p>
+      <div class="flex gap-2 items-center mb-6">
+        <Clock class="inline-block w-5 h-5" />
+        <p class="text-gray-700">
+          {duration} · {t["detail.max"]}
+          {max_people}
+          {t["detail.people"]}
+        </p>
+        <Verify />
+        <Cup />
+      </div>
     </header>
     <section aria-labelledby="descripcion-tour" class="mb-4">
       <h2 id="descripcion-tour" class="text-xl font-semibold mb-2">
-        {t['detail.description']}
+        {t["detail.description"]}
       </h2>
       <p class="text-gray-700">
         {description}
@@ -66,20 +71,22 @@ const {
     </section>
     <section aria-labelledby="itinerary-tour" class="mb-4">
       <h2 id="itinerary-tour" class="text-xl font-semibold mb-2">
-        {t['detail.showTours']}
+        {t["detail.showTours"]}
       </h2>
       <p class="text-gray-700">
-        {t['detail.showTours.description']}
+        {t["detail.showTours.description"]}
       </p>
       <ul class="list-disc pl-5 text-gray-700">
         {itinerary.map((item) => <li>{item}</li>)}
       </ul>
     </section>
     <section aria-labelledby="review-tour" class="mb-4">
-      <h2 id="review-tour" class="text-xl font-semibold mb-2">{t['detail.comment']}</h2>
+      <h2 id="review-tour" class="text-xl font-semibold mb-2">
+        {t["detail.comment"]}
+      </h2>
       {
         comments.length === 0 ? (
-          <p class="text-gray-700">{t['detail.no.comment']}</p>
+          <p class="text-gray-700">{t["detail.no.comment"]}</p>
         ) : (
           <>
             <div class="flex flex-col md:flex-row items-start md:items-center gap-8 p-4 mb-4">
@@ -119,7 +126,10 @@ const {
                   <div class="flex items-center gap-2 mb-1">
                     <span class="mr-2">{rc.rating}</span>
                     <div class="w-full bg-fondo-place rounded h-3">
-                      <div class="bg-buttons h-3 rounded" style={`width: ${rc.percentage}%;`} />
+                      <div
+                        class="bg-buttons h-3 rounded"
+                        style={`width: ${rc.percentage}%;`}
+                      />
                     </div>
                     <span class="text-sm text-gray-500">{rc.percentage}%</span>
                   </div>

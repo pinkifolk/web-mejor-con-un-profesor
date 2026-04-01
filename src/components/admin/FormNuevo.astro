@@ -1,246 +1,129 @@
 ---
-import Add from "@/assets/add.svg";
-import type { Hours } from '../../types/tours.js';
-import { GetHours } from '../../lib/db.js';
-const data:Hours[] = await GetHours();
+import Steps from "@/components/admin/Steps.astro";
+import ElementSteps from "@/components/admin/StepsElement.astro";
+import Schedule from "@/components/admin/Schedule.astro";
 ---
 
-<form class="w-lg">
-  <h2 class="text-2xl font-semibold mb-4">Información Básica</h2>
-  <div class="mb-4">
-    <label for="title" class="block text-[16px] font-medium mb-2">Titulo</label>
-    <input
-      type="text"
-      id="title"
-      name="title"
-      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-      required
-      placeholder="Ingrese el título del tour"
-      autocomplete="title"
-    />
-  </div>
-  <div class="mb-4">
-    <label for="description" class="block text-[16px] font-medium mb-2"
-      >Descripción</label
-    >
-    <textarea
-      id="description"
-      name="description"
-      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-      required
-      placeholder="Ingrese una descripción del tour"
-      rows="6"></textarea>
-  </div>
-  <div class="mb-4">
-    <label for="img" class="block text-[16px] font-medium mb-2">Imagen</label>
-    <input
-      type="file"
-      id="imgTour"
-      name="imgTour"
-      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-      required
-      accept="image/png, image/jpeg, image/jpg"
-    />
-  </div>
-  <div class="mb-4">
-    <label for="timing" class="block text-[16px] font-medium mb-2"
-      >Duración</label
-    >
-    <input
-      type="text"
-      id="timing"
-      name="timing"
-      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-      required
-      placeholder="Ingrese la duración del tour (e.g., 2 Horas)"
-      autocomplete="timing"
-    />
-  </div>
-  <div class="mb-4">
-    <label for="horario" class="block text-[16px] font-medium mb-2"
-      >Horarios</label
-    >
-    <div class="flex justify-start gap-4 flex-wrap m-3">
-      {
-        data.map((hour) => (
-          <div class="relative">
-            <input
-              type="checkbox"
-              name="horario"
-              id={`hora${hour.id}`}
-              value={hour.id}
-              class="hidden peer"
-            />
-            <label
-              for={`hora${hour.id}`}
-              class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected"
-            >
-              {hour.hour}
-            </label>
-          </div>
-        ))
-      }
-    </div>
-  </div>
-  <h2 class="text-2xl font-semibold mb-4">Puntos</h2>
-  <div class="mb-4">
-    <label for="titlePoint" class="block text-[16px] font-medium mb-2">
-      Título
-    </label>
-    <div class="flex gap-2">
-      <input
-        type="text"
-        id="titlePoint"
-        name="titlePoint"
-        class="flex-1 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-        placeholder="Ingrese el título del punto"
-      />
-      <button
-        id="addPoint"
-        type="button"
-        class="px-4 py-2 rounded-lg hover:bg-table cursor-pointer"
-      >
-        <Add />
-      </button>
-    </div>
-  </div>
+<section class="mb-10 flex">
+  <Steps />
+  <ElementSteps />
+</section>
+<Schedule />
 
-  <div
-    id="pointsList"
-    class="border border-table mb-4 rounded-lg p-2 flex flex-wrap gap-2"
-  >
-  </div>
-  <div class="mb-4">
-    <label for="persons" class="block text-[16px] font-medium mb-2"
-      >Max personas</label
-    >
-    <input
-      type="number"
-      id="persons"
-      name="persons"
-      class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-      required
-      placeholder="Ingrese la cantidad máxima de personas"
-      autocomplete="persons"
-    />
-  </div>
-  <div class="mb-4">
-    <label for="popular" class="block text-[16px] font-medium mb-2"
-      >Mostrar al inicio</label
-    >
-    <input
-      type="checkbox"
-      id="popular"
-      name="popular"
-      class="w-5 h-5 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-    />
-  </div>
-  <div class="flex justify-end mb-20">
-    <button
-      type="submit"
-      class="bg-buttons opacity-85 text-text-button py-2 px-6 rounded-4xl text-sm font-bold cursor-pointer hover:opacity-100"
-      >Crear</button
-    >
-  </div>
-</form>
 <script>
-  import { actions } from "astro:actions";
   import Sortable from "sortablejs";
   import { Notyf } from "notyf";
+
   const notyf = new Notyf({
     duration: 3000,
     position: { x: "center", y: "bottom" },
-    types: [
-      {
-        type: "custom-success",
-        background: "#16a34a",
-        icon: {
-          className: "notyf__icon-custom",
-          tagName: "div",
-        },
-      },
-      {
-        type: "custom-error",
-        background: "#dc2626",
-        icon: {
-          className: "notyf__icon-custom2",
-          tagName: "div",
-        },
-      },
-    ],
   });
 
-  const form = document.querySelector("form");
-  const input = document.getElementById("titlePoint") as HTMLInputElement;
-  const addBtn = document.getElementById("addPoint");
-  const list = document.getElementById("pointsList");
-  let draggedItem = null;
-
-  function createTag(text: string) {
+  const ul = document.getElementById("edit-config");
+  const globalButtons = document.querySelectorAll(".lang-btn");
+  if (ul) {
+    ul.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement).closest("[data-option]");
+      if (!target) return;
+      const allOptions = ul.querySelectorAll("[data-option]");
+      allOptions.forEach((li) => {
+        li.classList.remove("bg-fondo-place", "border-text-place");
+        li.classList.add("border-gray-300");
+      });
+      target.classList.add("bg-fondo-place", "border-text-place");
+      target.classList.remove("border-gray-300");
+      const option = target.getAttribute("data-option");
+      if (option) {
+        showInputs(option);
+      }
+    });
+  }
+  function showInputs(option: string) {
+    const divs = document.getElementsByClassName("element-panel");
+    const element = document.getElementById(`element${option}`);
+    for (const panel of divs) {
+      panel.classList.add("opacity-0", "invisible");
+      panel.classList.remove("opacity-100", "visible");
+    }
+    if (element) {
+      element.classList.remove("invisible");
+      element.classList.add("visible");
+      setTimeout(() => {
+        element.classList.remove("opacity-0");
+        element.classList.add("opacity-100");
+      }, 10);
+    }
+  }
+  function createTag(text:string, listId:string) {
     const tag = document.createElement("span");
     tag.className =
-      "flex items-center gap-2 bg-fondo-place px-4 py-1 rounded-full cursor-move";
-    tag.setAttribute("draggable", "true");
-    tag.innerHTML = `
-      ${text}
-      <button class="text-gray-400 hover:text-gray-700 font-bold">×</button>
-    `;
-    tag.querySelector("button")?.addEventListener("click", () => tag.remove());
-    return tag;
+      "flex justify-between bg-fondo-place px-8 py-4 rounded-lg text-sm animate-in fade-in cursor-pointer hover:shadow-md hover:shadow-gray-200";
+    tag.innerHTML = `${text} <button type="button" class="hover:text-red-500 font-bold"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg></button>`;
+    tag.querySelector("button")?.addEventListener("click",() =>tag.remove());
+    document.getElementById(listId)?.appendChild(tag);
   }
-  function addPoint() {
-    const value = input.value.trim();
-    if (!value) return;
-    list?.appendChild(createTag(value));
-    input.value = "";
-  }
+  globalButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const selectedLang = btn.getAttribute("data-lang");
+      console.log(selectedLang)
+      if (selectedLang) {
+        document.querySelectorAll(".lang-content").forEach((content) => {
+          content.classList.toggle(
+            "hidden",
+            !content.classList.contains(selectedLang),
+          );
+        });
+      document.querySelector('.magic')?.classList.add('opacity-0')
+      if(selectedLang !== 'es'){
+        document.querySelector('.magic')?.classList.remove('opacity-0')
+      }
+      }
 
-  addBtn?.addEventListener("click", addPoint);
-  input?.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" || e.keyCode === 13) {
-      e.preventDefault();
-      addPoint();
+      globalButtons.forEach((b) => {
+        const isActive = b.getAttribute("data-lang") === selectedLang;
+        if (isActive) {
+          b.classList.remove("border-gray-300");
+          b.classList.add("border-text-place");
+          b.classList.add("bg-fondo-place");
+        } else {
+          b.classList.remove("border-text-place");
+          b.classList.remove("bg-fondo-place");
+          b.classList.add("border-gray-300");
+        }
+      });
+    });
+  });
+  document.querySelectorAll("[data-dialog-target]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-dialog-target");
+      document
+        .querySelector(`[data-dialog-backdrop="${id}"]`)
+        ?.classList.remove("opacity-0", "pointer-events-none");
+    });
+  });
+  document.querySelectorAll("[data-dialog-close]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll("[data-dialog-backdrop]")
+        .forEach((b) => b.classList.add("opacity-0", "pointer-events-none"));
+    });
+  });
+  document.getElementById("addPoint")?.addEventListener("click", () => {
+    const input = document.getElementById("titlePoint") as HTMLInputElement;
+    if (input.value.trim()) {
+      createTag(input.value.trim(), "pointsList");
+      input.value = "";
     }
   });
-
-  if (typeof window !== "undefined") {
-    Sortable.create(document.getElementById("pointsList"), {
-      animation: 150,
-      ghostClass: "opacity-50",
-    });
-  }
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const points: string[] = [];
-    list?.querySelectorAll("span").forEach((tag) => {
-      const text = tag.textContent?.replace("×", "").trim();
-      if (text) points.push(text);
-    });
-    const horarios: string[] = [];
-    document.querySelectorAll<HTMLInputElement>("input[name=horario]:checked").forEach((checkbox) => {
-      horarios.push(checkbox.value);
-    });
-    formData.delete("horario");
-    formData.append("points", JSON.stringify(points));
-    formData.append("horario", JSON.stringify(horarios));
-
-    const {data, error} = await actions.tours.create(formData);
-
-    if (error) {
-        const zodError = error.issues?.[0]?.message;
-        const errorMessage = zodError || error.message || "Error desconocido";
-        notyf.open({
-          type: "custom-error",
-          message: errorMessage,
-        });
-      } else {
-        notyf.open({
-          type: "custom-success",
-          message: `Tour creado exitosamente`,
-        });
-        form.reset();
-        list?.querySelectorAll("span").forEach(tag => tag.remove());
-      }
+  document.getElementById("titlePoint")?.addEventListener("keypress", (e) =>{
+    const input = document.getElementById("titlePoint") as HTMLInputElement;
+    if (e.key === "Enter" && input.value.trim()) {
+      e.preventDefault();
+      createTag(input.value.trim(), "pointsList");
+      input.value = "";
+    }
   });
+  if (document.getElementById("pointsList"))
+    Sortable.create(document.getElementById("pointsList"), { animation: 150 });
+  
 </script>

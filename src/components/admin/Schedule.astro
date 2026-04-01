@@ -1,0 +1,237 @@
+---
+import type { Languages } from "../../types/tours.js";
+import { GetLanguages } from "../../lib/db.js";
+
+const flags: Languages[] = await GetLanguages();
+---
+<div data-dialog-backdrop="create" data-dialog-backdrop-close="true" class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black/60 opacity-0 transition-opacity duration-300">
+    <div data-dialog="create" class="relative m-4 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-2xl">
+      <h3 class="text-xl font-bold mb-4 border-b border-slate-300 pb-2">Configurar Nuevo Horario</h3>
+      
+      <div id="modal-fields-container" class="space-y-4">
+        <div>
+          <label class="block font-medium">Nombre del Horario 
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <input type="text" name="modal_name" class="w-full p-3 bg-fondo-place rounded-lg" required />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-medium">
+              Idioma 
+              <span class="text-red-800 align-middle">*</span>
+            </label>
+            <select name="modal_language" class="w-full p-3 bg-fondo-place rounded-lg" required>
+              <option value="" disabled selected>Selecciona un idioma</option>
+              {flags.map((f) => <option data-options={f.code} value={f.code}>{f.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium">Tipo 
+              <span class="text-red-800 align-middle">*</span>
+            </label>
+            <select id="type" name="type" class="w-full p-3 bg-fondo-place rounded-lg" required>
+              <option value="all-year" selected>Todo el año</option>
+              <option value="month-custom">Mes personalizado</option>
+              <option value="range">Rango de fechas</option>
+              <option value="date-custom">Fechas específicas</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="panel-month-custom" class="hidden bg-slate-50 p-4 rounded-lg">
+          <p class="text-sm font-bold mb-2">Seleccionar Meses:</p>
+          <div class="flex flex-wrap gap-2">
+            {['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'].map((m, i) => (
+              <label class="cursor-pointer">
+                <input type="checkbox" name="modal_month" value={i+1} class="hidden peer" />
+                <span class="px-3 py-1 bg-white border rounded-full peer-checked:bg-selected peer-checked:text-white transition-colors">{m}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div id="panel-range" class="hidden grid grid-cols-2 gap-4">
+          <input type="date" name="modal_init" class="p-3 bg-fondo-place rounded-lg" />
+          <input type="date" name="modal_end" class="p-3 bg-fondo-place rounded-lg" />
+        </div>
+
+        <div id="panel-date-custom" class="hidden">
+          <div class="flex gap-2">
+            <input type="date" id="random" class="flex-1 p-3 bg-fondo-place rounded-lg" />
+            <button id="addRandomDate" type="button" class="bg-buttons text-white px-4 rounded-lg">Agregar</button>
+          </div>
+          <div id="randomDatesList" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+
+        <div>
+          <label class="block font-medium mb-2">Días de la semana 
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <div class="flex flex-wrap gap-2">
+            {['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].map((d, i) => (
+              <label class="cursor-pointer">
+                <input type="checkbox" name="modal_day" value={i+1} class="hidden peer" required />
+                <span class="px-4 py-2 bg-fondo rounded-full peer-checked:bg-selected transition-colors text-sm">{d}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium mb-2">Horas de salida 
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <div class="flex gap-2">
+            <input type="time" id="hour" class="p-2 bg-fondo-place rounded-lg" required />
+            <button id="addHour" type="button" class="bg-buttons text-white px-4 rounded-lg">Agregar Hora</button>
+          </div>
+          <div id="hoursList" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-300">
+        <button type="button" data-dialog-close="true" class="px-6 py-2 text-slate-500 hover:bg-slate-100 rounded-lg">Cancelar</button>
+        <button id="create-schedule-btn" type="button" class="px-6 py-2 bg-buttons text-white rounded-lg shadow-lg">Guardar Horario</button>
+      </div>
+    </div>
+  </div>
+<script>
+  import { Notyf } from "notyf";
+  import type { TourFormData } from "@/types/tours";
+
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+  });
+  const selectContainer = document.getElementById('type') as HTMLSelectElement;
+  const today = new Date()
+  const scheduleData: string[] = [];
+
+  function createTag(text:string, listId:string) {
+    const tag = document.createElement("span");
+    tag.className =
+      "flex justify-between items-center gap-4 bg-gray-200 px-3 py-1 rounded-lg text-sm animate-in fade-in cursor-pointer hover:shadow-md hover:shadow-gray-200";
+    tag.innerHTML = `${text} <button type="button" class="hover:text-red-500">X</button>`;
+    tag.querySelector("button")?.addEventListener("click",() =>tag.remove());
+    document.getElementById(listId)?.appendChild(tag);
+  }
+
+  selectContainer?.addEventListener("change", (e) =>{
+    const target = e.target as HTMLSelectElement
+    const OPTIONS = [
+      "all-year",
+      "month-custom",
+      "range",
+      "date-custom",
+    ]
+    OPTIONS.forEach((option) =>{
+      const panel = document.getElementById(`panel-${option}`)
+      if(panel){
+        panel.classList.add("hidden")
+      }
+    })
+    if(OPTIONS.includes(target.value)){
+      const panel = document.getElementById(`panel-${target.value}`) as HTMLElement
+      panel?.classList.remove("hidden");
+    }
+  })
+
+  document.querySelectorAll("input[type='date']").forEach(el => {(el as HTMLInputElement).value = today.toISOString().split('T')[0]})
+  
+  document.getElementById("addRandomDate")?.addEventListener("click", (e) =>{
+    const input = document.getElementById("random") as HTMLInputElement;
+    if (input.value.trim()) {
+      e.preventDefault();
+      createTag(input.value.trim(), "randomDatesList");
+      input.value = today.toISOString().split('T')[0];
+    }
+  });
+  document.getElementById("addHour")?.addEventListener("click", (e) =>{
+    const input = document.getElementById("hour") as HTMLInputElement;
+    if (input.value.trim()) {
+      e.preventDefault();
+      createTag(input.value.trim(), "hoursList");
+      input.value = "";
+    }
+  });
+
+  document.getElementById('create-schedule-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const inputName = document.querySelector('input[name="modal_name"]') as HTMLInputElement;
+    const selectLanguage = document.querySelector('select[name="modal_language"]') as HTMLSelectElement;
+    const selectType = document.querySelector('select[name="type"]') as HTMLSelectElement;
+    const inputInit = document.querySelector('input[name="modal_init"]') as HTMLInputElement;
+    const inputEnd = document.querySelector('input[name="modal_end"]') as HTMLInputElement;
+
+
+    const name = inputName.value ;
+    const language = selectLanguage.value;
+    const type = selectType.value;
+
+    const monthNodes = document.querySelectorAll<HTMLInputElement>('input[name="modal_month"]:checked');
+    const selectedMonths = Array.from(monthNodes).map(cb => cb.value);
+
+    const dateInit = inputInit.value;
+    const dateEnd = inputEnd.value;
+
+    const dayNodes = document.querySelectorAll<HTMLInputElement>('input[name="modal_day"]:checked');
+    const selectedDays = Array.from(dayNodes).map(cb => cb.value);
+
+
+    const hoursNodes = document.querySelectorAll('#hoursList span');
+    const hours = Array.from(hoursNodes).map(s => s.textContent?.trim() || "");
+
+    const dateNodes = document.querySelectorAll('#randomDatesList span');
+    const specificDates = Array.from(dateNodes).map(s => s.textContent?.trim() || "");
+
+   
+    const data: TourFormData = {
+        nombre: name,
+        idioma: language,
+        tipo_configuracion: type,
+        meses: selectedMonths,
+        rango: {
+            inicio: dateInit,
+            fin: dateEnd
+        },
+        fechas_especificas: specificDates,
+        dias_semana: selectedDays,
+        horas_salida: hours
+    };
+    scheduleData.push(data as unknown as string);
+
+    if (!name || selectedDays.length === 0 || hours.length === 0) {
+         notyf.error("Por favor rellena los campos obligatorios (*)");
+        return;
+    }
+    notyf.success("Horario Creado");
+    const event = new CustomEvent('schedulesUpdated',{
+      detail:{
+        allSchedules: scheduleData
+      }
+    })
+    window.dispatchEvent(event);
+    
+    inputName.value = '';
+    selectLanguage.value = 'es'; 
+    selectType.value = 'all-year';
+    inputInit.value = '';
+    inputEnd.value = '';
+    monthNodes.forEach(cb => cb.checked = false);
+    dayNodes.forEach(cb => cb.checked = false);
+    const hoursList = document.getElementById('hoursList');
+    const datesList = document.getElementById('randomDatesList');
+    if (hoursList) hoursList.innerHTML = '';
+    if (datesList) datesList.innerHTML = '';
+    ['panel-month-custom', 'panel-range', 'panel-date-custom'].forEach(id => {
+      document.getElementById(id)?.classList.add('hidden');
+    });
+    document.querySelectorAll<HTMLElement>("[data-dialog-close]").forEach((btn) => btn.click());
+   
+
+});
+
+</script>

@@ -1,0 +1,51 @@
+---
+import Edit from "@/assets/edit-box.svg";
+import Routes from "@/assets/route.svg";
+import Photos from "@/assets/photo.svg";
+import Hours from "@/assets/schedule.svg";
+import Language from "@/assets/language.svg";
+---
+
+<div>
+  <ul
+    id="edit-config"
+    class="w-48 text-sm font-medium text-heading bg-neutral-primary-soft"
+  >
+    <li
+      data-option="languages"
+      class="flex gap-2 items-center px-4 py-2 my-1 border border-gray-300 rounded-lg hover:bg-fondo-place cursor-pointer"
+    >
+      <Language />
+      Idiomas
+    </li>
+    <li
+      data-option="general"
+      class="flex gap-2 items-center px-4 py-2 my-1 border border-gray-300 rounded-lg hover:bg-fondo-place cursor-pointer"
+    >
+      <Edit />
+      Datos Básicos
+    </li>
+
+    <li
+      data-option="route"
+      class="flex gap-2 items-center px-4 py-2 my-1 border border-gray-300 rounded-lg hover:bg-fondo-place cursor-pointer"
+    >
+      <Routes />
+      Ruta
+    </li>
+    <li
+      data-option="photo"
+      class="flex gap-2 items-center px-4 py-2 my-1 border border-gray-300 rounded-lg hover:bg-fondo-place cursor-pointer"
+    >
+      <Photos />
+      Fotos
+    </li>
+    <li
+      data-option="hours"
+      class="flex gap-2 items-center px-4 py-2 mt-1 border border-gray-300 rounded-lg hover:bg-fondo-place cursor-pointer"
+    >
+      <Hours />
+      Horarios
+    </li>
+  </ul>
+</div>

@@ -1,16 +1,10 @@
 ---
-import { GetHoursBySlug } from "../lib/db.js";
-import type { Hours } from "@/types/tours";
 import { ui } from "@/i18n/ui";
+import { date } from "astro:schema";
 
 const { slug } = Astro.params;
-const data: Hours = await GetHoursBySlug(slug);
 const { lang } = Astro.params;
 const t = ui[lang || "es"];
-
-const validarHoras = Array.isArray(data)
-  ? data.filter((h) => h.id !== null && h.hour !== null)
-  : [];
 ---
 
 <aside class="md:w-1/2 md:p-4">
@@ -20,12 +14,30 @@ const validarHoras = Array.isArray(data)
       {t["detail.date"]}
     </h2>
     <input
-      type="date"
+      type="text"
       id="fecha"
       name="fecha"
       data-slug={slug}
+      readonly
+      placeholder={new Date().toLocaleDateString(lang, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })}
       class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
+  </section>
+  <section class="mb-6" aria-labelledby="language-heading">
+    <h2 id="language-heading" class="text-xl font-bold pb-5">
+      {t["detail.language"]}
+    </h2>
+    <div class="language-heading flex flex-wrap justify-center gap-4"></div>
+  </section>
+  <section class="mb-6" aria-labelledby="horario-heading">
+    <h2 id="horario-heading" class="text-xl font-bold mb-4">
+      {t["detail.hours"]}
+    </h2>
+     <div class="horario-heading flex flex-wrap gap-4"></div>
   </section>
   <section class="mb-6" aria-labelledby="participantes-heading">
     <h2 id="participantes-heading" class="text-xl font-bold">
@@ -70,39 +82,6 @@ const validarHoras = Array.isArray(data)
       </div>
     </div>
   </section>
-
-  <section class="mb-6" aria-labelledby="horario-heading">
-    <h2 id="horario-heading" class="text-xl font-bold mb-4">
-      {t["detail.hours"]}
-    </h2>
-    {
-      validarHoras.length > 0 ? (
-        <div
-          class={`flex flex-wrap ${validarHoras.length > 4 ? "justify-start gap-4" : "justify-between"} my-6`}
-        >
-          {validarHoras.map((hour: Hours) => (
-            <div class="relative my-2">
-              <input
-                type="radio"
-                name="horario"
-                id={`hora${hour.id}`}
-                value={hour.id}
-                class="hidden peer"
-              />
-              <label
-                for={`hora${hour.id}`}
-                class="bg-fondo px-4 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected"
-              >
-                {hour.hour}
-              </label>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>{t["detail.no.hours"]}</p>
-      )
-    }
-  </section>
   <section class="mb-6" aria-labelledby="resumen-heading">
     <h2
       id="resumen-heading"
@@ -120,62 +99,192 @@ const validarHoras = Array.isArray(data)
         </p>
       </div>
       <div class="col-span-2">
-        <p class="text-sm" id="dateSelected"></p>
+        <p class="text-sm" id="language"></p>
         <p class="text-sm" id="HoursSelected"></p>
+      </div>
+      <div class="col-span-3">
+        <p class="text-sm" id="dateSelected"></p>
       </div>
     </div>
   </section>
   <button
     id="reservar"
     name="reservar"
-    class="bg-buttons px-4 py-2 w-full rounded-4xl text-text-button font-semibold cursor-pointer opacity-0 transition-opacity duration-1000 ease-in-out"
+    class="bg-buttons px-4 py-2 w-full rounded-4xl text-text-button font-semibold opacity-0 transition-opacity duration-1000 ease-in-out"
     >{t["detail.button"]}</button
   >
 </aside>
 
 <script>
-  const fechaInput = document.getElementById("fecha") as HTMLInputElement;
+  import { actions } from "astro:actions";
+  import { Notyf } from "notyf";
+  import Litepicker from "litepicker";
+  import type { Hours } from "@/types/tours";
   const enviarBtn = document.getElementById("reservar") as HTMLButtonElement;
   const cupos = document.getElementById("cupos") as HTMLSpanElement;
-  const detailsDate = document.getElementById(
-    "dateSelected",
-  ) as HTMLParagraphElement;
-  const detailsHour = document.getElementById(
-    "HoursSelected",
-  ) as HTMLParagraphElement;
+  const detailsHour = document.getElementById("HoursSelected") as HTMLParagraphElement;
+  const dateSelected = document.getElementById("dateSelected") as HTMLParagraphElement;
+  const languageSelected = document.getElementById("language") as HTMLParagraphElement;
+  const languageConteiner = document.querySelector(".language-heading") as HTMLDivElement;
+  const horarioConteiner = document.querySelector(".horario-heading") as HTMLDivElement;
   const hoursSelected = document.getElementsByName(
     "horario",
   ) as NodeListOf<HTMLInputElement>;
   let cuposDisponibles = parseInt(cupos.textContent || "0", 10);
-  const slug = fechaInput.dataset.slug;
   const lang = localStorage.getItem("preferred-lang");
-
-  fechaInput.addEventListener("change", async () => {
-    const selectedDate = fechaInput.value;
-    detailsDate.textContent = new Date(
-      `${selectedDate}T00:00:00`,
-    ).toLocaleDateString("es-ES", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    if (selectedDate) {
-      try {
-        const response = await fetch(
-          `/api/availability?date=${selectedDate}&slug=${slug}`,
-        );
-        const data = await response.json();
-        cupos.textContent = data.disponible;
-        cuposDisponibles = parseInt(data.disponible, 10);
-      } catch (error) {
-        console.error("Error al solicitar los dias disponibles:", error);
-        cupos.textContent = "0";
-      }
-    } else {
-      cupos.textContent = "0";
-    }
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
   });
+  const slug = document.getElementById("fecha")?.dataset.slug || ""
+  
+  function renderHoras(langs: Hours) {
+    horarioConteiner.innerHTML = "";
+    langs?.schedules?.length > 2 ? horarioConteiner.classList.add('justify-start') : horarioConteiner.classList.add('justify-center');
+    if (langs.schedules.length > 0) {
+      langs.schedules.forEach((schedule: { hour: string }) => {
+        const div = document.createElement("div");
+        div.className = "relative my-2";
+        div.innerHTML = `
+          <input
+            type="radio"
+            name="horario"
+            id="hora${schedule.hour}"
+            value="${schedule.hour}"
+            class="hidden peer"
+          />
+          <label
+            for="hora${schedule.hour}"
+            class="bg-fondo px-8 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected"
+          >
+            ${schedule.hour.slice(0, 5)}
+          </label>
+        `;
+        const input = div.querySelector('input[type="radio"]') as HTMLInputElement;
+        input.addEventListener("change", () => {
+          if (input.checked) {
+            detailsHour.textContent = `Hora: ${schedule.hour.slice(0, 5)} Hrs (Horario local)`;
+            enviarBtn.classList.add("opacity-100","cursor-pointer"); 
+          }
+        });
+        horarioConteiner.appendChild(div);
+      });
+    } else {
+      horarioConteiner.innerHTML = `<p>${t["detail.no.hours"]}</p>`;  
+    }
+  }
+
+  const picker = new Litepicker({
+    element: document.getElementById("fecha") as HTMLInputElement,
+    singleMode: true,
+    lang: "es-ES",
+    minDate: (new Date()).toISOString().split("T")[0],
+    format: "DD/MM/YYYY",
+    tooltipText: { one: "noche", other: "noches" },
+    setup: (picker) => {
+      picker.on("selected", async (date) => {
+        const jsDate = new Date(date.getTime());
+        const dateFormat = jsDate.toLocaleDateString('es-ES', {
+          weekday: 'long', 
+          day: 'numeric', 
+          month: 'long',  
+          year: 'numeric'
+        });
+          dateSelected.textContent = `Fecha: ${dateFormat.charAt(0).toUpperCase() + dateFormat.slice(1)}`;
+        if (date) {
+          try {
+            const { data, error } = await actions.bookingClient.availability({
+              date: date.format("YYYY-MM-DD"),
+              slug: slug,
+            });
+            cupos.textContent = data[0].disponible;
+            cuposDisponibles = parseInt(data[0].disponible, 10);
+          } catch (error) {
+            console.error("Error al solicitar los dias disponibles:", error);
+            cupos.textContent = "0";
+          }
+        } else {
+          cupos.textContent = "0";
+        }
+        try {
+          const {data, error} = await actions.bookingClient.readBySlug({slug})
+          if (languageConteiner){
+            if (data.length > 0) {
+              languageConteiner.innerHTML = "";
+              data.forEach((langs: Hours, index: number) => {
+                const div = document.createElement("div");
+                div.className = "relative";
+                div.innerHTML = `
+                  <input
+                    type="radio"
+                    name="language"
+                    id="${langs.code}"
+                    value="${langs.code}"
+                    ${index === 0 ? "checked" : ""}
+                    class="hidden peer"
+                  />
+                  <label
+                    for="${langs.code}"
+                    class="flex items-center justify-center bg-fondo border-2 border-transparent p-2 rounded-2xl cursor-pointer transition-all duration-300
+                      hover:bg-slate-50 peer-checked:border-buttons peer-checked:bg-white peer-checked:shadow-md group"
+                  >
+                    <div class="relative overflow-hidden rounded-lg">
+                      <div
+                        class="transition-transform duration-300 group-hover:scale-110"
+                      >
+                        ${langs.icon_svg}
+                      </div>
+                      <div class="absolute inset-0 flex items-center justify-center bg-buttons/20 opacity-0 peer-checked:group-[]:opacity-100 transition-opacity"></div>
+                    </div>
+                  </label>
+                `;
+                const input = div.querySelector('input[type="radio"]') as HTMLInputElement;
+                input.addEventListener("change", () => {
+                  if (input.checked) {
+                    languageSelected.textContent = `Idioma: ${langs.name}`;
+                    renderHoras(langs);
+                  }
+                });
+                languageConteiner.appendChild(div);
+
+                if (index === 0) {
+                  languageSelected.textContent = `Idioma: ${langs.name}`;
+                  renderHoras(langs);
+                }
+                
+              });
+            } else {
+              languageConteiner.innerHTML = `<p>${t["detail.no.language"]}</p>`;
+            }
+          }
+
+          
+        } catch (error) {
+          console.error("Error datos del booking:", error);
+          cupos.textContent = "0";
+        }
+
+      });
+    },
+    lockDaysFilter: (date) => {
+      const month = (date.getMonth() + 1).toString();
+      const allowedMonths = [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "12",
+      ];
+      return !allowedMonths.includes(month);
+    },
+  });
+
   document.querySelectorAll(".counter").forEach((couterEl) => {
     let count = 0;
     const span = couterEl.querySelector(".count") as HTMLSpanElement;
@@ -208,22 +317,11 @@ const validarHoras = Array.isArray(data)
       }
     });
   });
-  hoursSelected.forEach((hour) => {
-    hour.addEventListener("change", () => {
-      if (hour.checked) {
-        const spanElement = document.querySelector(`[for="${hour.id}"]`);
-        detailsHour.textContent = `Hora: ${spanElement?.innerHTML}`;
-        enviarBtn.classList.add("opacity-100");
-      }
-    });
-  });
 
   enviarBtn.addEventListener("click", async () => {
-    const selectedDate = fechaInput.value;
-    const adultos =
-      document.querySelector('[data-summary="adultos"]')?.textContent || "0";
-    const ninos =
-      document.querySelector('[data-summary="ninos"]')?.textContent || "0";
+    const selectedDate = (document.getElementById('fecha') as HTMLInputElement).value;
+    const adultos = document.querySelector('[data-summary="adultos"]')?.textContent || "0";
+    const ninos = document.querySelector('[data-summary="ninos"]')?.textContent || "0";
     let selectedHour = "";
     let hash = "";
     hoursSelected.forEach((hour) => {
@@ -232,40 +330,39 @@ const validarHoras = Array.isArray(data)
       }
     });
     if (!selectedDate) {
-      alert("Por favor selecciona una fecha.");
+      notyf.error("Por favor selecciona una fecha.");
       return;
     }
     if (parseInt(adultos, 10) === 0 && parseInt(ninos, 10) === 0) {
-      alert("Por favor selecciona al menos un participante.");
+      notyf.error("Por favor selecciona al menos un participante.");
       return;
     }
     if (!selectedHour) {
-      alert("Por favor selecciona un horario.");
+      notyf.error("Por favor selecciona un horario.");
       return;
     }
-    const payload = {
+    const payload : {
+      date: string;
+      adultos: number;
+      ninos: number;
+      hour: string;
+      slug: string;
+    } = {
       date: selectedDate,
-      adultos,
-      ninos,
+      adultos: parseInt(adultos, 10),
+      ninos: parseInt(ninos, 10),
       hour: selectedHour,
       slug: slug ?? "",
     };
     try {
-      const response = await fetch("/api/booking", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
+      const {data:hash, error} = await actions.bookingClient.newBooking(payload);
+      if (error) {
+        notyf.error("Error al confirmar la reserva. Inténtalo de nuevo.");
+        return;
       }
-      hash = new URLSearchParams(data).toString();
+      window.location.href = `confirmacion?booking=${hash}`;
     } catch (error) {
       console.error("Error al guardar en localStorage:", error);
     }
-    window.location.href = `${lang}/confirmacion?${hash}`;
   });
 </script>
