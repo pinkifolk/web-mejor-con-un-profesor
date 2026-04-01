@@ -1,17 +1,26 @@
+import { string } from "astro:schema";
 import type { a } from "node_modules/tailwindcss/dist/types-B254mqw1.d.mts";
 
 export type Tour = {
   id: number;
-  name: string;
+  name_es: string;
+  name_pt: string;
+  name_en: string;
   description: string;
   img: string;
   slug: string;
   status: boolean;
+}&{
+  [key in `name_${string}`]?: string;
 };
 export type TourDetail = {
   id: number;
-  name: string;
-  description: string;
+  name_es: string;
+  name_pt: string;
+  name_en: string;
+  description_es: string;
+  description_pt: string;
+  description_en: string;
   img: string;
   slug: string;
   status: boolean;
@@ -30,6 +39,10 @@ export type TourDetail = {
     rating: number;
     created_at: string;
   }[];
+}&{
+  [key in `name_${string}`]?: string;
+}&{
+  [key in `description_${string}`]?: string;
 };
 
 export type InsertNewTour = {
@@ -40,7 +53,7 @@ export type InsertNewTour = {
 };
 export type TourAdmin = {
   id: number;
-  name: string;
+  name_es: string;
   description: string;
   img: string;
   status: boolean;
@@ -49,9 +62,30 @@ export type TourAdmin = {
   hours: [string];
 };
 export type Hours = {
-  id: number;
+  name: string;
+  code: string;
+  icon_svg: string;
+  type_schedule: string;
+  date_start: string | null;
+  date_end: string | null;
+  configurations: string[];
+  day_week: number[];
   hour: string;
+  schedules: {
+    type_schedule: string;
+    date_start: string | null;
+    date_end: string | null;
+    configurations: string[];
+    day_week: number[];
+    hour: string;
+  }[];
 };
+export type  Languages = {
+  id: number;
+  name: string;
+  icon_svg: string;
+  code:string;
+}
 export type Availability = {
   total: string;
   disponible: string;
@@ -88,3 +122,30 @@ export type DetailBokings = {
   total: number;
   hour: string;
 };
+export type Schedule = {
+    nombre: string;
+    idioma: string;
+    tipo_configuracion: string;
+    meses:string[];
+    rango:object;
+    fechas_especificas:string[];
+    dias_semana: string[];
+    horas_salida: string[];
+}
+
+export type LanguageAccumulator = {
+    es: number;
+    pt: number;
+    en: number;
+    [key: string]: number;
+}
+export type TourFormData = {
+  nombre: string; 
+  idioma: string; 
+  tipo_configuracion: string; 
+  meses: string[]; 
+  rango: { inicio: string; fin: string; }; 
+  fechas_especificas: string[]; 
+  dias_semana: string[]; 
+  horas_salida: string[]; 
+}
