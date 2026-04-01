@@ -1,0 +1,89 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import Steps from "@/components/admin/Steps.astro";
+import ElementSteps from '@/components/admin/StepsElement.astro'
+import type { Languages } from "../../types/tours.js";
+import { GetLanguages } from "../../lib/db.js";
+
+const flags: Languages[] = await GetLanguages();
+const { id } = Astro.params;
+if (!id) {
+  return Astro.redirect("/404");
+}
+---
+
+<AdminLayout>
+  <article class="overflow-y-auto h-screen">
+    <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+      <h1 class="text-4xl font-bold">Nombre del tour</h1>
+    </header>
+    <section class="px-11 mb-10 flex">
+      <Steps />
+      <ElementSteps />
+    </section>
+  </article>
+</AdminLayout>
+
+<script>
+  const ul = document.getElementById("edit-config");
+  const globalButtons = document.querySelectorAll(".lang-btn");
+  if (ul) {
+    ul.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement).closest("[data-option]");
+      if (!target) return;
+      const allOptions = ul.querySelectorAll("[data-option]");
+      allOptions.forEach((li) => {
+        li.classList.remove("bg-fondo-place", "border-text-place");
+        li.classList.add("border-gray-300");
+      });
+      target.classList.add("bg-fondo-place", "border-text-place");
+      target.classList.remove("border-gray-300");
+      const option = target.getAttribute("data-option");
+      if (option) {
+        showInputs(option);
+      }
+    });
+  }
+  function showInputs(option: string) {
+    const divs = document.getElementsByClassName("element-panel");
+    const element = document.getElementById(`element${option}`);
+    for (const panel of divs) {
+      panel.classList.add("opacity-0", "invisible");
+      panel.classList.remove("opacity-100", "visible");
+    }
+    if (element) {
+      element.classList.remove("invisible");
+      element.classList.add("visible");
+      setTimeout(() => {
+        element.classList.remove("opacity-0");
+        element.classList.add("opacity-100");
+      }, 10);
+    }
+  }
+  globalButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const selectedLang = btn.getAttribute("data-lang");
+      if (selectedLang) {
+        document.querySelectorAll(".lang-content").forEach((content) => {
+          content.classList.toggle(
+            "hidden",
+            !content.classList.contains(selectedLang),
+          );
+        });
+      }
+
+      globalButtons.forEach((b) => {
+        const isActive = b.getAttribute("data-lang") === selectedLang;
+        if (isActive) {
+          b.classList.remove("border-gray-300");
+          b.classList.add("border-text-place");
+          b.classList.add("bg-fondo-place");
+        } else {
+          b.classList.remove("border-text-place");
+          b.classList.remove("bg-fondo-place");
+          b.classList.add("border-gray-300");
+        }
+      });
+    });
+  });
+</script>
