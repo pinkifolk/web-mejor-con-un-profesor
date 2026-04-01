@@ -170,7 +170,7 @@ const t = ui[lang || "es"];
         horarioConteiner.appendChild(div);
       });
     } else {
-      horarioConteiner.innerHTML = `<p>${t["detail.no.hours"]}</p>`;  
+      horarioConteiner.innerHTML = `<p>Sin horarios disponibles</p>`;  
     }
   }
 
@@ -254,7 +254,7 @@ const t = ui[lang || "es"];
                 
               });
             } else {
-              languageConteiner.innerHTML = `<p>${t["detail.no.language"]}</p>`;
+              languageConteiner.innerHTML = `<p>Sin idiomas disponibles</p>`;
             }
           }
 
@@ -267,6 +267,7 @@ const t = ui[lang || "es"];
       });
     },
     lockDaysFilter: (date) => {
+      if (!date) return false;
       const month = (date.getMonth() + 1).toString();
       const allowedMonths = [
         "1",
