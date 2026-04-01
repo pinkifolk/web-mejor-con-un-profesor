@@ -32,10 +32,15 @@ export const toursActions = {
   create: defineAction({
     accept: "form",
     input: z.object({
-      title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
-      description: z
+      title_es: z.string().min(3, "El título debe tener al menos 3 caracteres"),
+      title_pt: z.string().optional(),
+      title_en: z.string().optional(),
+
+      desc_es: z
         .string()
         .max(2000, "La descripción no puede exceder 2000 caracteres"),
+      desc_pt: z.string().optional(),
+      desc_en: z.string().optional(),
       imgTour: z
         .instanceof(File, { message: "La imagen debe ser un archivo válido" })
         .refine(
@@ -43,30 +48,35 @@ export const toursActions = {
             ["image/jpeg", "image/png", "image/webp"].includes(file.type),
           "Solo se permiten formatos JPG, PNG o WEBP",
         ),
+      find_es: z.string().min(3, "El título debe tener al menos 3 caracteres"),
+      find_pt: z.string().optional(),
+      find_en: z.string().optional(),
       timing: z.string().min(1, "Debe haber al menos un punto de interés"),
-      horario: z.string().min(1, "Debe haber al menos un horario disponible"),
-      points: z
-        .string()
-        .min(
-          3,
-          "El título del punto de interés debe tener al menos 3 caracteres",
-        ),
+      schedules: z.array(z.string().min(1, "Debe haber al menos un horario disponible")),
+      points: z.array(z.string().trim()),
       persons: z
         .string()
         .min(1, "Debe haber al menos una persona permitida para el tour"),
       popular: z.boolean().optional(),
     }),
     handler: async ({
-      title,
-      description,
+      title_es,
+      title_pt,
+      title_en,
+      desc_es,
+      desc_pt,
+      desc_en,
+      find_es,
+      find_pt ,
+      find_en,
       imgTour,
       timing,
-      horario,
+      schedules,
       points,
       persons,
       popular,
     }) => {
-      const slug = title
+      const slug = title_es
         ?.toString()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -101,15 +111,22 @@ export const toursActions = {
         ? newFileName
         : `https://storage.googleapis.com/${bucketName}/img/${newFileName}`;
       const newTour = await NewTour({
-        title,
-        description,
+        title_es,
+        title_pt,
+        title_en,
+        desc_es,
+        desc_pt,
+        desc_en,
+        find_es,
+        find_pt,
+        find_en,
         imgTour: urlImage,
         timing,
         persons,
         points,
         slug,
         popular,
-        horario,
+        schedules,
       });
       return JSON.parse(JSON.stringify(newTour));
     },
