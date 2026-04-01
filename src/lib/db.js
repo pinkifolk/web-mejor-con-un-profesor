@@ -99,7 +99,14 @@ export async function GetHoursBySlug(slug) {
     }
 
     const res = await pool.query(
-      "SELECT H.id, H.hour FROM tours T LEFT JOIN tours_hours TH ON TH.tours_id=T.id LEFT JOIN hours H ON H.id=TH.hours_id WHERE slug=$1 AND TH.status=false ORDER BY TH.id",
+      `SELECT L.code, L.icon_svg, L.name, jsonb_agg(
+        jsonb_build_object(
+            'hour', TH.hour,
+            'day_week', TH.day_week,
+            'type_schedule', TH.type_schedule,
+            'configurations', TH.configurations
+        ) ORDER BY TH.hour ASC
+    ) AS schedules FROM tours_hours TH LEFT JOIN languages L ON L.id=TH.language_id WHERE tours_id=(SELECT id FROM tours WHERE slug=$1) GROUP BY L.id, L.code, L.icon_svg, L.name ORDER BY L.id;`,
       [slug],
     );
     return res.rows;
@@ -128,17 +135,27 @@ export async function GetAvailability(date, slug) {
 }
 export async function NewBooking(booking) {
   try {
+    const fineIdHour = await pool.query(
+      `
+      SELECT TH.id FROM tours_hours TH 
+      LEFT JOIN tours T ON T.id=TH.tours_id 
+      WHERE T.slug=$1 AND TH.hour=$2;`, 
+      [booking.slug, booking.hour]
+    );
+    if (fineIdHour.rows.length === 0) {
+      throw new Error("El tour o el horario no existen, favor verificar");
+    }
+    const hourId = fineIdHour.rows[0].id;
     const res = await pool.query(
       `
-                              INSERT INTO booking (adult, child, date_booking, hour_id, tour_id, confirmation, ticket, hash, created_at, updated_at)
-                            VALUES ($1, $2, $3, $4, (SELECT id FROM tours WHERE slug=$5), false, NULL, (SELECT gen_random_uuid()), NOW(), NULL)
-                            RETURNING hash
-                        `,
+      INSERT INTO booking (adult, child, date_booking, hour_id, tour_id, confirmation, ticket, hash, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, (SELECT id FROM tours WHERE slug=$5), false, NULL, gen_random_uuid(), NOW(), NULL)
+      RETURNING hash`,
       [
         booking.adultos,
         booking.ninos,
         booking.date,
-        booking.hour,
+        hourId,
         booking.slug,
       ],
     );
@@ -153,16 +170,36 @@ function generarCodigoTicket() {
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${fecha}-${random}`;
 }
-export async function ConfirmBooking(data) {
+export async function GetBookingStatus({ id }) {
+  try {    
+    if (!isUuid(id)) {
+      throw new Error(
+        "No modificar la url de confirmación o el hash generado no es válido",
+      );
+    }
+    const res = await pool.query(
+      "SELECT confirmation FROM booking WHERE hash = $1",
+      [id],
+    );
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró la reserva, favor intentar nuevamente");
+    }
+    return res.rows[0].confirmation;
+  } catch (error) {
+    console.error("Error en GetBookingStatus:", error);
+    throw error;
+  }
+}
+export async function ConfirmBooking({nombre, apellido, email, telefono, id}) {
   try {
-    if (!isUuid(data.id)) {
+    if (!isUuid(id)) {
       throw new Error(
         "No modificar la url de confirmación o el hash generado no es válido",
       );
     }
     const checkRes = await pool.query(
       "SELECT confirmation FROM booking WHERE hash = $1",
-      [data.id],
+      [id],
     );
     if (checkRes.rows.length === 0) {
       throw new Error("No se encontró la reserva, favor intentar nuevamente");
@@ -179,23 +216,21 @@ export async function ConfirmBooking(data) {
       RETURNING id
     `,
       [
-        data.nombre,
-        data.apellido,
-        data.email,
-        data.telefono,
+        nombre,
+        apellido,
+        email,
+        telefono,
         generarCodigoTicket(),
-        data.id,
+        id,
       ],
     );
     if (res.rows.length === 0) {
       throw new Error("Reserva no encontrada");
     }
     const tourRes = await pool.query(
-      "SELECT T.name, T.img, B.adult, B.child, B.date_booking, H.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN hours H ON H.id=B.hour_id WHERE B.id=$1",
+      "SELECT T.name_es, T.name_pt, T.name_en, T.img, B.adult, B.child, B.date_booking, TH.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN tours_hours TH ON TH.id=B.hour_id WHERE B.id=$1",
       [res.rows[0].id],
     );
-    console.log(tourRes.rows[0]);
-    console.log(res.rows[0].id)
     return tourRes.rows[0];
   } catch (error) {
     console.error("Error en ConfirmBooking:", error);
@@ -222,12 +257,12 @@ export async function RandomTour() {
 
 export async function GetDataFromDashboard() {
   const today =
-    await pool.query(`SELECT T.id, T.name, T.img, SUM(B.adult) personas, SUM(B.child) ninos, H.hour AS hours, H.id hourId, string_agg(DISTINCT B.status, ', ') as status
+    await pool.query(`SELECT T.id, T.name, T.img, SUM(B.adult) personas, SUM(B.child) ninos, TH.hour AS hours, TH.id hourId, string_agg(DISTINCT B.status, ', ') as status
                                   FROM booking B 
                                   LEFT JOIN tours T ON T.id=B.tour_id
-                                  LEFT JOIN hours H ON H.id=B.hour_id
+                                  LEFT JOIN tours_hours TH ON TH.tours_id=B.id
                                   WHERE DATE(B.date_booking) = CURRENT_DATE
-                                  GROUP BY T.id, H.id;`);
+                                  GROUP BY T.id, TH.id;`);
   const nexts = await pool.query(`SELECT 
                                     T.name,
                                     to_char(B.date_booking, 'DD/MM/YYYY') AS fecha_formateada, 
@@ -283,29 +318,30 @@ export async function ActionsBooking(id, hourId, actions) {
     // queda pendiente el envio de correo
     return action.rows[0];
   } else {
-     const action = await pool.query(
+    const action = await pool.query(
       `UPDATE booking SET status='confirmed' WHERE tour_id=$1 AND hour_id=$2 RETURNING *`,
       [id, hourId],
+    );
+    const { hour_id, tour_id } = action.rows[0];
+    const closeHour = await pool.query(
+      `UPDATE tours_hours SET status=false WHERE tour_id=$1 AND hour_id=$2`,
+      [tour_id, hour_id],
     );
     return action.rows[0];
     // si se confirma hay que cambiar el status a confirmed y avisar a los usuarios
   }
-
-  return { id, hourId, actions };
 }
 
 // Tours
 export async function GetToursAdmin() {
   try {
     const res = await pool.query(`SELECT 
-                                T.id,
-                                T.name,
-                                COUNT(B.id) total_bookings,
-                                T.status
-                                FROM tours T 
-                                LEFT JOIN booking B ON B.tour_id=T.id AND B.confirmation= true 
-                                GROUP BY T.id
-                                ORDER BY T.id;`);
+                                id,
+                                name_es,
+                                img,
+                                status
+                                FROM tours 
+                                ORDER BY id;`);
     if (res.rows.length === 0) {
       throw new Error("No hay tours disponibles");
     }
@@ -339,11 +375,18 @@ export const GetToursAdminById = async (id) => {
   }
 };
 export async function NewTour({
-  title,
-  description,
+  title_es,
+  title_pt,
+  title_en,
+  desc_es,
+  desc_pt,
+  desc_en,
+  find_es,
+  find_pt,
+  find_en,
   imgTour,
   timing,
-  horario,
+  schedules,
   points,
   persons,
   popular,
@@ -359,18 +402,25 @@ export async function NewTour({
       );
     }
     const res = await pool.query(
-      `
-                              INSERT INTO tours (name, description, img, duration, "max_people",slug,status,populate)
-                            VALUES ($1, $2, $3, $4, $5, $6,false, $7)
-                            RETURNING *
-                        `,
+      `INSERT INTO tours 
+      (name_es, name_pt, name_en, description_es, description_pt, description_en, find_me_es, find_me_pt, find_me_en, img, duration, "max_people",slug,status,populate) 
+       VALUES 
+       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)RETURNING *`,
       [
-        title,
-        description,
+        title_es,
+        title_pt,
+        title_en,
+        desc_es,
+        desc_pt,
+        desc_en,
+        find_es,
+        find_pt,
+        find_en,
         imgTour,
         timing,
         parseInt(persons),
         slug,
+        false,
         popular || false,
       ],
     );
@@ -378,24 +428,48 @@ export async function NewTour({
     if (!id) {
       throw new Error("Error al crear el tour");
     }
+    const rawPoints = Array.isArray(points) ? points[0] : points;
     const pointsArray =
-      typeof points === "string" ? JSON.parse(points) : points;
-    console.log({ id, pointsArray });
+      typeof rawPoints === "string" ? JSON.parse(rawPoints) : rawPoints;
     if (Array.isArray(pointsArray) && pointsArray.length > 0) {
       await pool.query(
         `INSERT INTO itinerary (tour_id, name) 
-     SELECT $1, unnest($2::text[])`,
+        SELECT $1, unnest($2::text[])`,
         [id, pointsArray],
       );
     }
 
+    const rawSchedules = Array.isArray(schedules) ? schedules[0] : schedules;
     const horariosArray =
-      typeof horario === "string" ? JSON.parse(horario) : horario;
+      typeof rawSchedules === "string"
+        ? JSON.parse(rawSchedules)
+        : rawSchedules;
+
     if (Array.isArray(horariosArray)) {
       for (const h of horariosArray) {
+        const isRange = h.tipo_configuracion === "range";
+        const dateStart = isRange ? h.rango?.inicio : null;
+        const dateEnd = isRange ? h.rango?.fin : null;
+        const cleanHour = Array.isArray(h.horas_salida)
+          ? h.horas_salida[0].replace(" X", "")
+          : h.horas_salida?.replace(" X", "");
+
         await pool.query(
-          `INSERT INTO tours_hours (tours_id, hours_id) VALUES ($1, $2)`,
-          [id, h],
+          `INSERT INTO tours_hours 
+      (tours_id, name, language_id, type_schedule, date_start, date_end, configurations, day_week, hour) 
+      VALUES 
+      ($1, $2, (SELECT id FROM languages WHERE code = $3 LIMIT 1), $4, $5, $6, $7, $8, $9)`,
+          [
+            id,
+            h.nombre,
+            h.idioma,
+            h.tipo_configuracion,
+            dateStart,
+            dateEnd,
+            JSON.stringify(h.meses || h.fechas_especificas || []),
+            h.dias_semana,
+            cleanHour,
+          ],
         );
       }
     }
@@ -435,69 +509,25 @@ export async function ChangeStatus(id, status) {
   }
 }
 
-// Horas
-export async function GetHours() {
+// Languages
+export async function GetLanguages() {
   try {
-    const res = await pool.query("SELECT * FROM hours ORDER BY hour");
-    if (res.rows.length === 0) {
-      throw new Error("No hay horas disponibles");
-    }
-    return res.rows;
-  } catch (error) {
-    console.error("Error en funcion GetHours:", error);
-    throw error;
-  }
-}
-export async function NewHour(hora) {
-  try {
-    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hora]);
-
-    if (res.rows.length === 1) {
-      throw new Error("la hora ya existe");
-    }
-    const create = await pool.query(
-      "INSERT INTO hours (hour) VALUES ($1) RETURNING *",
-      [hora],
-    );
-    return create.rows[0];
-  } catch (error) {
-    console.error("Error en NewHour:", error);
-    throw error;
-  }
-}
-export async function deleteHour(id) {
-  try {
-    const res = await pool.query("DELETE FROM hours WHERE id=$1 RETURNING *", [
-      id,
-    ]);
+    const res = await pool.query("SELECT * FROM languages ORDER BY id ASC");
     if (res.rows.length === 0) {
       throw new Error("No se encontró la hora a eliminar");
     }
-    return res.rows[0];
+    return res.rows;
   } catch (error) {
-    console.error("Error en deleteHour:", error);
+    console.error("Error en GetLanguages:", error);
     throw error;
   }
 }
-
-export async function updateHour(id, hour) {
-  try {
-    const res = await pool.query("SELECT * FROM hours WHERE hour = $1", [hour]);
-
-    if (res.rows.length === 1) {
-      throw new Error("La hora ya existe, por favor elegir otra hora");
-    }
-
-    const update = await pool.query(
-      "UPDATE hours SET hour=$1 WHERE id=$2 RETURNING *",
-      [hour, id],
-    );
-
-    return update.rows[0];
-  } catch (error) {
-    console.error("Error en updateHour:", error);
-    throw error;
-  }
+export async function NewLanguages(name, code, icon) {
+  // ojo que aqui hay que crear nuevos campos en la tabla tours (name, description, find_me)
+  // ALTER TABLE tours ADD COLUMN name_pt varchar(255) null;
+  // ALTER TABLE tours ADD COLUMN description_pt text null;
+  // ALTER TABLE tours ADD COLUMN find_me_es text null;
+  return (name, code, icon);
 }
 // usuarios
 export async function GetUsers() {
