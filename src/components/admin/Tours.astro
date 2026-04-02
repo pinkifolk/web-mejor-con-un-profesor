@@ -191,9 +191,9 @@
               "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
             row.innerHTML = `
               <td class="pl-4 py-4">
-                <img class="w-28 h-28 rounded-2xl" src="${tour.img}" alt="">
+                <img class="w-28 h-28 rounded-2xl object-cover" src="${tour.img}" alt="">
               </td>
-              <td class="pl-4 py-4">${tour.name_es}</td>
+              <td class="py-4">${tour.name_es}</td>
               <td>
                 <span class="bg-fondo-place rounded-3xl px-8 py-2">
                   ${!tour.status ? "Activo" : "Pausado"}

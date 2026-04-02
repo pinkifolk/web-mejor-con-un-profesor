@@ -1,0 +1,277 @@
+---
+
+---
+
+<article class="overflow-y-auto h-full">
+  <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+    <h1 class="text-4xl font-bold">Tour Premiados</h1>
+    <button
+      type="button"
+      class="bg-fondo-place text-text-place text-sm py-2 px-4 rounded-4xl hover:bg-buttons hover:text-text-button"
+      aria-label="Crear nueva premiación"
+      data-dialog-target="create"
+      >Crear Premiación
+    </button>
+  </header>
+  <section class="px-11">
+    <div class="border border-table rounded-lg w-full">
+      <table class="min-w-full w-full table-fixed">
+        <thead>
+          <tr class="text-left border-b border-table font-medium text-sm">
+            <th class="py-2 px-4 font-normal">Tour</th>
+            <th class="py-2 font-normal w-1/4">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- modal para crear -->
+  <div
+    data-dialog-backdrop="create"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="create"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Crear Premiado
+      </div>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        <form>
+          <label for="tour" class="block text-[16px] font-medium my-2"
+            >Tours
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <select name="tour" id="tour" class="w-full p-3 bg-fondo-place rounded-lg" required>
+            <option value="" disabled selected>Selecciona un tour</option>
+           </select>
+          </select>
+          <label for="logo" class="block text-[16px] font-medium my-2"
+            >Logo
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <input
+            type="file"
+            id="logo"
+            name="logo"
+            class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+            required
+          />
+          <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+            <button
+              data-dialog-close="true"
+              class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+              type="button"
+            >
+              Cancelar
+            </button>
+            <button
+              id="create"
+              type="submit"
+              class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            >
+              Crear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</article>
+<!-- modal para eliminar -->
+<div
+  data-dialog-backdrop="delete"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+>
+  <div
+    data-dialog="delete"
+    class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+  >
+    <div
+      class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+    >
+      Eliminar Premiado
+    </div>
+    <form>
+      <div
+        class="relative border-t border-slate-200 py-4 leading-normal text-slate-600 font-light"
+      >
+        ¿Estás seguro de que deseas eliminar este premiado? Esta acción no se
+        puede deshacer.
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+        <button
+          data-dialog-close="true"
+          class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          type="button"
+        >
+          Cancelar
+        </button>
+        <button
+          id="delete"
+          class="rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+          type="submit"
+        >
+          Eliminar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  import { actions } from "astro:actions";
+  import { Notyf } from "notyf";
+  let id: string | null = null;
+
+  const tableBody = document.getElementById("table-body");
+  const forms = document.querySelectorAll(
+    "form",
+  ) as NodeListOf<HTMLFormElement>;
+ const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+  });
+  async function getData() {
+    try {
+      const { data, error } = await actions.awarded.read();
+      if (data) {
+        if (tableBody) {
+          tableBody.innerHTML = "";
+          data.forEach((awarde: { name_es: string; id: string }) => {
+            const row = document.createElement("tr");
+            row.className =
+              "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0";
+            row.innerHTML = `
+            <td class="pl-4 py-4">
+              ${awarde.name_es}
+            </td>
+            <td>
+              <button
+                type="button"
+                data-id="${awarde.id}"
+                class="text-text-place font-semibold cursor-pointer px-2"
+                data-dialog-target="delete"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+              </button>
+            </td>
+          `;
+            tableBody.appendChild(row);
+          });
+          attachDialogListeners();
+        }
+      } else {
+        notyf.error({
+          message: "Error al obtener los datos",
+        });
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    }
+  }
+  getData();
+  function attachDialogListeners() {
+    document.querySelectorAll("[data-dialog-target]").forEach(async (trigger) => {
+      const dialogId = trigger.getAttribute("data-dialog-target");
+      const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+      const backdrop = document.querySelector(
+        `[data-dialog-backdrop="${dialogId}"]`,
+      );
+
+      function openDialog() {
+        [dialog, backdrop].forEach((el) =>
+          el?.classList.remove("pointer-events-none", "opacity-0"),
+        );
+      }
+      const {id: dataId} = (trigger as HTMLElement).dataset;
+      id = dataId ?? null;
+      if(dialogId === "create") {
+        const { data , error} = await actions.awarded.selectTours();
+        if(data) {
+          const select = dialog?.querySelector("select[name='tour']") as HTMLSelectElement;
+          data.forEach((tour: { id: string; name_es: string }) => {
+            const option = document.createElement("option");
+            option.value = tour.id;
+            option.textContent = tour.name_es;
+            select.appendChild(option);
+          });
+        } else {
+          notyf.error({
+            message: error?.message || "Error al cargar los tours",
+          });
+        }
+      } 
+
+      function closeDialog() {
+        dialog?.classList.add("pointer-events-none", "opacity-0");
+        backdrop?.classList.add("pointer-events-none", "opacity-0");
+        id = null;
+      }
+
+      trigger.addEventListener("click", openDialog);
+      dialog
+        ?.querySelectorAll("[data-dialog-close]")
+        .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+      backdrop?.addEventListener("click", (event) => {
+        if (
+          event.target === backdrop &&
+          backdrop.hasAttribute("data-dialog-backdrop-close")
+        ) {
+          closeDialog();
+        }
+      });
+    });
+  }
+  forms.forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const buttonSubmit = event.submitter as HTMLButtonElement;
+      buttonSubmit.disabled = true;
+
+      async function actionsModel(action: string) {
+        if (id && (action === "delete")) {
+          formData.append("id", id);
+        }
+        switch (action) {
+          case "create":
+            return await actions.awarded.create(formData);
+          case "delete":
+            return await actions.awarded.delete(formData);
+          default:
+            throw new Error("Acción no reconocida");
+        }
+      }
+      const response = await actionsModel(buttonSubmit.id);
+      if (response.error) {
+        const zodError = response.error.issues?.[0]?.message;
+        const errorMessage =
+          zodError || response.error.message || "Error desconocido";
+        notyf.error({
+          message: errorMessage,
+        });
+      } else {
+        notyf.success({
+          message: buttonSubmit.id === "create" ? "Premiado creado exitosamente" : "Premiado eliminado exitosamente",
+        });
+        getData();
+        document
+          .querySelectorAll<HTMLElement>("[data-dialog-close]")
+          .forEach((btn) => btn.click());
+      }
+      buttonSubmit.disabled = false;
+    });
+  });
+</script>

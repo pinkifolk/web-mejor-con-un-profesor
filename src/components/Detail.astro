@@ -18,12 +18,12 @@ if (!slug) {
 
 const referer = Astro.request.headers.get("referer");
 
-
 const tour: TourDetail = await GetTourBySlug(slug);
 const name = tour[`name_${lang}`] || tour.name_es;
 const description = tour[`description_${lang}`] || tour.description_es;
 const {
   img,
+  img_awarded,
   duration,
   max_people,
   itinerary,
@@ -40,7 +40,9 @@ const {
   </nav>
   <article>
     <header>
-      <img class="w-34 absolute -ml-5 -mt-7" src="/img/best_tour.webp" alt="" />
+      {
+        img_awarded && (<img class="w-34 absolute -ml-5 -mt-7" src={img_awarded} alt="Elegido como el mejor tour" />)
+      }
       <img
         src={img}
         alt={`Imagen de tour ${name}, cultura y recomendaciones explicadas por un profesor`}
