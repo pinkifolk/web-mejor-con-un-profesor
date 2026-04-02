@@ -4,6 +4,7 @@ import { loginActions } from "@/actions/adminLogin";
 import { bookingAction } from "@/actions/adminBooking";
 import { LanguagesAction } from "@/actions/adminLanguages";
 import { bookingActions } from "@/actions/Boking";
+import { awardedActions } from "@/actions/adminAwarded";
 
 export const server = {
   login: loginActions,
@@ -12,4 +13,5 @@ export const server = {
   users: userActions,
   booking: bookingAction,
   bookingClient: bookingActions,
+  awarded: awardedActions,
 };
