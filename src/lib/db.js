@@ -45,7 +45,7 @@ export async function GetDestinosAll() {
   }
 }
 export async function GetTourBySlug(slug) {
-  const res = await pool.query("SELECT * FROM tours WHERE slug=$1", [slug]);
+  const res = await pool.query("SELECT T.*, A.img_awarded FROM tours T LEFT JOIN awarded A ON T.id = A.tour_id WHERE T.slug=$1", [slug]);
   if (res.rows.length === 0) {
     return null;
   }
@@ -619,6 +619,47 @@ export async function deleteUser(id) {
     return res.rows[0];
   } catch (error) {
     console.error("Error en deleteUser:", error);
+    throw error;
+  }
+}
+// premiados
+export async function GetAwarded() {
+  try {
+    const res = await pool.query("SELECT A.id, T.name_es FROM awarded A LEFT JOIN tours T ON A.tour_id = T.id ORDER BY A.id ASC");
+    if (res.rows.length === 0) {
+      throw new Error("No se encontraron premiados");
+    }
+    return res.rows;
+  } catch (error) {
+    console.error("Error en GetAwarded:", error);
+    throw error;
+  }
+}
+
+export async function NewAwarded({ tour, urlImage }) {
+  try {    
+    const res = await pool.query(
+      "INSERT INTO awarded (tour_id, img_awarded) VALUES ($1, $2) RETURNING *",
+      [tour, urlImage]
+    );
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en NewAwarded:", error);
+    throw error;
+  }
+}
+export async function DeleteAwarded({id}) {
+  try {
+    const res = await pool.query(
+      "DELETE FROM awarded WHERE id=$1 RETURNING *",
+      [id],
+    );
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró el premiado a eliminar");
+    }
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en DeleteAwarded:", error);
     throw error;
   }
 }

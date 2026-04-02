@@ -22,6 +22,7 @@ export type TourDetail = {
   description_pt: string;
   description_en: string;
   img: string;
+  img_awarded: string;
   slug: string;
   status: boolean;
   duration: string;
