@@ -1,37 +1,59 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { GetHoursBySlug, GetAvailability,NewBooking,ConfirmBooking, GetBookingStatus, RandomTour } from "@/lib/db";
+import {
+  GetHoursBySlug,
+  GetAvailability,
+  NewBooking,
+  ConfirmBooking,
+  GetBookingStatus,
+  RandomTour,
+} from "@/lib/db";
 
 export const bookingActions = {
   readBySlug: defineAction({
     input: z.object({
       slug: z.string(),
+      date: z.string()
     }),
-    handler: async ({slug}) => {
-        const getTourBySlug = await GetHoursBySlug(slug);
-        return JSON.parse(JSON.stringify(getTourBySlug));
+    handler: async ({ slug,date }) => {
+      const getTourBySlug = await GetHoursBySlug(slug,date);
+      return JSON.parse(JSON.stringify(getTourBySlug));
     },
   }),
   availability: defineAction({
     input: z.object({
       slug: z.string(),
       date: z.string(),
+      hour: z.number(),
     }),
-    handler: async ({ slug, date }) => {
-      const getAvailability = await GetAvailability(date,slug);
+    handler: async ({ slug, date, hour }) => {
+      const getAvailability = await GetAvailability(date, slug, hour);
       return JSON.parse(JSON.stringify(getAvailability));
     },
   }),
   newBooking: defineAction({
     input: z.object({
       slug: z.string(),
-      date: z.string(),
-      hour: z.string(), 
+      date: z.string().transform((str) => {
+        if (str.includes("/")) {
+          const [d, m, y] = str.split("/");
+          return `${y}-${m}-${d}`;
+        }
+        return str;
+      }),
+      hour: z.string(),
       adultos: z.number(),
       ninos: z.number(),
     }),
     handler: async ({ slug, date, hour, adultos, ninos }) => {
-      const newBooking = await NewBooking({slug, date, hour, adultos, ninos});
+      console.log("Input received in newBooking action:", {
+        slug,
+        date,
+        hour,
+        adultos,
+        ninos,
+      });
+      const newBooking = await NewBooking({ slug, date, hour, adultos, ninos });
       return JSON.parse(JSON.stringify(newBooking));
     },
   }),
@@ -40,11 +62,17 @@ export const bookingActions = {
       nombre: z.string().min(1, "El nombre es requerido"),
       apellido: z.string().min(1, "El apellido es requerido"),
       email: z.string().email("El email no es válido"),
-      telefono: z.string().min(1, "El teléfono es requerido"),
+      codigoNumero: z.string().min(1, "El teléfono es requerido"),
       id: z.string(),
     }),
-    handler: async ({ nombre, apellido, email, telefono, id }) => {
-      const confirmBooking = await ConfirmBooking({nombre, apellido, email, telefono, id});
+    handler: async ({ nombre, apellido, email, codigoNumero, id }) => {
+      const confirmBooking = await ConfirmBooking({
+        nombre,
+        apellido,
+        email,
+        codigoNumero,
+        id,
+      });
       return JSON.parse(JSON.stringify(confirmBooking));
     },
   }),
