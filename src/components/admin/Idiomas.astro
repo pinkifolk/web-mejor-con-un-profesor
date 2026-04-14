@@ -347,11 +347,11 @@
         }
         switch (action) {
           case "create":
-            return await actions.hours.create(formData);
-          case "update":
-            return await actions.hours.update(formData);
-          case "delete":
-            return await actions.hours.delete(formData);
+            return await actions.languages.create(formData);
+          // case "update":
+          //   return await actions.languages.update(formData);
+          // case "delete":
+          //   return await actions.languages.delete(formData);
           default:
             throw new Error("Acción no reconocida");
         }

@@ -1,0 +1,78 @@
+---
+
+---
+
+<article class="overflow-y-auto h-full">
+  <header class="flex items-center justify-between bg-header h-16 px-11 my-4">
+    <h1 class="text-4xl font-bold">Reservas</h1>
+  </header>
+  <section class="px-11 mb-10">
+    <div class="border border-table rounded-lg w-full">
+      <table class="min-w-full w-full table-fixed">
+        <thead>
+          <tr class="text-left border-b border-table font-medium text-sm">
+            <th class="py-2 font-normal w-1/4"></th>
+            <th class="py-2 font-normal w-1/4">Nombre</th>
+            <th class="py-2 px-4 font-normal w-1/4">Fecha</th>
+            <th class="py-2 font-normal w-1/4">Horario</th>
+            <th class="py-2 font-normal w-1/4">Idioma</th>
+            <th class="py-2 font-normal w-1/4">Reservas</th>
+            <th class="py-2 font-normal w-1/4">Personas</th>
+            <th class="py-2 font-normal w-1/4"></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </section>
+</article>
+<script>
+  import { actions } from "astro:actions";
+  import type { Booking } from "@/types/tours";
+  const tableBody = document.getElementById("table-body");
+  async function getData() {
+    try {
+      const { data, error } = await actions.booking.read();
+      if (data) {
+        if (tableBody) {
+          tableBody.innerHTML = "";
+          data.forEach((booking: Booking) => {
+            const row = document.createElement("tr");
+            row.className =
+              "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0 relative";
+            row.innerHTML = `
+              <td class="py-4 pl-4">
+              <img
+                src=${booking.img}
+                alt=${`imagen del tour ${booking.name_es}`}
+                class="object-cover rounded-md w-20 h-20"
+              />
+            </td>
+            <td class="py-4 text-md font-medium"
+              >${booking.name_es}</td
+            >
+            <td class="py-4 px-4 text-gray-400">${booking.date_booking}</td>
+            <td class="py-4 text-gray-400">${booking.hour.slice(0, 5)}</td>
+            <td class="py-4 text-gray-400">${booking.name}</td>
+            <td class="py-4 text-gray-400">${booking.booking}</td>
+            <td class="py-4 text-gray-400">${booking.persons}</td>
+            <td class="py-4">
+              <a
+                href="reservas/${booking.identity}"
+                class="text-text-place text-sm py-2 px-4 rounded-4xl shadow-md hover:bg-fondo-place after:content-[''] after:absolute after:inset-0 after:z-10"
+                >Ver detalles</a
+              >
+            </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        }
+      } else {
+         console.error("tableBody no existe:", error);
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    }
+  }
+  getData();
+</script>

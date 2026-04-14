@@ -31,7 +31,7 @@ const { data } = Astro.props;
 
           <img
             src={tour.img}
-            alt={`Imagen del tour ${tour.name}`}
+            alt={`Imagen del tour ${tour.name_es}`}
             class="w-16 h-16 rounded-lg object-cover"
           />
         </div>
@@ -172,7 +172,7 @@ const { data } = Astro.props;
         if (dialogId === "acciones") {
           id = (trigger as HTMLElement).dataset.number || "";
           hour = (trigger as HTMLElement).dataset.hour || "";
-          const { data, error } = await actions.boking.readDetail({
+          const { data, error } = await actions.booking.readDetail({
             id,
             hour,
           });
@@ -249,13 +249,13 @@ const { data } = Astro.props;
     e.preventDefault();
     const submitter = e.submitter as HTMLButtonElement;
     if (submitter.value === "cancelTour") {
-      const { data, error } = await actions.boking.actions({
+      const { data, error } = await actions.booking.actions({
         id: id || "",
         hour: hour || "",
         accion: "cancelado",
       });
     } else {
-      const { data, error } = await actions.boking.actions({
+      const { data, error } = await actions.booking.actions({
         id: id || "",
         hour: hour || "",
         accion: "confirmado",
