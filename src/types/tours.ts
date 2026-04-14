@@ -1,6 +1,3 @@
-import { string } from "astro:schema";
-import type { a } from "node_modules/tailwindcss/dist/types-B254mqw1.d.mts";
-
 export type Tour = {
   id: number;
   name_es: string;
@@ -10,7 +7,7 @@ export type Tour = {
   img: string;
   slug: string;
   status: boolean;
-}&{
+} & {
   [key in `name_${string}`]?: string;
 };
 export type TourDetail = {
@@ -40,9 +37,9 @@ export type TourDetail = {
     rating: number;
     created_at: string;
   }[];
-}&{
+} & {
   [key in `name_${string}`]?: string;
-}&{
+} & {
   [key in `description_${string}`]?: string;
 };
 
@@ -73,27 +70,30 @@ export type Hours = {
   day_week: number[];
   hour: string;
   schedules: {
+    id: number;
     type_schedule: string;
     date_start: string | null;
     date_end: string | null;
     configurations: string[];
     day_week: number[];
     hour: string;
+    is_closed:boolean;
   }[];
 };
-export type  Languages = {
+export type Languages = {
   id: number;
   name: string;
   icon_svg: string;
-  code:string;
-}
+  code: string;
+  hour:string;
+};
 export type Availability = {
   total: string;
   disponible: string;
 };
 export type GetTodayTour = {
   id: number;
-  name: string;
+  name_es: string;
   img: string;
   personas: number;
   ninos: number;
@@ -124,29 +124,52 @@ export type DetailBokings = {
   hour: string;
 };
 export type Schedule = {
-    nombre: string;
-    idioma: string;
-    tipo_configuracion: string;
-    meses:string[];
-    rango:object;
-    fechas_especificas:string[];
-    dias_semana: string[];
-    horas_salida: string[];
-}
+  nombre: string;
+  idioma: string;
+  tipo_configuracion: string;
+  meses: string[];
+  rango: object;
+  fechas_especificas: string[];
+  dias_semana: string[];
+  horas_salida: string[];
+};
 
 export type LanguageAccumulator = {
-    es: number;
-    pt: number;
-    en: number;
-    [key: string]: number;
-}
+  es: number;
+  pt: number;
+  en: number;
+  [key: string]: number;
+};
 export type TourFormData = {
-  nombre: string; 
-  idioma: string; 
-  tipo_configuracion: string; 
-  meses: string[]; 
-  rango: { inicio: string; fin: string; }; 
-  fechas_especificas: string[]; 
-  dias_semana: string[]; 
-  horas_salida: string[]; 
-}
+  nombre: string;
+  idioma: string;
+  tipo_configuracion: string;
+  meses: string[];
+  rango: { inicio: string; fin: string };
+  fechas_especificas: string[];
+  dias_semana: string[];
+  horas_salida: string[];
+};
+export type Booking = {
+  id: number;
+  img: string;
+  name_es: string;
+  date_booking: string;
+  hour: string;
+  name: string;
+  booking: number;
+  persons: number;
+  max_people: number;
+  identity: string;
+  hour_id: string; 
+  block:boolean;
+};
+export type Persons = {
+  id: number;
+  name: string;
+  last_name: string;
+  adult: string;
+  child: string;
+  phone: string;
+  status: string;
+};
