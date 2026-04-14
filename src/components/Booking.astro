@@ -138,11 +138,11 @@ const t = ui[lang || "es"];
   });
   const slug = document.getElementById("fecha")?.dataset.slug || ""
   
-  function renderHoras(langs: Hours) {
+  function renderHoras(langs: Hours, date:string) {
     horarioConteiner.innerHTML = "";
     langs?.schedules?.length > 2 ? horarioConteiner.classList.add('justify-start') : horarioConteiner.classList.add('justify-center');
     if (langs.schedules.length > 0) {
-      langs.schedules.forEach((schedule: { hour: string }) => {
+      langs.schedules.forEach((schedule) => {
         const div = document.createElement("div");
         div.className = "relative my-2";
         div.innerHTML = `
@@ -151,18 +151,32 @@ const t = ui[lang || "es"];
             name="horario"
             id="hora${schedule.hour}"
             value="${schedule.hour}"
+            data-hour=${schedule.id}
+            ${schedule.is_closed ? 'disabled' : ''}
             class="hidden peer"
           />
           <label
             for="hora${schedule.hour}"
-            class="bg-fondo px-8 py-2 rounded-4xl cursor-pointer peer-checked:bg-selected"
+            class="bg-fondo px-8 py-2 rounded-4xl ${schedule.is_closed ? 'cursor-not-allowed line-through' :'cursor-pointer'} peer-checked:bg-selected"
           >
             ${schedule.hour.slice(0, 5)}
           </label>
         `;
         const input = div.querySelector('input[type="radio"]') as HTMLInputElement;
-        input.addEventListener("change", () => {
+        input.addEventListener("change", async() => {
           if (input.checked) {
+            try {
+            const { data, error } = await actions.bookingClient.availability({
+              date: date,
+              slug: slug,
+              hour: Number(input.dataset.hour),
+            });
+            cupos.textContent = data[0].disponible;
+            cuposDisponibles = parseInt(data[0].disponible, 10);
+          } catch (error) {
+            console.error("Error al solicitar los dias disponibles:", error);
+            cupos.textContent = "0";
+          }
             detailsHour.textContent = `Hora: ${schedule.hour.slice(0, 5)} Hrs (Horario local)`;
             enviarBtn.classList.add("opacity-100","cursor-pointer"); 
           }
@@ -191,23 +205,9 @@ const t = ui[lang || "es"];
           year: 'numeric'
         });
           dateSelected.textContent = `Fecha: ${dateFormat.charAt(0).toUpperCase() + dateFormat.slice(1)}`;
-        if (date) {
-          try {
-            const { data, error } = await actions.bookingClient.availability({
-              date: date.format("YYYY-MM-DD"),
-              slug: slug,
-            });
-            cupos.textContent = data[0].disponible;
-            cuposDisponibles = parseInt(data[0].disponible, 10);
-          } catch (error) {
-            console.error("Error al solicitar los dias disponibles:", error);
-            cupos.textContent = "0";
-          }
-        } else {
-          cupos.textContent = "0";
-        }
         try {
-          const {data, error} = await actions.bookingClient.readBySlug({slug})
+          const {data, error} = await actions.bookingClient.readBySlug({slug, date: date.format("YYYY-MM-DD")})
+          console.log(data)
           if (languageConteiner){
             if (data.length > 0) {
               languageConteiner.innerHTML = "";
@@ -242,14 +242,15 @@ const t = ui[lang || "es"];
                 input.addEventListener("change", () => {
                   if (input.checked) {
                     languageSelected.textContent = `Idioma: ${langs.name}`;
-                    renderHoras(langs);
+                    renderHoras(langs,date.format("YYYY-MM-DD"));
+                    cupos.textContent = "0";
                   }
                 });
                 languageConteiner.appendChild(div);
 
                 if (index === 0) {
                   languageSelected.textContent = `Idioma: ${langs.name}`;
-                  renderHoras(langs);
+                  renderHoras(langs,date.format("YYYY-MM-DD"));
                 }
                 
               });

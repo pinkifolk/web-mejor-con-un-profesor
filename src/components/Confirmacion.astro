@@ -3,6 +3,54 @@ import { ui } from "@/i18n/ui";
 
 const { lang } = Astro.params;
 const t = ui[lang || "es"];
+const countryCodes = [
+  "+56",
+  "+54",
+  "+51",
+  "+55",
+  "+57",
+  "+52",
+  "+34",
+  "+1",
+  "+591",
+  "+598",
+  "+593",
+  "+595",
+  "+506",
+  "+502",
+  "+503",
+  "+504",
+  "+505",
+  "+507",
+  "+58",
+  "+53",
+  "+1809",
+  "+1829",
+  "+1849",
+  "+33",
+  "+49",
+  "+39",
+  "+44",
+  "+351",
+  "+41",
+  "+31",
+  "+32",
+  "+46",
+  "+47",
+  "+45",
+  "+358",
+  "+7",
+  "+86",
+  "+81",
+  "+82",
+  "+61",
+  "+64",
+  "+27",
+  "+971",
+  "+966",
+  "+91",
+  "+972",
+];
 ---
 
 <section class="md:p-18 p-5">
@@ -53,17 +101,32 @@ const t = ui[lang || "es"];
     <div class="mb-4">
       <label for="telefono" class="block text-[16px] font-medium mb-2"
         >{t["confirm.phone"]}
-     <span class="text-red-800 align-middle">*</span>
-    </label
-      >
-      <input
-        type="tel"
-        id="telefono"
-        name="telefono"
-        class="w-full p-3 mb-2 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
-        required
-        placeholder={t["confirm.phone.label"]}
-      />
+        <span class="text-red-800 align-middle">*</span>
+      </label>
+      <div class="flex gap-2">
+        <select
+          name="codigo_pais"
+          class="w-24 p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place cursor-pointer"
+        >
+          {
+            countryCodes
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+              .map((code) => (
+                <option value={code} selected={code === "+56"}>
+                  {code}
+                </option>
+              ))
+          }
+        </select>
+        <input
+          type="tel"
+          id="telefono"
+          name="telefono"
+          class="flex-1 p-3  bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place"
+          required
+          placeholder={t["confirm.phone.label"]}
+        />
+      </div>
     </div>
 
     <button
@@ -108,6 +171,7 @@ const t = ui[lang || "es"];
     const apellido = (formData.get("apellido") ?? "").toString().trim();
     const email = (formData.get("email") ?? "").toString().trim();
     const telefono = (formData.get("telefono") ?? "").toString().trim();
+    const codigo = (formData.get("codigo_pais") ?? "").toString().trim();
 
     if (!nombre || !apellido || !email || !telefono) {
       notyf.error({
@@ -121,12 +185,12 @@ const t = ui[lang || "es"];
       });
       return;
     }
-
+    const codigoNumero = `${codigo} ${telefono}`
     const bookingData = {
       nombre,
       apellido,
       email,
-      telefono,
+      codigoNumero,
       id,
     };
     try {
@@ -139,7 +203,8 @@ const t = ui[lang || "es"];
       }
 
       if (data) {
-        const { ticketid, img, name_es, date_booking, hours, adult, child } = data;
+        const { ticketid, img, name_es, date_booking, hours, adult, child } =
+          data;
         form.reset();
         ticket.classList.add("opacity-100");
         tourElement.textContent = name_es;
