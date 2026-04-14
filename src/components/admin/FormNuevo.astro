@@ -65,7 +65,6 @@ import Schedule from "@/components/admin/Schedule.astro";
   globalButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const selectedLang = btn.getAttribute("data-lang");
-      console.log(selectedLang)
       if (selectedLang) {
         document.querySelectorAll(".lang-content").forEach((content) => {
           content.classList.toggle(

@@ -1,5 +1,6 @@
 ---
-import Magic from '@/assets/magic.svg'
+import Magic from "@/assets/magic.svg";
+import Load from "@/assets/load.svg";
 import { GetLanguages } from "@/lib/db";
 import type { Languages } from "@/types/tours";
 
@@ -8,19 +9,106 @@ const flags: Languages[] = await GetLanguages();
 
 <div class="flex gap-2 mb-3" data-field-group="title">
   {
-    flags.map((flag:Languages, index) => (
+    flags.map((flag: Languages, index) => (
       <button
         type="button"
         data-lang={flag.code}
         class="lang-btn flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-full text-xs transition-all"
-
       >
-        <div set:html={flag.icon_svg} class="w-6 h-6"></div>
+        <div set:html={flag.icon_svg} class="w-6 h-6" />
         {flag.code.toUpperCase()}
       </button>
     ))
   }
-  <button class="magic text-slate-400 ml-3 opacity-0 transition-all delay-100 cursor-pointer" title="Generar traducciones automáticas">
-    <Magic />
+  <button
+    type="button"
+    class="magic group relative text-slate-400 ml-3 opacity-0 transition-all delay-100 cursor-pointer"
+    title="Generar traducciones automáticas"
+  >
+    <span class="icon-static group-data-[loading=true]:hidden">
+      <Magic />
+    </span>
+    <span class="icon-loading hidden group-data-[loading=true]:block animate-spin">
+      <Load />
+    </span>
   </button>
 </div>
+
+<script>
+  import { actions } from "astro:actions";
+  import { Notyf } from "notyf";
+
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+  });
+  async function typeWriter(element: HTMLInputElement | HTMLTextAreaElement, text: string, speed = 30) {
+    element.value = "";
+
+    for (let i = 0; i < text.length; i++) {
+      element.value += text.charAt(i);
+      element.scrollTop = element.scrollHeight;
+      await new Promise((resolve) => setTimeout(resolve, speed));
+    }
+  }
+  const btnMagic =
+    (document.querySelector(".magic") as HTMLButtonElement) || null;
+
+  btnMagic.addEventListener("click", async (e) => {
+    const btnLanguage = document.querySelectorAll<HTMLElement>(
+      "[data-lang]:not(.hidden)",
+    );
+    const langsTranlate = Array.from(btnLanguage).map((btn) => btn.dataset.lang) || [];
+    const button = e.currentTarget as HTMLButtonElement;
+    console.log(button.dataset.loading)
+    button.dataset.loading = "true";
+    button.disabled = true;
+    try{
+      const payload = {
+      fields: {
+        title:(document.querySelector("#title_es") as HTMLInputElement)?.value ?? "",
+        descripcion: (document.querySelector("#desc_es") as HTMLInputElement)?.value ?? "",
+        findme: (document.querySelector("#find_es") as HTMLInputElement)?.value ?? "",
+      },
+      targetLang: langsTranlate,
+    };
+
+    const { data, error } = await actions.languages.translate(payload);
+    if (data?.success) {
+      Object.keys(data.translations).forEach((lang) => {
+        const t = data.translations[lang];
+        if (document.querySelector(`#title_${lang}`)) {
+          typeWriter(
+            document.querySelector(`#title_${lang}`) as HTMLInputElement,
+            t.title,
+            20,
+          );
+          typeWriter(
+            document.querySelector(`#desc_${lang}`) as HTMLInputElement,
+            t.descripcion,
+            20,
+          );
+          typeWriter(
+            document.querySelector(`#find_${lang}`) as HTMLInputElement,
+            t.findme,
+            20,
+          );
+        }
+      });
+
+      notyf.success("¡Todos los idiomas han sido actualizados! 🌍✨");
+    } else {
+      notyf.error("Error al traducir el paquete");
+    }
+    } catch(error){
+      console.error(error);
+    } finally {
+      setTimeout(() => {
+        button.dataset.loading = "false";
+        button.disabled = false;
+      }, 500);
+    }
+
+    
+  });
+</script>

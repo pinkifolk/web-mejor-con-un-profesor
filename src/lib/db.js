@@ -7,6 +7,8 @@ const SSL = process.env.SSL || import.meta.env.SSL;
 const DATABASE_URL = process.env.DATABASE_URL || import.meta.env.DATABASE_URL;
 const PEPPER = process.env.PEPPER || import.meta.env.PEPPER;
 const SECRET = process.env.SECRET || import.meta.env.SECRET;
+const TRANSLATE_KEY =
+  process.env.TRANSLATE_KEY || import.meta.env.TRANSLATE_KEY;
 
 const { Pool } = postgress;
 // al pasar a qa debe activarse el ssl
@@ -92,8 +94,8 @@ export async function GetTourBySlug(slug) {
   }));
   return tour;
 }
-export async function GetHoursBySlug(slug,date) {
-  console.log(slug,date)
+export async function GetHoursBySlug(slug, date) {
+  console.log(slug, date);
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
       slug,
@@ -117,7 +119,7 @@ export async function GetHoursBySlug(slug,date) {
      LEFT JOIN block_booking BB ON BB.tour_id = TH.tours_id AND BB.hour_id=TH.id AND BB.date_booking =$1
      WHERE tours_id=(SELECT id FROM tours WHERE slug=$2) 
      GROUP BY L.id, L.code, L.icon_svg, L.name ORDER BY L.id;`,
-      [date,slug],
+      [date, slug],
     );
     return res.rows;
   } catch (error) {
@@ -126,7 +128,7 @@ export async function GetHoursBySlug(slug,date) {
   }
 }
 export async function GetAvailability(date, slug, hour) {
-  console.log({date, slug, hour})
+  console.log({ date, slug, hour });
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
       slug,
@@ -370,50 +372,60 @@ export async function BookingByid(id) {
 }
 export async function CancelPerson(id) {
   const cancel = await pool.query(
-    `UPDATE booking SET status='canceled' WHERE id=$1 RETURNING status`,[id]
+    `UPDATE booking SET status='canceled' WHERE id=$1 RETURNING status`,
+    [id],
   );
-  
-  const status = cancel.rows.status
 
-  if(!status === 'canceled') return false;
-  return true
-  
+  const status = cancel.rows.status;
+
+  if (!status === "canceled") return false;
+  return true;
 }
-export async function CloseBooking(tour,date,hour) {
-  const exists = await pool.query(`
+export async function CloseBooking(tour, date, hour) {
+  const exists = await pool.query(
+    `
     SELECT id FROM block_booking WHERE tour_id=$1 AND date_booking=$2 AND hour_id=$3;
-    `,[tour,date,hour]
+    `,
+    [tour, date, hour],
   );
-  if(exists.rows.length === 0){
-    const created = await pool.query(`
-      INSERT INTO block_booking (tour_id,date_booking,hour_id) VALUES ($1,$2,$3) RETURNING id`,[tour,date,hour])
+  if (exists.rows.length === 0) {
+    const created = await pool.query(
+      `
+      INSERT INTO block_booking (tour_id,date_booking,hour_id) VALUES ($1,$2,$3) RETURNING id`,
+      [tour, date, hour],
+    );
     return {
-      status: "bloqueado"
-    }
-  }else{
-    const deleted = await pool.query(`
+      status: "bloqueado",
+    };
+  } else {
+    const deleted = await pool.query(
+      `
       DELETE FROM block_booking WHERE tour_id=$1 AND date_booking=$2 AND hour_id=$3 RETURNING id
-      `,[tour,date,hour]
-    )
+      `,
+      [tour, date, hour],
+    );
     return {
-      status: "desbloqueado"
-    }
+      status: "desbloqueado",
+    };
   }
 }
-export async function CancelBooking(tour,date,hour) {
-  const exists = await pool.query(`
+export async function CancelBooking(tour, date, hour) {
+  const exists = await pool.query(
+    `
     SELECT id FROM booking WHERE tour_id=$1 AND date_booking::date = $2::date AND hour_id=$3;
-    `,[tour,date,hour]
+    `,
+    [tour, date, hour],
   );
-   if (exists.rows.length === 0) {
-      throw new Error("No encontramos el tour");
-    }
+  if (exists.rows.length === 0) {
+    throw new Error("No encontramos el tour");
+  }
   const cancel = await pool.query(
-    `UPDATE booking SET status='canceled' WHERE tour_id=$1 AND date_booking::date = $2::date AND hour_id=$3 RETURNING status`,[tour,date,hour]
+    `UPDATE booking SET status='canceled' WHERE tour_id=$1 AND date_booking::date = $2::date AND hour_id=$3 RETURNING status`,
+    [tour, date, hour],
   );
   return {
-    status: 'success',
-    count: cancel.rowCount
+    status: "success",
+    count: cancel.rowCount,
   };
 }
 
@@ -599,7 +611,7 @@ export async function GetLanguages() {
   try {
     const res = await pool.query("SELECT * FROM languages ORDER BY id ASC");
     if (res.rows.length === 0) {
-      throw new Error("No se encontró la hora a eliminar");
+      throw new Error("No se encontrón lenguajes");
     }
     return res.rows;
   } catch (error) {
@@ -614,6 +626,65 @@ export async function NewLanguages(name, code, icon) {
   // ALTER TABLE tours ADD COLUMN find_me_es text null;
   return (name, code, icon);
 }
+export async function DeleteLanguages(id) {
+  try {
+    const res = await pool.query(`SELECT * FROM languages WHERE id=$1`, [id]);
+    if (res.rows.length === 0) {
+      throw new Error("No se encontró el lenguaje");
+    }
+    const deleted = await pool.query(`DELETE FROM languages WHERE id=$1`, [id]);
+    return true;
+  } catch (error) {
+    console.error("Error en DeleteLanguages:", error);
+    throw error;
+  }
+}
+
+export async function Translate(fields, targetLang) {
+  const keys = Object.keys(fields);
+  const values = Object.values(fields);
+  const results = {};
+  const languagesToTranslate = targetLang.filter(lang => lang !== 'es')
+
+  try {
+    for (const lang of languagesToTranslate) {
+      const params = new URLSearchParams({
+        key: TRANSLATE_KEY,
+        source: "es",
+        target: lang,
+        format: "text",
+      });
+
+      values.forEach((text) => params.append("q", text));
+
+      const response = await fetch(
+        `https://translation.googleapis.com/language/translate/v2?${params.toString()}`,
+        { method: "POST" },
+      );
+
+      const result = await response.json();
+
+      if (result.error) {
+        console.error(`Error traduciendo a ${lang}:`, result.error.message);
+        continue;
+      }
+
+      const translatedObject = {};
+      keys.forEach((key, index) => {
+        translatedObject[key] = result.data.translations[index].translatedText;
+      });
+      results[lang] = translatedObject;
+    }
+
+    return {
+      success: true,
+      translations: results,
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 // usuarios
 export async function GetUsers() {
   try {
