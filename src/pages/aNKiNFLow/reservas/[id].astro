@@ -1,0 +1,307 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import Chevron from "@/assets/chevron.svg";
+---
+
+<AdminLayout>
+  <article class="overflow-y-auto h-full">
+    <section class="py-8">
+      <div class="container mx-auto px-30">
+        <h1 class="text-2xl font-bold mb-6">Detalles de la Reserva</h1>
+        <a
+          href="../reservas"
+          class="bg-fondo-place text-sm text-gray-600 py-2 px-4 rounded-xl shadow-md mb-4 flex items-center gap-1 w-max hover:text-gray-400"
+        >
+          <Chevron class="rotate-90" />
+          Volver a Reservas
+        </a>
+        <div
+          class="detail bg-white rounded-lg p-6 flex gap-3 border border-gray-300"
+        >
+        </div>
+      </div>
+    </section>
+    <div class="container mx-auto w-max mb-10">
+      <h2 class="text-xl font-semibold">Reservas confirmadas</h2>
+
+      <div class="border border-table rounded-lg w-full">
+        <table class="table-fixed mt-4 rounded-lg">
+          <thead>
+            <tr class="text-left border-b border-table font-medium text-sm">
+              <th class="py-2 px-4 font-normal">Nombre</th>
+              <th class="py-2 px-4 font-normal">Personas</th>
+              <th class="py-2 px-4 font-normal">Telefono</th>
+              <th class="py-2 font-normal"></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+  <!-- modal para eliminar -->
+  <div
+    data-dialog-backdrop="delete"
+    data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center
+         bg-black/60 opacity-0 transition-opacity duration-300"
+  >
+    <div
+      data-dialog="delete"
+      class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+    >
+      <div
+        class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800"
+      >
+        Eliminar Reserva
+      </div>
+        <div
+          class="relative border-t border-b border-slate-200 py-6 text-pretty leading-normal text-slate-600 font-light"
+        >
+          <p>¿Estás seguro de que deseas eliminar esta reserva 😱?</p> 
+          Esta acción no se puede deshacer.
+        </div>
+        <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+          <button
+            data-dialog-close="true"
+            class="rounded-md border border-transparent py-2 px-4 text-center text-sm transition-all cursor-pointer text-slate-600 hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="button"
+          >
+            Cancelar
+          </button>
+          <button
+            id="delete"
+            class="btn-confirmar-cancelar rounded-md bg-buttons py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md cursor-pointer active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+            type="button"
+          >
+            Eliminar
+          </button>
+        </div>
+    </div>
+  </div>
+</AdminLayout>
+<script>
+  import { actions } from "astro:actions";
+  import type { Booking, Persons } from "@/types/tours";
+  import { Notyf } from "notyf";
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+  });
+  const id = window.location.pathname.split("/").pop() || "";
+  const detailContainer = document.querySelector(".detail") as HTMLDivElement;
+  const tableBody = document.getElementById("table-body") as HTMLTableElement;
+  async function getData() {
+    try {
+      const { data, error } = await actions.booking.readById({ id });
+      if (data) {
+        if (detailContainer) {
+          detailContainer.innerHTML = "";
+          data.tourInfo.forEach((booking: Booking) => {
+            const jsDate = new Date(booking.date_booking);
+            const dateFormat = jsDate.toLocaleDateString("es-ES", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+            detailContainer.innerHTML = `
+            <div class="rounded-lg">
+            <img
+              src=${booking.img}
+              alt=${`imagen del tour ${booking.name_es}`}
+              class="object-cover rounded-md h-60 w-60"
+            />
+          </div>
+          <div class="rounded-lg p-4 flex-1">
+            <h1 class="text-lg font-semibold">
+              ${booking.name_es}
+            </h1>
+            <div class="flex items-center gap-2 p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-188.5-11.5Q280-423 280-440t11.5-28.5Q303-480 320-480t28.5 11.5Q360-457 360-440t-11.5 28.5Q337-400 320-400t-28.5-11.5ZM640-400q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-188.5-11.5Q280-263 280-280t11.5-28.5Q303-320 320-320t28.5 11.5Q360-297 360-280t-11.5 28.5Q337-240 320-240t-28.5-11.5ZM640-240q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z"/></svg>
+              ${dateFormat.charAt(0).toUpperCase() + dateFormat.slice(1)}
+            </div>
+            <div class="flex items-center gap-2 p-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              ${booking.hour.slice(0, 5)}
+            </div>
+            <div class="flex items-center gap-2 p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M325-111.5q-73-31.5-127.5-86t-86-127.5Q80-398 80-480.5t31.5-155q31.5-72.5 86-127t127.5-86Q398-880 480.5-880t155 31.5q72.5 31.5 127 86t86 127Q880-563 880-480.5T848.5-325q-31.5 73-86 127.5t-127 86Q563-80 480.5-80T325-111.5ZM480-162q26-36 45-75t31-83H404q12 44 31 83t45 75Zm-104-16q-18-33-31.5-68.5T322-320H204q29 50 72.5 87t99.5 55Zm208 0q56-18 99.5-55t72.5-87H638q-9 38-22.5 73.5T584-178ZM170-400h136q-3-20-4.5-39.5T300-480q0-21 1.5-40.5T306-560H170q-5 20-7.5 39.5T160-480q0 21 2.5 40.5T170-400Zm216 0h188q3-20 4.5-39.5T580-480q0-21-1.5-40.5T574-560H386q-3 20-4.5 39.5T380-480q0 21 1.5 40.5T386-400Zm268 0h136q5-20 7.5-39.5T800-480q0-21-2.5-40.5T790-560H654q3 20 4.5 39.5T660-480q0 21-1.5 40.5T654-400Zm-16-240h118q-29-50-72.5-87T584-782q18 33 31.5 68.5T638-640Zm-234 0h152q-12-44-31-83t-45-75q-26 36-45 75t-31 83Zm-200 0h118q9-38 22.5-73.5T376-782q-56 18-99.5 55T204-640Z"/></svg> ${booking.name}
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-80q-50 0-85-35t-35-85v-120h120v-560l60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60v680q0 50-35 85t-85 35H240Zm480-80q17 0 28.5-11.5T760-200v-560H320v440h360v120q0 17 11.5 28.5T720-160ZM360-600v-80h240v80H360Zm0 120v-80h240v80H360Zm320-120q-17 0-28.5-11.5T640-640q0-17 11.5-28.5T680-680q17 0 28.5 11.5T720-640q0 17-11.5 28.5T680-600Zm0 120q-17 0-28.5-11.5T640-520q0-17 11.5-28.5T680-560q17 0 28.5 11.5T720-520q0 17-11.5 28.5T680-480ZM240-160h360v-80H200v40q0 17 11.5 28.5T240-160Zm-40 0v-80 80Z"/></svg> ${booking.booking} Reserva${booking.booking > 1 ? "s" : ""} 
+            </div>
+            <div class="flex items-center gap-2 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M411-480q-28 0-46-21t-13-49l12-72q8-43 40.5-70.5T480-720q44 0 76.5 27.5T597-622l12 72q5 28-13 49t-46 21H411Zm24-80h91l-8-49q-2-14-13-22.5t-25-8.5q-14 0-24.5 8.5T443-609l-8 49ZM124-441q-23 1-39.5-9T63-481q-2-9-1-18t5-17q0 1-1-4-2-2-10-24-2-12 3-23t13-19l2-2q2-19 15.5-32t33.5-13q3 0 19 4l3-1q5-5 13-7.5t17-2.5q11 0 19.5 3.5T208-626q1 0 1.5.5t1.5.5q14 1 24.5 8.5T251-596q2 7 1.5 13.5T250-570q0 1 1 4 7 7 11 15.5t4 17.5q0 4-6 21-1 2 0 4l2 16q0 21-17.5 36T202-441h-78Zm676 1q-33 0-56.5-23.5T720-520q0-12 3.5-22.5T733-563l-28-25q-10-8-3.5-20t18.5-12h80q33 0 56.5 23.5T880-540v20q0 33-23.5 56.5T800-440ZM0-240v-63q0-44 44.5-70.5T160-400q13 0 25 .5t23 2.5q-14 20-21 43t-7 49v65H0Zm240 0v-65q0-65 66.5-105T480-450q108 0 174 40t66 105v65H240Zm560-160q72 0 116 26.5t44 70.5v63H780v-65q0-26-6.5-49T754-397q11-2 22.5-2.5t23.5-.5Zm-320 30q-57 0-102 15t-53 35h311q-9-20-53.5-35T480-370Zm0 50Zm1-280Z"/></svg>
+            ${booking.persons} / ${booking.max_people} personas
+            </div>
+          </div>
+          <div class="flex flex-col gap-2 justify-center">
+            <button type="button"
+              class="text-text-place text-sm py-2 px-4 rounded-lg shadow-md hover:bg-fondo-place cursor-pointer"
+            >
+              Cambiar Horario
+            </button>
+            <button type="button"
+              class="text-text-place text-sm py-2 px-4 rounded-lg shadow-md hover:bg-fondo-place cursor-pointer"
+            >
+              Modificar Max personas
+            </button>
+            <button type="button"
+              data-booking=${booking.id}
+              data-date=${booking.date_booking}
+              data-hour=${booking.hour_id}
+              class="close-booking text-text-place text-sm py-2 px-4 rounded-lg shadow-md hover:bg-fondo-place cursor-pointer"
+            >
+          ${booking.block ? "Activar Reserva" : "Cerrar Reserva"}
+            </button>
+            <button type="button"
+              data-booking=${booking.id}
+              data-date=${booking.date_booking}
+              data-hour=${booking.hour_id}
+              data-dialog-target="delete"
+              class="cancel-trigger text-text-place text-sm py-2 px-4 rounded-lg shadow-md hover:bg-buttons hover:text-white cursor-pointer"
+            >
+              Cancelar Reserva
+            </button>
+          </div>
+            `;
+          });
+          tableBody.innerHTML = "";
+          data.infoperson.forEach((person: Persons) => {
+            const row = document.createElement("tr");
+            row.className =
+              "hover:bg-fondo text-text text-sm border-b border-table last:border-b-0 relative";
+            row.innerHTML = `
+             <td class="py-4 pl-4">${person.name} ${person.last_name}</td>
+              <td class="py-4 pl-4">${person.adult + person.child} </td>
+              <td class="py-4 pl-4"><a href=${`https://wa.me/${person.phone.replace(/[+ ]/g, "")}`} target="_blank">${person.phone}</a></td>
+              <td class="py-4 px-4">
+                <button type="button" data-person=${person.id} class="cancel-person text-red-500 hover:text-red-700 ml-2 cursor-pointer hover:bg-buttons hover:text-white p-2 rounded-lg"
+                  >${person.status === "pending" ? "Cancelar reserva" : "Cancelada"}</button
+                >
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+          attachDialogListeners()
+        }
+      } else {
+        console.error("detailContainer no existe:", error);
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+    }
+  }
+  getData();
+  tableBody.addEventListener("click", async (e) => {
+    const btn = (e.target as Element | null)?.closest(".cancel-person");
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const personId = Number((btn as HTMLButtonElement).dataset.person) || 0;
+      if (!personId) return;
+      try {
+        const { data, error } = await actions.booking.cancelPerson({
+          id: personId,
+        });
+        if (data) {
+          btn.textContent = "Cancelada";
+        }
+        notyf.success({
+          message: `Reserva cancelada correctamente`,
+        });
+      } catch (error) {
+        console.error("Error inesperado:", error);
+        notyf.error({
+          message: `No pudimos cancelar la reserva, intenta más tarde`,
+        });
+      }
+    }
+  });
+  async function ejecutarAccionBooking(typeAction: string, { tour, date, hour, btn }: { tour: string; date: string; hour: string; btn: HTMLButtonElement | null }) {
+  try {
+    if (typeAction === 'bloquear') {
+      try {
+         const { data, error } = await actions.booking.closeBooking({ tour, date, hour });
+      
+      if (btn) {
+        btn.innerHTML = data.status === "bloqueado" ? "Activar Reserva" : "Cerrar Reserva";
+      }
+      
+      notyf.success({
+        message: data.status === "bloqueado" ? "Reserva cerrada" : "Reserva abierta",
+      });
+      } catch (err){
+        console.log(err)
+
+      }
+     
+    } 
+    
+    if (typeAction === 'cancelar') {
+      const { data, error } = await actions.booking.cancelBooking({ tour, date, hour });
+      notyf.success({ message: "Reserva cancelada" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    notyf.error({ message: "No se pudo ejecutar la acción" });
+  }
+}
+  document.addEventListener("click", async (e) => {
+    const btn = (e.target as Element).closest("button");
+    if (!btn) return;
+    const tour = (btn as HTMLButtonElement).dataset.booking || "";
+    const date = (btn as HTMLButtonElement).dataset.date || "";
+    const hour = (btn as HTMLButtonElement).dataset.hour || "";
+
+    if (btn.classList.contains("close-booking")) {
+      await ejecutarAccionBooking('bloquear', { tour, date, hour, btn});
+    }
+
+    if (btn.classList.contains("cancel-trigger")) {
+    const modal = document.querySelector('[data-dialog="delete"]');
+    const confirmBtn = modal?.querySelector(".btn-confirmar-cancelar") as HTMLButtonElement | null;
+      if (confirmBtn) {
+        confirmBtn.dataset.booking = tour;
+        confirmBtn.dataset.date = date;
+        confirmBtn.dataset.hour = hour;
+      }
+    }
+    if (btn.classList.contains("btn-confirmar-cancelar")) {
+      await ejecutarAccionBooking('cancelar', { tour, date, hour, btn });
+    }
+
+  });
+
+  function attachDialogListeners() {
+    document.querySelectorAll("[data-dialog-target]").forEach((trigger) => {
+      const dialogId = trigger.getAttribute("data-dialog-target");
+      const dialog = document.querySelector(`[data-dialog="${dialogId}"]`);
+      const backdrop = document.querySelector(
+        `[data-dialog-backdrop="${dialogId}"]`,
+      );
+
+      function openDialog() {
+        dialog?.classList.remove("pointer-events-none", "opacity-0");
+        backdrop?.classList.remove("pointer-events-none", "opacity-0");
+      }
+
+      function closeDialog() {
+        dialog?.classList.add("pointer-events-none", "opacity-0");
+        backdrop?.classList.add("pointer-events-none", "opacity-0");
+      }
+
+      trigger.addEventListener("click", openDialog);
+      dialog
+        ?.querySelectorAll("[data-dialog-close]")
+        .forEach((closeBtn) => closeBtn.addEventListener("click", closeDialog));
+      backdrop?.addEventListener("click", (event) => {
+        if (
+          event.target === backdrop &&
+          backdrop.hasAttribute("data-dialog-backdrop-close")
+        ) {
+          closeDialog();
+        }
+      });
+    });
+  }
+</script>
