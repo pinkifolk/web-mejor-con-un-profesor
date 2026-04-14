@@ -66,7 +66,7 @@ export const ui = {
     "confirm.name.label": "Ingrese su nombre",
     "confirm.last_name.label": "Ingrese su apellido",
     "confirm.email.label": "Ingrese su correo electrónico",
-    "confirm.phone.label": "Ingrese su número telefónico",
+    "confirm.phone.label": "Ingrese su número telefónico ",
     "confirm.button": "Confirmar Reserva",
     "confirmed.title": "¡Todo listo!",
     "confirmed.description":"Reserva confirmada. Te enviamos un ",
