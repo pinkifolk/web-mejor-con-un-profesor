@@ -7,6 +7,7 @@ import Users from "@/assets/user.svg";
 import Trofeo from "@/assets/trofeo.svg";
 import Booking from "@/assets/booking.svg";
 import Language from "@/assets/language.svg";
+import LogOut from "@/assets/logout.svg";
 ---
 
 <aside class="w-64 text-black p-4 shadow-lg">
@@ -66,4 +67,24 @@ import Language from "@/assets/language.svg";
       </a>
     </ul>
   </nav>
+  <div class="absolute bottom-3 w-58">
+    <button
+      type="button"
+      class="logout flex gap-5 w-full justify-center items-center py-2 text-text-place text-sm rounded-lg shadow-md hover:bg-fondo-place cursor-pointer"
+    >
+      Salir
+      <LogOut />
+    </button>
+  </div>
 </aside>
+<script>
+  import { actions } from "astro:actions";
+
+  const btnLogOut = document.querySelector(".logout") as HTMLButtonElement;
+  btnLogOut.addEventListener("click", async () => {
+    const { data, error } = await actions.login.logout();
+    if (data && data.success) {
+      window.location.href = "/aNKiNFLow/";
+    }
+  });
+</script>

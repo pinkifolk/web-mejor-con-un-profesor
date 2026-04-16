@@ -843,7 +843,7 @@ export async function ValidateLogin(usuario, clave) {
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name },
       SECRET,
-      { expiresIn: "10m" },
+      { expiresIn: "5m" },
     );
 
     return { success: true, twofa: user.two_factor_enabled, token: token };
@@ -888,7 +888,20 @@ export async function Actived2FA(id) {
     if (res.rowCount === 0) {
       throw new Error("Usuario no encontrado");
     }
-    return true;
+    const findUser = await pool.query(
+      "SELECT id, name, email FROM users WHERE id = $1",
+      [id],
+    );
+    const user = findUser.rows[0]
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name },
+      SECRET,
+      { expiresIn: "20m" },
+    );
+    return {
+      success : true,
+      token : token
+    };
   } catch (error) {
     console.error("Error en Actived2FA:", error);
     throw error;
