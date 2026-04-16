@@ -95,7 +95,6 @@ export async function GetTourBySlug(slug) {
   return tour;
 }
 export async function GetHoursBySlug(slug, date) {
-  console.log(slug, date);
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
       slug,
@@ -128,7 +127,6 @@ export async function GetHoursBySlug(slug, date) {
   }
 }
 export async function GetAvailability(date, slug, hour) {
-  console.log({ date, slug, hour });
   try {
     const fineSlug = await pool.query("SELECT * FROM tours WHERE slug=$1", [
       slug,

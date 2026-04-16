@@ -207,7 +207,6 @@ const t = ui[lang || "es"];
           dateSelected.textContent = `Fecha: ${dateFormat.charAt(0).toUpperCase() + dateFormat.slice(1)}`;
         try {
           const {data, error} = await actions.bookingClient.readBySlug({slug, date: date.format("YYYY-MM-DD")})
-          console.log(data)
           if (languageConteiner){
             if (data.length > 0) {
               languageConteiner.innerHTML = "";

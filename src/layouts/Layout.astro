@@ -69,7 +69,6 @@ const navTranslations = {
 					</svg>
 					`;
           const { data, error } = await actions.bookingClient.randomTour();
-          console.log("Respuesta del servidor:", data);
           if (data && data.slug) {
             setTimeout(() => {
               window.location.href = `/${lang}/${data.slug}`;

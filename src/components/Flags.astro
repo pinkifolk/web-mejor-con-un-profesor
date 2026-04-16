@@ -60,7 +60,6 @@ const flags: Languages[] = await GetLanguages();
     );
     const langsTranlate = Array.from(btnLanguage).map((btn) => btn.dataset.lang) || [];
     const button = e.currentTarget as HTMLButtonElement;
-    console.log(button.dataset.loading)
     button.dataset.loading = "true";
     button.disabled = true;
     try{
