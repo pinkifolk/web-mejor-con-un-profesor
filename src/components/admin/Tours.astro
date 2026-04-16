@@ -149,24 +149,6 @@
   const notyf = new Notyf({
     duration: 3000,
     position: { x: "center", y: "bottom" },
-    types: [
-      {
-        type: "custom-success",
-        background: "#16a34a",
-        icon: {
-          className: "notyf__icon-custom",
-          tagName: "div",
-        },
-      },
-      {
-        type: "custom-error",
-        background: "#dc2626",
-        icon: {
-          className: "notyf__icon-custom2",
-          tagName: "div",
-        },
-      },
-    ],
   });
   let id: string | null = null;
   let status: string | null = null;
@@ -237,8 +219,7 @@
           attachDialogListeners();
         }
       } else {
-        notyf.open({
-          type: "custom-error",
+        notyf.error({
           message: "Error al obtener los datos",
         });
       }
@@ -357,12 +338,11 @@
       if (response.error) {
         const zodError = response.error.issues?.[0]?.message;
         const errorMessage = zodError || response.error.message || "Error desconocido";
-        notyf.open({
-          type: "custom-error",
+        notyf.error({
           message: errorMessage,
         });
       } else {
-        notyf.open({
+        notyf.success({
           type: "custom-success",
           message: `Tour ${buttonSubmit.id === "change" ? `${status === "false" ? "pausado" : "activado"}` : buttonSubmit.id === "delete" ? "eliminado" : "creado"} exitosamente`,
         });
