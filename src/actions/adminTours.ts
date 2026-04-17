@@ -1,5 +1,5 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
 import { Storage } from "@google-cloud/storage";
 import fs from "fs";
 import path from "node:path";

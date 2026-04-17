@@ -1,5 +1,7 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { sendTourConfirmation } from "@/services/confirmBooking";
+import { sendCancelBooking } from "@/services/sendCancelBooking";
 import {
   GetHoursBySlug,
   GetAvailability,
@@ -7,16 +9,19 @@ import {
   ConfirmBooking,
   GetBookingStatus,
   RandomTour,
+  Sendmail,
+  CancelBookinClient,
 } from "@/lib/db";
+import { email } from "astro:schema";
 
 export const bookingActions = {
   readBySlug: defineAction({
     input: z.object({
       slug: z.string(),
-      date: z.string()
+      date: z.string(),
     }),
-    handler: async ({ slug,date }) => {
-      const getTourBySlug = await GetHoursBySlug(slug,date);
+    handler: async ({ slug, date }) => {
+      const getTourBySlug = await GetHoursBySlug(slug, date);
       return JSON.parse(JSON.stringify(getTourBySlug));
     },
   }),
@@ -61,7 +66,7 @@ export const bookingActions = {
     input: z.object({
       nombre: z.string().min(1, "El nombre es requerido"),
       apellido: z.string().min(1, "El apellido es requerido"),
-      email: z.string().email("El email no es válido"),
+      email: z.email("El email no es válido"),
       codigoNumero: z.string().min(1, "El teléfono es requerido"),
       id: z.string(),
     }),
@@ -73,6 +78,13 @@ export const bookingActions = {
         codigoNumero,
         id,
       });
+      if (confirmBooking) {
+        try {
+          await sendTourConfirmation(email, confirmBooking);
+        } catch (mailError) {
+          console.error("Error al enviar el correo:", mailError);
+        }
+      }
       return JSON.parse(JSON.stringify(confirmBooking));
     },
   }),
@@ -89,6 +101,44 @@ export const bookingActions = {
     handler: async () => {
       const randomTour = await RandomTour();
       return JSON.parse(JSON.stringify(randomTour));
+    },
+  }),
+  send: defineAction({
+    input: z.object({
+      id: z.string(),
+    }),
+    handler: async ({ id }) => {
+      const senmail = await Sendmail(id);
+      if (senmail) {
+        try {
+          await sendTourConfirmation(senmail.email, senmail);
+        } catch (mailError) {
+          console.error("Error al enviar el correo:", mailError);
+        }
+      }
+      return {
+        success: true,
+        data: senmail,
+      };
+    },
+  }),
+  cancelBooking: defineAction({
+    input: z.object({
+      id: z.string(),
+      email: z.email()
+    }),
+    handler: async ({ id, email }) => {
+      const cancelBookinClient = await CancelBookinClient( id, email);
+       if (cancelBookinClient) {
+        try {
+          await sendCancelBooking(cancelBookinClient.email, cancelBookinClient);
+        } catch (mailError) {
+          console.error("Error al enviar el correo:", mailError);
+        }
+      }
+      return {
+        success: true,
+      };
     },
   }),
 };

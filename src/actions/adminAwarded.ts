@@ -1,10 +1,9 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
 import { Storage } from "@google-cloud/storage";
 import { GetAwarded, GetToursAdmin, NewAwarded, DeleteAwarded } from "@/lib/db";
 import fs from "fs";
 import path from "node:path";
-import { read } from "node:fs";
 const storage = new Storage();
 const bucketName = "betterwhitateacher";
 

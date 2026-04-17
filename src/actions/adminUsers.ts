@@ -1,5 +1,5 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
 import {GetUsers, NewUser,updateUser,deleteUser,resetPasswordUser} from '@/lib/db'
 export const userActions = {
     read: defineAction({
