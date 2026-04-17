@@ -1,4 +1,3 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node'
 
@@ -16,6 +15,9 @@ export default defineConfig({
       host: true,
       port: process.env.PORT ? Number(process.env.PORT) : 4321
   },
+ session: {
+    enabled: true, 
+  },
 
   vite: {
     plugins: [tailwindcss()],
@@ -23,5 +25,11 @@ export default defineConfig({
   i18n: {
     locales: ["es", "en", "pt"],
     defaultLocale: "es",
-  }
+    routing: {
+      prefixDefaultLocale: true, 
+    },
+    fallback: {
+      en: 'es'
+    }
+  },
 });

@@ -10,14 +10,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.1",
-    "@google-cloud/storage": "^7.17.2",
+    "@astrojs/node": "^10.0.5",
+    "@google-cloud/storage": "^5.18.3",
     "@tailwindcss/vite": "4.1.11",
-    "astro": "^5.16.0",
+    "astro": "^6.1.7",
     "bcryptjs": "^3.0.2",
     "canvas-confetti": "^1.9.3",
     "jsonwebtoken": "^9.0.2",
     "litepicker": "^2.0.12",
+    "nodemailer": "^8.0.5",
     "notyf": "^3.10.0",
     "pg": "8.16.3",
     "qrcode": "1.5.4",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^8.0.0",
     "@types/qrcode": "^1.5.6",
     "@types/speakeasy": "^2.0.10"
   }
