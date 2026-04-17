@@ -3,8 +3,8 @@ import Flags from "@/components/Flags.astro";
 import Add from "@/assets/add.svg";
 import Chevron from "@/assets/chevron.svg";
 import ImagenUpload from "@/assets/image-upload.svg";
-import type { Languages } from "../../types/tours.js";
-import { GetLanguages } from "../../lib/db.js";
+import type { Languages } from "@/types/tours";
+import { GetLanguages } from "@/lib/db";
 
 const flags: Languages[] = await GetLanguages();
 ---

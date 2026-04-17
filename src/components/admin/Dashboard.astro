@@ -1,8 +1,8 @@
 ---
-import Today from "./Today.astro"
-import Next from "./Next.astro"
-import Statistics from "./Statistics.astro"
-import {GetDataFromDashboard} from "../../lib/db"
+import Today from "@/components/admin/Today.astro"
+import Next from "@/components/admin/Next.astro"
+import Statistics from "@/components/admin/Statistics.astro"
+import {GetDataFromDashboard} from "@/lib/db"
 
 const response = await GetDataFromDashboard();
 

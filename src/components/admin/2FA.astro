@@ -1,5 +1,4 @@
 ---
-
 ---
 
 <section class="flex justify-center items-center h-full">
@@ -45,7 +44,7 @@
     const {data, error} = await actions.login.verify2FA(formData);
  
     if (data && data.success) {
-      window.location.href = "/aNKiNFLow/dashboard";
+      window.location.href = "/es/aNKiNFLow/dashboard";
       }else{
         notyf.error({
         message: data?.message || error?.message || "Credenciales Incorrectas",

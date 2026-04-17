@@ -2,7 +2,8 @@
 import { ui } from "@/i18n/ui";
 
 const { lang } = Astro.params;
-const t = ui[lang || "es"];
+const currentLang = (lang && ui[lang]) ? lang : "es";
+const t = ui[currentLang];
 const countryCodes = [
   "+56",
   "+54",

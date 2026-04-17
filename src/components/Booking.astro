@@ -4,7 +4,8 @@ import { date } from "astro:schema";
 
 const { slug } = Astro.params;
 const { lang } = Astro.params;
-const t = ui[lang || "es"];
+const currentLang = (lang && ui[lang]) ? lang : "es";
+const t = ui[currentLang];
 ---
 
 <aside class="md:w-1/2 md:p-4">

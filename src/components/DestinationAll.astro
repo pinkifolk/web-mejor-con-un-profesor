@@ -4,7 +4,8 @@ import type { Tour } from "@/types/tours";
 import { ui } from "@/i18n/ui";
 const data = await GetDestinosAll();
 const { lang } = Astro.params;
-const t = ui[lang || "es"];
+const currentLang = (lang && ui[lang]) ? lang : "es";
+const t = ui[currentLang];
 ---
 <section class="p-4">
   <h1 class="text-2xl font-bold">{t["tours.title"]}</h1>
