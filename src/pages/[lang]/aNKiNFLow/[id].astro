@@ -2,8 +2,8 @@
 import AdminLayout from "@/layouts/AdminLayout.astro";
 import Steps from "@/components/admin/Steps.astro";
 import ElementSteps from '@/components/admin/StepsElement.astro'
-import type { Languages } from "../../types/tours.js";
-import { GetLanguages } from "../../lib/db.js";
+import type { Languages } from "@/types/tours";
+import { GetLanguages } from "@/lib/db";
 
 const flags: Languages[] = await GetLanguages();
 const { id } = Astro.params;

@@ -4,7 +4,8 @@ import Search from '@/components/Search.astro'
 import Destination from '@/components/Destination.astro'
 import { ui } from "@/i18n/ui";
 const { lang } = Astro.params;
-const t = ui[lang || "es"];
+const currentLang = (lang && ui[lang]) ? lang : "es";
+const t = ui[currentLang];
 
 ---
 

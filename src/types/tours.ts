@@ -3,10 +3,16 @@ export type Tour = {
   name_es: string;
   name_pt: string;
   name_en: string;
+  name: string;
+  date_booking: string;
+  hours:string;
   description: string;
   img: string;
   slug: string;
-  status: boolean;
+  status: string;
+  ticketid:string;
+  email:string;
+  last_name:string;
 } & {
   [key in `name_${string}`]?: string;
 };

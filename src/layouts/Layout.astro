@@ -5,7 +5,8 @@ import { ui } from "@/i18n/ui";
 const { mainClass, } = Astro.props;
 const { lang } = Astro.params;
 const pdMain = mainClass ? mainClass : "px-5 md:px-[160px] py-6";
-const t = ui[lang || "es"];
+const currentLang = (lang && ui[lang]) ? lang : "es";
+const t = ui[currentLang];
 const navTranslations = {
   home: t['nav.home'],
   about: t['nav.about'],

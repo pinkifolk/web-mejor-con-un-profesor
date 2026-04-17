@@ -8,38 +8,40 @@ const t = ui[lang || "es"];
 ---
 
 <Layout mainClass="md:px-20">
-
-  <div class="container-confirmed mx-60 py-10 bg-white border border-gray-100 rounded-3xl shadow-2xl mt-20 p-5 hidden">
   <div
-    class="flex flex-col justify-center items-center h-full text-center"
+    class="container-confirmed mx-60 py-10 bg-white border border-gray-100 rounded-3xl shadow-2xl mt-20 p-5 hidden"
   >
-    <div class="bg-green-100 p-3 rounded-full w-fit mx-auto mb-4">
-      <svg
-        class="w-10 h-10 text-green-500"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+    <div class="flex flex-col justify-center items-center h-full text-center">
+      <div class="bg-green-100 p-3 rounded-full w-fit mx-auto mb-4">
+        <svg
+          class="w-10 h-10 text-green-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-3">
+        {t["confirmed.estatus.title"]}
+      </h1>
+      <span class="text-gray-600">
+        {t["confirmed.estatus.description"]}
+      </span>
+      <button
+        type="button"
+        class="send-mail text-blue-500 hover:text-blue-700 cursor-pointer"
+        >{t["confirmed.estatus.button"]}</button
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M5 13l4 4L19 7"></path>
-      </svg>
     </div>
-    <h1 class="text-2xl font-bold text-gray-800 mb-3">
-      {t["confirmed.estatus.title"]}
-    </h1>
-    <span class="text-gray-600">
-      {t["confirmed.estatus.description"]}
-    </span>
-    <a href="" class="text-blue-500 hover:text-blue-700"
-      >{t["confirmed.estatus.button"]}</a
-    >
   </div>
-    
-  </div>
-  <div class="container-confirmation grid grid-rows-2 md:grid-cols-2 md:grid-rows-none md:gap-3 opacity-0">
+  <div
+    class="container-confirmation grid grid-rows-2 md:grid-cols-2 md:grid-rows-none md:gap-3 opacity-0"
+  >
     <Confirmacions />
     <Ticket />
   </div>
@@ -50,6 +52,8 @@ const t = ui[lang || "es"];
   import { Notyf } from "notyf";
   const params = new URLSearchParams(window.location.search);
   const id = params.get("booking") || "";
+  const sendMail =
+    (document.querySelector(".send-mail") as HTMLButtonElement) || null;
   const notyf = new Notyf({
     duration: 3000,
     position: { x: "center", y: "bottom" },
@@ -66,11 +70,16 @@ const t = ui[lang || "es"];
         );
       }
       if (data) {
-        document.querySelector(".container-confirmed")?.classList.remove("hidden");
-        document.querySelector(".container-confirmation")?.classList.add("hidden");
-
+        document
+          .querySelector(".container-confirmed")
+          ?.classList.remove("hidden");
+        document
+          .querySelector(".container-confirmation")
+          ?.classList.add("hidden");
       }
-      document.querySelector(".container-confirmation")?.classList.add("opacity-100");
+      document
+        .querySelector(".container-confirmation")
+        ?.classList.add("opacity-100");
     } catch (error) {
       console.error("Error al cargar el estado de la reserva:", error);
       notyf.error({
@@ -79,4 +88,16 @@ const t = ui[lang || "es"];
     }
   }
   loadStatus();
+  sendMail.addEventListener("click", async () => {
+    try {
+      const { data, error } = await actions.bookingClient.send({ id });
+      if(data?.success){
+        notyf.success({
+        message: `Mensaje enviado`,
+      });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  });
 </script>

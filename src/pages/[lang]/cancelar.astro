@@ -1,0 +1,88 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { ui } from "@/i18n/ui";
+const { lang } = Astro.params;
+const currentLang = lang && ui[lang] ? lang : "es";
+const t = ui[currentLang];
+---
+
+<Layout mainClass="px-5 md:px-20">
+  <div class="flex flex-col md:flex-row justify-center bg-gray-50/50">
+    <div class="flex items-center justify-center min-h-[400px] p-4">
+      <div
+        class="flex flex-col items-center text-center gap-5 m-auto py-12 px-8 max-w-md w-full bg-white border border-gray-100 rounded-[2rem] shadow-xl shadow-gray-200/50"
+      >
+        <div
+          class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-2"
+        >
+          <span class="text-3xl">🌿</span>
+        </div>
+
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+            {t["cancelBookin.title"]}
+          </h2>
+          <p class="text-gray-500 text-base leading-relaxed">
+            {t["cancelBookin.description"]}
+          </p>
+        </div>
+
+        <form>
+          <label for="email" class="block text-[16px] font-medium mb-2"
+            >{t["cancelBookin.email"]}
+            <span class="text-red-800 align-middle">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="w-full p-3 bg-fondo-place text-text-place rounded-lg focus:outline-none focus:ring-2 focus:ring-text-place mb-3"
+            required
+            placeholder={t["confirm.email.label"]}
+          />
+          <button
+            class="w-full text-text-place text-sm py-2 px-4 rounded-lg shadow-md hover:bg-buttons hover:text-white cursor-pointer"
+          >
+            {t["cancelBookin.button"]}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</Layout>
+<script>
+  import { actions } from "astro:actions";
+  import { Notyf } from "notyf";
+  const notyf = new Notyf({
+    duration: 3000,
+    position: { x: "center", y: "bottom" },
+  });
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("ticket") || "";
+  const form = document.querySelector("form") as HTMLFormElement;
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = (document.querySelector('[name="email"]') as HTMLInputElement)
+      .value;
+
+    try {
+      const { data, error } = await actions.bookingClient.cancelBooking({
+        id: id,
+        email: email,
+      });
+      if (error) {
+        notyf.error(error.message || "No pudimos procesar la cancelación");
+        return;
+      }
+      const btn = e.target as HTMLElement
+      const button = btn.querySelector("button") as HTMLButtonElement
+      button.innerHTML = "Cancelada"
+      button.disabled = true
+      notyf.success({
+        message: "Reserva cancelada correctamente",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+</script>

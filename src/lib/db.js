@@ -232,7 +232,7 @@ export async function ConfirmBooking({
       throw new Error("Reserva no encontrada");
     }
     const tourRes = await pool.query(
-      "SELECT T.name_es, T.name_pt, T.name_en, T.img, B.adult, B.child, B.date_booking, TH.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN tours_hours TH ON TH.id=B.hour_id WHERE B.id=$1",
+      "SELECT T.name_es, T.name_pt, T.name_en, T.img, CONCAT(B.name, ' ', B.last_name) name, B.adult, B.child, B.date_booking, TH.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN tours_hours TH ON TH.id=B.hour_id WHERE B.id=$1",
       [res.rows[0].id],
     );
     return tourRes.rows[0];
@@ -642,7 +642,7 @@ export async function Translate(fields, targetLang) {
   const keys = Object.keys(fields);
   const values = Object.values(fields);
   const results = {};
-  const languagesToTranslate = targetLang.filter(lang => lang !== 'es')
+  const languagesToTranslate = targetLang.filter((lang) => lang !== "es");
 
   try {
     for (const lang of languagesToTranslate) {
@@ -890,18 +890,62 @@ export async function Actived2FA(id) {
       "SELECT id, name, email FROM users WHERE id = $1",
       [id],
     );
-    const user = findUser.rows[0]
+    const user = findUser.rows[0];
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name },
       SECRET,
       { expiresIn: "20m" },
     );
     return {
-      success : true,
-      token : token
+      success: true,
+      token: token,
     };
   } catch (error) {
     console.error("Error en Actived2FA:", error);
+    throw error;
+  }
+}
+
+// mails
+
+export async function Sendmail(id) {
+  try {
+    const tourRes = await pool.query(
+      "SELECT T.name_es, T.name_pt, T.name_en, T.img, CONCAT(B.name, ' ', B.last_name) name, B.adult, B.child, B.date_booking, B.email, TH.hour AS hours, B.ticket AS ticketid FROM tours T LEFT JOIN booking B ON B.tour_id=T.id LEFT JOIN tours_hours TH ON TH.id=B.hour_id WHERE B.hash=$1",
+      [id],
+    );
+    return tourRes.rows[0];
+  } catch (error) {
+    console.error("Error en Sendmail:", error);
+    throw error;
+  }
+}
+export async function CancelBookinClient(id, email) {
+  try {
+    const find = await pool.query(
+      `SELECT id FROM booking WHERE ticket=$1 AND email=$2`,
+      [id, email],
+    );
+    if (find.rowCount === 0) {
+      throw new Error("Reserva no encontrada");
+    }
+    const cancel = await pool.query(
+      `UPDATE booking SET status='canceled', confirmation=false WHERE ticket=$1 AND email=$2 RETURNING name,last_name,email,ticket`,
+      [id, email],
+    );
+    const res = await pool.query(`
+      SELECT 
+      T.name_es, 
+      CONCAT(B.name, ' ', B.last_name) name, 
+      B.date_booking, 
+      B.email, 
+      B.status 
+      FROM tours T 
+      LEFT JOIN booking B ON B.tour_id=T.id 
+      WHERE B.ticket=$1 AND B.email=$2`,[id,email])
+    return res.rows[0];
+  } catch (error) {
+    console.error("Error en Sendmail:", error);
     throw error;
   }
 }

@@ -1,9 +1,10 @@
 ---
-import '../../styles/global.css'
-import Login from '@/components/admin/Login.astro'
+import '@/styles/global.css'
+import ActivarTwoFa from '@/components/admin/ActivarTwoFa.astro'
+const { lang  } = Astro.params;
 ---
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -14,7 +15,7 @@ import Login from '@/components/admin/Login.astro'
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 	</head>
 	<body>
-        <Login />
+		<ActivarTwoFa />
 	</body>
 </html>
 
