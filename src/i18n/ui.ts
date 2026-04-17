@@ -89,6 +89,10 @@ export const ui = {
     "modal.schedule.add": "Agregar",
     "modal.schedule.cancel": "Cancelar",
     "modal.schedule.create": "Crear",
+    "cancelBookin.title": "¡No te preocupes!",
+    "cancelBookin.description": "Entendemos que los planes cambian. Santiago seguirá aquí esperándote para cuando estés listo para una nueva aventura.",
+    "cancelBookin.email": "Ingrese el email con el que hizo la reserva",
+    "cancelBookin.button": "Cancelar Reserva",
   },
   en: {
     "lang": "en",
@@ -176,6 +180,11 @@ export const ui = {
     "modal.schedule.add": "Add",
     "modal.schedule.cancel": "Cancel",
     "modal.schedule.create": "Create",
+    "cancelBookin.title": "Don't worry!",
+    "cancelBookin.description": "We understand that plans change. Santiago will still be here waiting for you when you're ready for a new adventure.",
+    "cancelBookin.email": "Enter the email address you used to make the reservation",
+    "cancelBookin.button": "Cancel Reservation",
+    
   },
   pt: {
     "lang": "pt",
@@ -263,5 +272,9 @@ export const ui = {
     "modal.schedule.add": "Adicionar",
     "modal.schedule.cancel": "Cancelar",
     "modal.schedule.create": "Criar",
+    "cancelBookin.title": "Não se preocupe!",
+    "cancelBookin.description": "Entendemos que os planos mudam. Santiago ainda estará aqui esperando por você quando estiver pronto para uma nova aventura.",
+    "cancelBookin.email": "Insira o endereço de e-mail que você usou para fazer a reserva.",
+    "cancelBookin.button": "Cancelar reserva",
   },
 } as const;
